@@ -1,0 +1,1 @@
+DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/ampflux" 
