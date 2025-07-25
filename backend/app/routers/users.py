@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.database import SessionLocal
 from app import models, schemas
 from app.utils.security import get_current_user, require_company_admin
@@ -14,12 +14,14 @@ def get_db():
         db.close()
 
 @router.get("/me", response_model=schemas.UserRead)
-def get_current_user_info(current_user: models.User = Depends(get_current_user)):
-    return current_user
+def get_current_user_info(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Fetch user with company information
+    user = db.query(models.User).options(joinedload(models.User.company)).filter(models.User.id == current_user.id).first()
+    return user
 
 @router.get("/", response_model=list[schemas.UserRead])
 def list_users(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    users = db.query(models.User).filter(models.User.company_id == current_user.company_id).all()
+    users = db.query(models.User).options(joinedload(models.User.company)).filter(models.User.company_id == current_user.company_id).all()
     return users
 
 @router.get("/company", response_model=schemas.CompanyRead)

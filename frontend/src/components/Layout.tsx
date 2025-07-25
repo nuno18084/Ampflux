@@ -7,6 +7,7 @@ import {
   UserIcon,
   ArrowRightOnRectangleIcon,
   BoltIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
@@ -60,9 +61,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-sm text-gray-700">{user?.name}</span>
+              <div className="flex items-center space-x-4">
+                {/* Company Information */}
+                {user?.company && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <BuildingOfficeIcon className="h-4 w-4" />
+                    <span>{user.company.name}</span>
+                  </div>
+                )}
+                {/* User Information */}
+                <div className="flex items-center space-x-2">
+                  <UserIcon className="h-5 w-5 text-gray-400" />
+                  <span className="text-sm text-gray-700">{user?.name}</span>
+                </div>
               </div>
               <button
                 onClick={handleLogout}

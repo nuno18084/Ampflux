@@ -3,18 +3,24 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useAuth } from "../hooks/useAuth";
 import {
   PlusIcon,
   FolderIcon,
   BoltIcon,
   ChartBarIcon,
   CogIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 
 export const DashboardPage: React.FC = () => {
+  const { user } = useAuth();
+  const queryKey = user ? ["projects", user.id] : ["projects"];
+
   const { data: projects, isLoading } = useQuery({
-    queryKey: ["projects"],
+    queryKey,
     queryFn: () => apiClient.getProjects(),
+    enabled: !!user,
   });
 
   const recentProjects = projects?.slice(0, 3) || [];
@@ -29,6 +35,12 @@ export const DashboardPage: React.FC = () => {
             <p className="text-gray-600">
               Welcome to AmpFlux - Your Circuit Design Platform
             </p>
+            {user?.company && (
+              <div className="flex items-center mt-2 text-sm text-gray-500">
+                <BuildingOfficeIcon className="h-4 w-4 mr-1" />
+                <span>{user.company.name}</span>
+              </div>
+            )}
           </div>
           <Link
             to="/projects"

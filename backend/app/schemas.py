@@ -11,12 +11,19 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
+class CompanyRead(BaseModel):
+    id: int
+    name: str
+    class Config:
+        orm_mode = True
+
 class UserRead(BaseModel):
     id: int
     name: str
     email: EmailStr
     role: UserRole
     company_id: int
+    company: CompanyRead
     class Config:
         orm_mode = True
 
@@ -36,10 +43,4 @@ class TokenPayload(BaseModel):
 
 class CompanyCreate(BaseModel):
     name: str
-
-class CompanyRead(BaseModel):
-    id: int
-    name: str
-    class Config:
-        orm_mode = True
 

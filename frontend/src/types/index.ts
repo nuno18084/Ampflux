@@ -1,9 +1,15 @@
+export interface Company {
+  id: number;
+  name: string;
+}
+
 export interface User {
   id: number;
   name: string;
   email: string;
   role: UserRole;
   company_id: number;
+  company: Company;
 }
 
 export interface UserCreate {
