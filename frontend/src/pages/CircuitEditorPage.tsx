@@ -159,27 +159,6 @@ export const CircuitEditorPage: React.FC = () => {
     }
   }, [savedCircuit, circuitLoading]);
 
-  // Auto-save when components change (debounced)
-  useEffect(() => {
-    if (placedComponents.length > 0 && !draggedComponent) {
-      const timeoutId = setTimeout(() => {
-        // Use the ref to get the most current positions
-        const currentComponents =
-          currentPositionsRef.current.length > 0
-            ? currentPositionsRef.current
-            : placedComponents;
-
-        const circuitData = {
-          components: currentComponents,
-          connections: connections,
-        };
-        saveMutation.mutate(circuitData);
-      }, 1000); // Save after 1 second of no changes
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [placedComponents, connections, draggedComponent]);
-
   // Debug component rendering - only log once when components change
   useEffect(() => {
     if (placedComponents.length > 0) {
@@ -241,10 +220,13 @@ export const CircuitEditorPage: React.FC = () => {
       });
     },
     onSuccess: (data) => {
-      setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-      }, 3000);
+      // Only show success message for manual saves, not auto-saves
+      if (data && data.id) {
+        setSaveSuccess(true);
+        setTimeout(() => {
+          setSaveSuccess(false);
+        }, 3000);
+      }
 
       // Invalidate the circuit versions cache to force a fresh fetch
       queryClient.invalidateQueries({
@@ -551,30 +533,6 @@ export const CircuitEditorPage: React.FC = () => {
                 {isSaving ? "Saving..." : "Save"}
               </button>
               <button
-                onClick={() => {
-                  console.log("=== TEST SAVE ===");
-                  const testData = {
-                    components: [
-                      {
-                        id: "test_resistor",
-                        componentId: "resistor",
-                        type: "resistor",
-                        name: "Test Resistor",
-                        x: 500,
-                        y: 300,
-                        properties: { resistance: 100 },
-                      },
-                    ],
-                    connections: [],
-                  };
-                  console.log("Saving test data:", testData);
-                  saveMutation.mutate(testData);
-                }}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Test Save
-              </button>
-              <button
                 onClick={handleSimulate}
                 disabled={isSimulating || placedComponents.length === 0}
                 className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
@@ -587,77 +545,82 @@ export const CircuitEditorPage: React.FC = () => {
         </div>
 
         {/* Canvas */}
-        <div
-          className="flex-1 bg-white border border-gray-200 rounded-lg relative overflow-hidden"
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onMouseMove={handleCanvasMouseMove}
-          onMouseUp={handleCanvasMouseUp}
-        >
-          {/* Placed Components */}
-          {placedComponents.map((component, index) => (
-            <div
-              key={component.id}
-              style={{
-                position: "absolute",
-                left: component.x,
-                top: component.y,
-                width: "120px",
-                height: "120px",
-                backgroundColor: "#f3f4f6",
-                border: "2px solid #d1d5db",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
-                color: "#374151",
-                fontWeight: "bold",
-                fontSize: "14px",
-                textAlign: "center",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                cursor: "move",
-              }}
-              onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
-              onClick={() => handleComponentClick(component)}
-            >
-              <div>
-                <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                  {component.name}
+        <div className="flex-1 p-6 relative">
+          <div
+            className="w-full h-full bg-white border-2 border-dashed border-gray-300 rounded-lg relative overflow-hidden"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+            style={{
+              cursor: draggedComponent ? "grabbing" : "default",
+            }}
+          >
+            {/* Placed Components */}
+            {placedComponents.map((component, index) => (
+              <div
+                key={component.id}
+                style={{
+                  position: "absolute",
+                  left: component.x,
+                  top: component.y,
+                  width: "120px",
+                  height: "120px",
+                  backgroundColor: "#f3f4f6",
+                  border: "2px solid #d1d5db",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 1000,
+                  color: "#374151",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  textAlign: "center",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  cursor: "move",
+                }}
+                onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
+                onClick={() => handleComponentClick(component)}
+              >
+                <div>
+                  <div style={{ fontSize: "12px", marginBottom: "5px" }}>
+                    {component.name}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* Connection lines */}
-          <svg
-            className="absolute inset-0 pointer-events-none"
-            width="100%"
-            height="100%"
-          >
-            {connections.map((connection) => {
-              const fromComponent = placedComponents.find(
-                (c) => c.id === connection.from
-              );
-              const toComponent = placedComponents.find(
-                (c) => c.id === connection.to
-              );
+            {/* Connection lines */}
+            <svg
+              className="absolute inset-0 pointer-events-none"
+              width="100%"
+              height="100%"
+            >
+              {connections.map((connection) => {
+                const fromComponent = placedComponents.find(
+                  (c) => c.id === connection.from
+                );
+                const toComponent = placedComponents.find(
+                  (c) => c.id === connection.to
+                );
 
-              if (!fromComponent || !toComponent) return null;
+                if (!fromComponent || !toComponent) return null;
 
-              return (
-                <line
-                  key={connection.id}
-                  x1={fromComponent.x + 50}
-                  y1={fromComponent.y + 50}
-                  x2={toComponent.x + 50}
-                  y2={toComponent.y + 50}
-                  stroke="green"
-                  strokeWidth="3"
-                />
-              );
-            })}
-          </svg>
+                return (
+                  <line
+                    key={connection.id}
+                    x1={fromComponent.x + 50}
+                    y1={fromComponent.y + 50}
+                    x2={toComponent.x + 50}
+                    y2={toComponent.y + 50}
+                    stroke="green"
+                    strokeWidth="3"
+                  />
+                );
+              })}
+            </svg>
+          </div>
         </div>
       </div>
     </div>
