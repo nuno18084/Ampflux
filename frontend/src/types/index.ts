@@ -47,6 +47,7 @@ export interface ProjectCreate {
 export interface CircuitVersion {
   id: number;
   project_id: number;
+  version_number: number;
   data_json: string;
   created_at: string;
 }

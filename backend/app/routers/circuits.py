@@ -16,6 +16,9 @@ router = APIRouter()
 class CircuitSimulationRequest(BaseModel):
     circuit_data: str
 
+class CircuitVersionRequest(BaseModel):
+    data_json: str
+
 def get_db():
     db = SessionLocal()
     try:
@@ -23,25 +26,38 @@ def get_db():
     finally:
         db.close()
 
+@router.get("/test")
+def test_circuits():
+    return {"message": "Circuits router is working"}
+
 @router.post("/{project_id}/save_version", response_model=dict)
-def save_circuit_version(project_id: int, data_json: Any, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     # Check project membership
     member = db.query(models.ProjectMember).filter_by(project_id=project_id, user_id=current_user.id).first()
     if not member:
         raise HTTPException(status_code=403, detail="Not a project member")
-    version = models.CircuitVersion(project_id=project_id, data_json=data_json)
+    
+    # Get the next version number for this project
+    latest_version = db.query(models.CircuitVersion).filter_by(project_id=project_id).order_by(models.CircuitVersion.version_number.desc()).first()
+    next_version_number = 1 if latest_version is None else latest_version.version_number + 1
+    
+    version = models.CircuitVersion(
+        project_id=project_id, 
+        version_number=next_version_number,
+        data_json=request.data_json
+    )
     db.add(version)
     db.commit()
     db.refresh(version)
-    return {"id": version.id, "created_at": version.created_at}
+    return {"id": version.id, "version_number": version.version_number, "created_at": version.created_at}
 
 @router.get("/{project_id}/versions", response_model=List[dict])
 def list_circuit_versions(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     member = db.query(models.ProjectMember).filter_by(project_id=project_id, user_id=current_user.id).first()
     if not member:
         raise HTTPException(status_code=403, detail="Not a project member")
-    versions = db.query(models.CircuitVersion).filter_by(project_id=project_id).order_by(models.CircuitVersion.created_at.desc()).all()
-    return [{"id": v.id, "created_at": v.created_at} for v in versions]
+    versions = db.query(models.CircuitVersion).filter_by(project_id=project_id).order_by(models.CircuitVersion.version_number.desc()).all()
+    return [{"id": v.id, "version_number": v.version_number, "created_at": v.created_at, "data_json": v.data_json} for v in versions]
 
 @router.post("/{project_id}/simulate", response_model=dict)
 def simulate_circuit(project_id: int, request: CircuitSimulationRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

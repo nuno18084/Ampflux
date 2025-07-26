@@ -1,20 +1,17 @@
-import React, { useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "../lib/api";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowLeftIcon,
   DocumentArrowDownIcon,
   PlayIcon,
   CogIcon,
-  BoltIcon,
-  Battery0Icon,
-  LightBulbIcon,
-  Square3Stack3DIcon,
-  CircleStackIcon,
-  CpuChipIcon,
-  ArrowLeftIcon,
+  XMarkIcon,
+  CheckIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
+import { apiClient } from "../lib/api";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 interface CircuitComponent {
   id: string;
@@ -24,47 +21,56 @@ interface CircuitComponent {
   properties: Record<string, number | boolean>;
 }
 
+interface PlacedComponent {
+  id: string;
+  componentId: string;
+  type: string;
+  name: string;
+  x: number;
+  y: number;
+  properties: Record<string, number | boolean>;
+}
+
+interface Connection {
+  id: string;
+  from: string;
+  to: string;
+}
+
 const circuitComponents: CircuitComponent[] = [
-  {
-    id: "battery",
-    type: "voltage_source",
-    name: "Battery",
-    icon: Battery0Icon,
-    properties: { voltage: 12, internal_resistance: 0.1 },
-  },
   {
     id: "resistor",
     type: "resistor",
     name: "Resistor",
-    icon: Square3Stack3DIcon,
+    icon: CogIcon,
     properties: { resistance: 100 },
   },
   {
     id: "capacitor",
     type: "capacitor",
     name: "Capacitor",
-    icon: CircleStackIcon,
-    properties: { capacitance: 1e-6 },
+    icon: CogIcon,
+    properties: { capacitance: 0.001 },
   },
   {
     id: "inductor",
     type: "inductor",
     name: "Inductor",
-    icon: CpuChipIcon,
-    properties: { inductance: 1e-3 },
+    icon: CogIcon,
+    properties: { inductance: 0.001 },
   },
   {
     id: "led",
     type: "led",
     name: "LED",
-    icon: LightBulbIcon,
+    icon: CogIcon,
     properties: { forward_voltage: 2.1, current_limit: 0.02 },
   },
   {
     id: "switch",
     type: "switch",
     name: "Switch",
-    icon: BoltIcon,
+    icon: CogIcon,
     properties: { is_closed: false },
   },
 ];
@@ -72,90 +78,349 @@ const circuitComponents: CircuitComponent[] = [
 export const CircuitEditorPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [selectedComponent, setSelectedComponent] =
-    useState<CircuitComponent | null>(null);
-  const [circuitData, setCircuitData] = useState<string>("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSimulating, setIsSimulating] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const currentPositionsRef = useRef<PlacedComponent[]>([]); // Track current positions during drag
 
+  // Force remount on every page load to reset state
+  const remountKey = Date.now();
+
+  // State
+  const [placedComponents, setPlacedComponents] = useState<PlacedComponent[]>(
+    []
+  );
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [selectedComponent, setSelectedComponent] =
+    useState<PlacedComponent | null>(null);
+  const [draggedComponent, setDraggedComponent] = useState<string | null>(null);
+  const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
+  const [mousePosition, setMousePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationResult, setSimulationResult] = useState<any>(null);
+  const [showInstructions, setShowInstructions] = useState(true);
+
+  // Queries
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["project", projectId],
-    queryFn: () => apiClient.getProject(Number(projectId)),
+    queryFn: () => apiClient.getProject(parseInt(projectId!)),
     enabled: !!projectId,
   });
 
-  const saveMutation = useMutation({
-    mutationFn: (data: string) =>
-      apiClient.saveCircuitVersion(Number(projectId), data),
-    onSuccess: () => {
-      setIsSaving(false);
+  const {
+    data: savedCircuit,
+    isLoading: circuitLoading,
+    error: circuitError,
+  } = useQuery({
+    queryKey: ["circuitVersions", parseInt(projectId!)],
+    queryFn: () => {
+      console.log("=== FETCHING CIRCUIT VERSIONS ===");
+      console.log("Project ID:", projectId);
+      return apiClient.getCircuitVersions(parseInt(projectId!));
     },
-    onError: () => {
-      setIsSaving(false);
+    enabled: !!projectId,
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
+  // Monitor savedCircuit changes
+  useEffect(() => {
+    console.log("=== SAVED CIRCUIT DATA CHANGED ===");
+    console.log("savedCircuit:", savedCircuit);
+    console.log("circuitLoading:", circuitLoading);
+    console.log("circuitError:", circuitError);
+  }, [savedCircuit, circuitLoading, circuitError]);
+
+  // Load saved circuit data
+  useEffect(() => {
+    if (savedCircuit && savedCircuit.length > 0 && !circuitLoading) {
+      // The backend returns versions ordered by version_number DESC (newest first)
+      // So the latest version is at index 0, not at the end
+      const latestCircuit = savedCircuit[0]; // FIXED: Use index 0 instead of length-1
+
+      try {
+        const circuitData = JSON.parse(latestCircuit.data_json);
+
+        if (circuitData.components && circuitData.components.length > 0) {
+          setPlacedComponents(circuitData.components);
+        }
+        if (circuitData.connections && circuitData.connections.length > 0) {
+          setConnections(circuitData.connections);
+        }
+      } catch (error) {
+        console.error("Error parsing saved circuit data:", error);
+      }
+    }
+  }, [savedCircuit, circuitLoading]);
+
+  // Auto-save when components change (debounced)
+  useEffect(() => {
+    if (placedComponents.length > 0 && !draggedComponent) {
+      const timeoutId = setTimeout(() => {
+        // Use the ref to get the most current positions
+        const currentComponents =
+          currentPositionsRef.current.length > 0
+            ? currentPositionsRef.current
+            : placedComponents;
+
+        const circuitData = {
+          components: currentComponents,
+          connections: connections,
+        };
+        saveMutation.mutate(circuitData);
+      }, 1000); // Save after 1 second of no changes
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [placedComponents, connections, draggedComponent]);
+
+  // Debug component rendering - only log once when components change
+  useEffect(() => {
+    if (placedComponents.length > 0) {
+      console.log("=== COMPONENTS LOADED ===");
+      console.log("Total components:", placedComponents.length);
+      placedComponents.forEach((comp, index) => {
+        console.log(`Component ${index + 1}:`, {
+          id: comp.id,
+          name: comp.name,
+          x: comp.x,
+          y: comp.y,
+          type: comp.type,
+        });
+      });
+
+      // Log the first component's exact position
+      const firstComponent = placedComponents[0];
+      console.log("FIRST COMPONENT POSITION:", {
+        name: firstComponent.name,
+        x: firstComponent.x,
+        y: firstComponent.y,
+        id: firstComponent.id,
+      });
+
+      // Log all component positions
+      console.log("ALL COMPONENT POSITIONS:");
+      placedComponents.forEach((comp, index) => {
+        console.log(`${index + 1}. ${comp.name}: (${comp.x}, ${comp.y})`);
+      });
+    }
+  }, [placedComponents.length]); // Only trigger when length changes, not on every render
+
+  // Mutations
+  const saveMutation = useMutation({
+    mutationFn: (circuitData: any) => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const jsonData = JSON.stringify(circuitData);
+
+      return fetch(`http://localhost:8000/circuits/${projectId}/save_version`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          data_json: jsonData,
+        }),
+      }).then((response) => {
+        if (!response.ok) {
+          return response.text().then((text) => {
+            throw new Error(`Save failed: ${response.status} ${text}`);
+          });
+        }
+        return response.json();
+      });
+    },
+    onSuccess: (data) => {
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+
+      // Invalidate the circuit versions cache to force a fresh fetch
+      queryClient.invalidateQueries({
+        queryKey: ["circuitVersions", parseInt(projectId!)],
+      });
+    },
+    onError: (error: any) => {
+      console.error("Save error:", error);
+      alert(`Save failed: ${error.message}`);
     },
   });
 
   const simulateMutation = useMutation({
-    mutationFn: (data: string) =>
-      apiClient.simulateCircuit(Number(projectId), data),
-    onSuccess: () => {
-      setIsSimulating(false);
+    mutationFn: (circuitData: any) =>
+      apiClient.simulateCircuit(parseInt(projectId!), circuitData),
+    onSuccess: (result) => {
+      setSimulationResult(result);
     },
     onError: () => {
-      setIsSimulating(false);
+      alert("Simulation failed");
     },
   });
 
-  const handleSave = () => {
-    setIsSaving(true);
-    saveMutation.mutate(circuitData);
-  };
-
-  const handleSimulate = () => {
-    setIsSimulating(true);
-    simulateMutation.mutate(circuitData);
-  };
-
-  const handleBack = () => {
-    navigate(`/projects/${projectId}`);
-  };
-
+  // Event handlers
   const handleDragStart = (e: React.DragEvent, component: CircuitComponent) => {
     e.dataTransfer.setData("application/json", JSON.stringify(component));
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const componentData = e.dataTransfer.getData("application/json");
-    if (componentData) {
-      const component = JSON.parse(componentData);
-      setSelectedComponent(component);
-    }
+    if (!canvasRef.current) return;
+
+    const componentData = JSON.parse(
+      e.dataTransfer.getData("application/json")
+    );
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left - 40;
+    const y = e.clientY - rect.top - 40;
+
+    const newComponent: PlacedComponent = {
+      id: `${componentData.id}_${Date.now()}`,
+      componentId: componentData.id,
+      type: componentData.type,
+      name: componentData.name,
+      x,
+      y,
+      properties: componentData.properties,
+    };
+
+    setPlacedComponents((prev) => [...prev, newComponent]);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  if (projectLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
+  const handleComponentMouseDown = (
+    e: React.MouseEvent,
+    componentId: string
+  ) => {
+    e.stopPropagation();
+    const component = placedComponents.find((c) => c.id === componentId);
+    if (component) {
+      setDragOffset({
+        x: e.clientX - component.x,
+        y: e.clientY - component.y,
+      });
+      setDraggedComponent(componentId);
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent) => {
+    if (draggedComponent) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      let x = e.clientX - rect.left - dragOffset.x;
+      let y = e.clientY - rect.top - dragOffset.y;
+
+      // Constrain to canvas boundaries
+      const componentSize = 120;
+      const padding = 10;
+      x = Math.max(padding, Math.min(x, rect.width - componentSize - padding));
+      y = Math.max(padding, Math.min(y, rect.height - componentSize - padding));
+
+      const updatedComponents = placedComponents.map((component) =>
+        component.id === draggedComponent ? { ...component, x, y } : component
+      );
+
+      setPlacedComponents(updatedComponents);
+      currentPositionsRef.current = updatedComponents; // Update ref with current positions
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    if (draggedComponent) {
+      // Use the ref to get the most current positions
+      const currentComponents =
+        currentPositionsRef.current.length > 0
+          ? currentPositionsRef.current
+          : placedComponents;
+
+      // Save the final position immediately
+      const circuitData = {
+        components: currentComponents,
+        connections: connections,
+      };
+      saveMutation.mutate(circuitData);
+    }
+    setDraggedComponent(null);
+  };
+
+  const handleComponentClick = (component: PlacedComponent) => {
+    setSelectedComponent(component);
+  };
+
+  const handleComponentDelete = (componentId: string) => {
+    setPlacedComponents((prev) => prev.filter((c) => c.id !== componentId));
+    setConnections((prev) =>
+      prev.filter((c) => c.from !== componentId && c.to !== componentId)
     );
+    setSelectedComponent(null);
+  };
+
+  const handlePropertyChange = (
+    componentId: string,
+    property: string,
+    value: number | boolean
+  ) => {
+    setPlacedComponents((prev) =>
+      prev.map((component) =>
+        component.id === componentId
+          ? {
+              ...component,
+              properties: { ...component.properties, [property]: value },
+            }
+          : component
+      )
+    );
+  };
+
+  const handleSave = () => {
+    console.log("Manual save triggered");
+    const circuitData = {
+      components: placedComponents,
+      connections: connections,
+    };
+    console.log("Manual save circuit data:", circuitData);
+    saveMutation.mutate(circuitData);
+  };
+
+  const handleSimulate = () => {
+    setIsSimulating(true);
+    const circuitData = {
+      components: placedComponents,
+      connections: connections,
+    };
+    simulateMutation.mutate(circuitData);
+    setIsSimulating(false);
+  };
+
+  const handleBack = () => {
+    navigate(`/projects/${projectId}`);
+  };
+
+  if (projectLoading || circuitLoading) {
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div key={remountKey} className="h-screen flex bg-gray-50">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Components</h2>
-          <p className="text-sm text-gray-500">Drag components to the canvas</p>
+          <p className="text-sm text-gray-500">Drag to add to circuit</p>
         </div>
 
-        {/* Components List */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 gap-3">
             {circuitComponents.map((component) => (
@@ -163,7 +428,7 @@ export const CircuitEditorPage: React.FC = () => {
                 key={component.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, component)}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-3 cursor-move hover:bg-gray-100 transition-colors duration-200 group"
+                className="bg-gray-50 border border-gray-200 rounded-lg p-3 cursor-move hover:bg-gray-100 transition-colors duration-200"
               >
                 <div className="flex flex-col items-center text-center">
                   <component.icon className="h-8 w-8 text-blue-600 mb-2" />
@@ -179,9 +444,18 @@ export const CircuitEditorPage: React.FC = () => {
         {/* Properties Panel */}
         {selectedComponent && (
           <div className="border-t border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">
-              Properties
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-900">
+                {selectedComponent.name} Properties
+              </h3>
+              <button
+                onClick={() => handleComponentDelete(selectedComponent.id)}
+                className="text-red-600 hover:text-red-700 p-1"
+                title="Delete component"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </div>
             <div className="space-y-3">
               {Object.entries(selectedComponent.properties).map(
                 ([key, value]) => (
@@ -196,24 +470,45 @@ export const CircuitEditorPage: React.FC = () => {
                       checked={typeof value === "boolean" ? value : undefined}
                       value={typeof value === "number" ? value : undefined}
                       onChange={(e) => {
-                        const newProperties = {
-                          ...selectedComponent.properties,
-                        };
-                        if (typeof value === "boolean") {
-                          newProperties[key] = e.target.checked;
-                        } else {
-                          newProperties[key] = parseFloat(e.target.value);
-                        }
-                        setSelectedComponent({
-                          ...selectedComponent,
-                          properties: newProperties,
-                        });
+                        const newValue =
+                          typeof value === "boolean"
+                            ? e.target.checked
+                            : parseFloat(e.target.value);
+                        handlePropertyChange(
+                          selectedComponent.id,
+                          key,
+                          newValue
+                        );
                       }}
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 )
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Instructions */}
+        {showInstructions && (
+          <div className="border-t border-gray-200 p-4 bg-blue-50">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-blue-900 mb-1">
+                  Getting Started
+                </h4>
+                <ul className="text-xs text-blue-700 space-y-1">
+                  <li>• Drag components to the canvas</li>
+                  <li>• Click components to edit properties</li>
+                  <li>• Drag components to move them</li>
+                </ul>
+              </div>
+              <button
+                onClick={() => setShowInstructions(false)}
+                className="text-blue-500 hover:text-blue-700"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
             </div>
           </div>
         )}
@@ -227,7 +522,7 @@ export const CircuitEditorPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleBack}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Back to Project
@@ -237,22 +532,52 @@ export const CircuitEditorPage: React.FC = () => {
                   {project?.name} - Circuit Editor
                 </h1>
                 <p className="text-sm text-gray-500">
-                  Design and simulate your circuit
+                  Build your circuit by dragging components
                 </p>
               </div>
             </div>
             <div className="flex space-x-3">
+              {saveSuccess && (
+                <div className="flex items-center px-3 py-2 text-sm text-green-600 bg-green-50 rounded-md">
+                  <CheckIcon className="h-4 w-4 mr-2" />
+                  Saved successfully!
+                </div>
+              )}
               <button
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isSaving || placedComponents.length === 0}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
                 {isSaving ? "Saving..." : "Save"}
               </button>
               <button
+                onClick={() => {
+                  console.log("=== TEST SAVE ===");
+                  const testData = {
+                    components: [
+                      {
+                        id: "test_resistor",
+                        componentId: "resistor",
+                        type: "resistor",
+                        name: "Test Resistor",
+                        x: 500,
+                        y: 300,
+                        properties: { resistance: 100 },
+                      },
+                    ],
+                    connections: [],
+                  };
+                  console.log("Saving test data:", testData);
+                  saveMutation.mutate(testData);
+                }}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Test Save
+              </button>
+              <button
                 onClick={handleSimulate}
-                disabled={isSimulating}
+                disabled={isSimulating || placedComponents.length === 0}
                 className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 <PlayIcon className="h-4 w-4 mr-2" />
@@ -263,56 +588,77 @@ export const CircuitEditorPage: React.FC = () => {
         </div>
 
         {/* Canvas */}
-        <div className="flex-1 p-6">
-          <div
-            className="w-full h-full bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-          >
-            {selectedComponent ? (
-              <div className="text-center">
-                <selectedComponent.icon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {selectedComponent.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Component added to canvas
-                </p>
-                <div className="mt-4">
-                  <button
-                    onClick={() => setSelectedComponent(null)}
-                    className="text-sm text-blue-600 hover:text-blue-500"
-                  >
-                    Clear selection
-                  </button>
+        <div
+          className="flex-1 bg-white border border-gray-200 rounded-lg relative overflow-hidden"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
+        >
+          {/* Placed Components */}
+          {placedComponents.map((component, index) => (
+            <div
+              key={component.id}
+              style={{
+                position: "absolute",
+                left: component.x,
+                top: component.y,
+                width: "120px",
+                height: "120px",
+                backgroundColor: "#f3f4f6",
+                border: "2px solid #d1d5db",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+                color: "#374151",
+                fontWeight: "bold",
+                fontSize: "14px",
+                textAlign: "center",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                cursor: "move",
+              }}
+              onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
+              onClick={() => handleComponentClick(component)}
+            >
+              <div>
+                <div style={{ fontSize: "12px", marginBottom: "5px" }}>
+                  {component.name}
                 </div>
               </div>
-            ) : (
-              <div className="text-center">
-                <CogIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Circuit Canvas
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Drag components from the sidebar to start building your
-                  circuit
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          ))}
 
-        {/* JSON Editor */}
-        <div className="bg-gray-50 border-t border-gray-200 p-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">
-            Circuit Data (JSON)
-          </h3>
-          <textarea
-            value={circuitData}
-            onChange={(e) => setCircuitData(e.target.value)}
-            className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
-            placeholder="Enter circuit data in JSON format..."
-          />
+          {/* Connection lines */}
+          <svg
+            className="absolute inset-0 pointer-events-none"
+            width="100%"
+            height="100%"
+          >
+            {connections.map((connection) => {
+              const fromComponent = placedComponents.find(
+                (c) => c.id === connection.from
+              );
+              const toComponent = placedComponents.find(
+                (c) => c.id === connection.to
+              );
+
+              if (!fromComponent || !toComponent) return null;
+
+              return (
+                <line
+                  key={connection.id}
+                  x1={fromComponent.x + 50}
+                  y1={fromComponent.y + 50}
+                  x2={toComponent.x + 50}
+                  y2={toComponent.y + 50}
+                  stroke="green"
+                  strokeWidth="3"
+                />
+              );
+            })}
+          </svg>
         </div>
       </div>
     </div>

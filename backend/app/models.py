@@ -76,6 +76,7 @@ class CircuitVersion(Base):
     __tablename__ = "circuit_versions"
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    version_number = Column(Integer, nullable=False)  # Project-specific version number
     data_json = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     project = relationship("Project", back_populates="circuit_versions")

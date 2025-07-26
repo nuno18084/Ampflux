@@ -14,6 +14,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectPage } from "./pages/ProjectPage";
 import { CircuitEditorPage } from "./pages/CircuitEditorPage";
+import { CircuitEditorPageZustand } from "./pages/CircuitEditorPageZustand";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -66,6 +67,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CircuitEditorPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/projects/:projectId/circuit-zustand"
+                element={
+                  <ProtectedRoute>
+                    <CircuitEditorPageZustand />
                   </ProtectedRoute>
                 }
               />

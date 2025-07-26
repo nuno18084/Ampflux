@@ -1,8 +1,9 @@
 from pydantic_settings import BaseSettings
 import secrets
+import os
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/ampflux"
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/ampflux"
     SECRET_KEY: str = ""  # Will be loaded from environment variable
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours

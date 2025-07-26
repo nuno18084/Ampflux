@@ -140,8 +140,7 @@ class ApiClient {
   ): Promise<CircuitVersion> {
     const response: AxiosResponse<CircuitVersion> = await this.client.post(
       `/circuits/${projectId}/save_version`,
-      {},
-      { params: { data_json: dataJson } }
+      { data_json: dataJson }
     );
     return response.data;
   }
