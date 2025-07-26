@@ -275,14 +275,13 @@ export const CircuitEditorPage: React.FC = () => {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (!canvasRef.current) return;
 
     const componentData = JSON.parse(
       e.dataTransfer.getData("application/json")
     );
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 40;
-    const y = e.clientY - rect.top - 40;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - 60; // Center the component
+    const y = e.clientY - rect.top - 60;
 
     const newComponent: PlacedComponent = {
       id: `${componentData.id}_${Date.now()}`,
