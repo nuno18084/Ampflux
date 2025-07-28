@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthProvider";
+import { ThemeProvider } from "./contexts/ThemeProvider";
 import { queryClient } from "./lib/queryClient";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
@@ -15,14 +16,15 @@ import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectPage } from "./pages/ProjectPage";
 import { CircuitEditorPage } from "./pages/CircuitEditorPage";
 import { CircuitEditorPageZustand } from "./pages/CircuitEditorPageZustand";
+import { ProfilePage } from "./pages/ProfilePage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
@@ -63,6 +65,17 @@ function App() {
               />
 
               <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <ProfilePage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/projects/:projectId/editor"
                 element={
                   <ProtectedRoute>
@@ -83,9 +96,9 @@ function App() {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </div>
-        </Router>
-      </AuthProvider>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
