@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { LoadingSpinner } from "./LoadingSpinner";
+import { LoadingAnimation } from "./LoadingAnimation";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,8 +12,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-start justify-center pt-40 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <LoadingAnimation size="xl" showText={false} />
       </div>
     );
   }

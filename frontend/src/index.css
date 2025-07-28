@@ -2,6 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom flow animation for loading line */
+@keyframes flow {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  50% {
+    width: 100%;
+    opacity: 1;
+  }
+  100% {
+    width: 0;
+    opacity: 0;
+  }
+}
+
+/* Custom animation class */
+.animate-flow {
+  animation: flow 2s ease-in-out infinite;
+}
+
+/* Custom flow-through animation for bolt icon */
+@keyframes flow-through {
+  0% {
+    transform: translateX(-100%) scale(0.8);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Custom animation class for flow-through */
+.animate-flow-through {
+  animation: flow-through 2s ease-in-out infinite;
+}
+
+/* Custom draw-bolt animation for smooth outline drawing */
+@keyframes draw-bolt {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Custom animation class for drawing bolt */
+.animate-draw-bolt {
+  animation: draw-bolt 2s ease-in-out infinite;
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;

@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingSkeleton } from "../components/LoadingSkeleton";
+import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
 import {
@@ -17,7 +19,17 @@ import {
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const queryKey = user ? ["projects", user.id] : ["projects"];
+
+  // Simulate page loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 1000); // Show loading for 1 second
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const { data: projects, isLoading } = useQuery({
     queryKey,
@@ -36,6 +48,21 @@ export const DashboardPage: React.FC = () => {
       document.body.style.overflow = "auto";
     };
   }, []);
+
+  // Show loading animation while page is loading
+  if (isPageLoading) {
+    return (
+      <div
+        className={`min-h-screen flex items-start justify-center pt-40 transition-colors duration-200 ${
+          theme === "dark"
+            ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+            : "bg-gradient-to-br from-green-50 via-white to-emerald-50"
+        }`}
+      >
+        <LoadingAnimation size="xl" showText={false} />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -110,29 +137,33 @@ export const DashboardPage: React.FC = () => {
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
               }`}
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl shadow-lg">
-                    <FolderIcon className="h-7 w-7 text-white" />
+              {isLoading ? (
+                <LoadingSkeleton type="stat" />
+              ) : (
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl shadow-lg">
+                      <FolderIcon className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p
+                      className={`text-sm font-medium uppercase tracking-wide ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Total Projects
+                    </p>
+                    <p
+                      className={`text-3xl font-bold ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {projects?.length || 0}
+                    </p>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <p
-                    className={`text-sm font-medium uppercase tracking-wide ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    Total Projects
-                  </p>
-                  <p
-                    className={`text-3xl font-bold ${
-                      theme === "dark" ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {isLoading ? "..." : projects?.length || 0}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
             <div
@@ -142,29 +173,33 @@ export const DashboardPage: React.FC = () => {
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
               }`}
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-xl shadow-lg">
-                    <BoltIcon className="h-7 w-7 text-white" />
+              {isLoading ? (
+                <LoadingSkeleton type="stat" />
+              ) : (
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-xl shadow-lg">
+                      <BoltIcon className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p
+                      className={`text-sm font-medium uppercase tracking-wide ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Active Circuits
+                    </p>
+                    <p
+                      className={`text-3xl font-bold ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      0
+                    </p>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <p
-                    className={`text-sm font-medium uppercase tracking-wide ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    Active Circuits
-                  </p>
-                  <p
-                    className={`text-3xl font-bold ${
-                      theme === "dark" ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    0
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
             <div
@@ -174,29 +209,33 @@ export const DashboardPage: React.FC = () => {
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
               }`}
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                    <ChartBarIcon className="h-7 w-7 text-white" />
+              {isLoading ? (
+                <LoadingSkeleton type="stat" />
+              ) : (
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                      <ChartBarIcon className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p
+                      className={`text-sm font-medium uppercase tracking-wide ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Simulations
+                    </p>
+                    <p
+                      className={`text-3xl font-bold ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      0
+                    </p>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <p
-                    className={`text-sm font-medium uppercase tracking-wide ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    Simulations
-                  </p>
-                  <p
-                    className={`text-3xl font-bold ${
-                      theme === "dark" ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    0
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -251,8 +290,10 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="p-6">
                 {isLoading ? (
-                  <div className="flex justify-center py-8">
-                    <LoadingSpinner size="lg" />
+                  <div className="space-y-3">
+                    <LoadingSkeleton type="card" />
+                    <LoadingSkeleton type="card" />
+                    <LoadingSkeleton type="card" />
                   </div>
                 ) : recentProjects.length > 0 ? (
                   <div className="space-y-3">

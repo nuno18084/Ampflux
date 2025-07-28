@@ -11,7 +11,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { apiClient } from "../lib/api";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingAnimation } from "../components/LoadingAnimation";
 
 interface CircuitComponent {
   id: string;
@@ -448,7 +448,11 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   if (projectLoading || circuitLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-start justify-center pt-40">
+        <LoadingAnimation size="xl" showText={false} />
+      </div>
+    );
   }
 
   return (

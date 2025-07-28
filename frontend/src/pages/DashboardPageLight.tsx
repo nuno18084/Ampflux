@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingAnimation } from "../components/LoadingAnimation";
 import { apiClient } from "../lib/api";
-import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
 import {
   PlusIcon,
@@ -136,7 +136,7 @@ export const DashboardPageLight: React.FC = () => {
               <div className="p-6">
                 {isLoading ? (
                   <div className="flex justify-center py-8">
-                    <LoadingSpinner size="lg" />
+                    <LoadingAnimation size="xl" showText={false} />
                   </div>
                 ) : recentProjects.length > 0 ? (
                   <div className="space-y-3">

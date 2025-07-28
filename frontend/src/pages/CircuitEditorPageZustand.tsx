@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
@@ -10,7 +10,7 @@ import {
 import { useCircuitStore } from "../stores/circuitStore";
 import type { PlacedComponent, Connection } from "../stores/circuitStore";
 import { apiClient } from "../lib/api";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingAnimation } from "../components/LoadingAnimation";
 
 // Circuit components data
 const circuitComponents = [
@@ -266,7 +266,11 @@ export const CircuitEditorPageZustand: React.FC = () => {
   };
 
   if (projectLoading || circuitLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-start justify-center pt-40">
+        <LoadingAnimation size="xl" showText={false} />
+      </div>
+    );
   }
 
   return (

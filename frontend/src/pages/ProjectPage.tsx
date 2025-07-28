@@ -1,35 +1,35 @@
 import React from "react";
-import { useParams, Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingAnimation } from "../components/LoadingAnimation";
 import { apiClient } from "../lib/api";
-import { LoadingSpinner } from "../components/LoadingSpinner";
 import {
   ArrowLeftIcon,
   PencilIcon,
-  ClockIcon,
   FolderIcon,
+  ClockIcon,
+  BoltIcon,
 } from "@heroicons/react/24/outline";
 
 export const ProjectPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const projectId = parseInt(id || "0");
+  const { projectId } = useParams<{ projectId: string }>();
 
-  const { data: project, isLoading } = useQuery({
+  const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["project", projectId],
-    queryFn: () => apiClient.getProject(projectId),
+    queryFn: () => apiClient.getProject(parseInt(projectId!)),
     enabled: !!projectId,
   });
 
-  const { data: versions } = useQuery({
+  const { data: versions, isLoading: versionsLoading } = useQuery({
     queryKey: ["circuit-versions", projectId],
-    queryFn: () => apiClient.getCircuitVersions(projectId),
+    queryFn: () => apiClient.getCircuitVersions(parseInt(projectId!)),
     enabled: !!projectId,
   });
 
-  if (isLoading) {
+  if (projectLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex justify-center items-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-start justify-center pt-40">
+        <LoadingAnimation size="xl" showText={false} />
       </div>
     );
   }
@@ -182,12 +182,12 @@ export const ProjectPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               to={`/projects/${project.id}/editor`}
-              className="group flex items-center p-6 bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 rounded-xl hover:shadow-lg hover:border-green-500/30 transition-all duration-200 transform hover:-translate-y-1"
+              className="group flex items-center p-6 rounded-xl transition-all duration-500 ease-out bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 hover:shadow-lg hover:border-green-500/30"
             >
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-lg mr-4 group-hover:scale-110 transition-transform duration-200 shadow-lg">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-lg mr-4 group-hover:scale-105 transition-transform duration-500 ease-out shadow-lg">
                 <PencilIcon className="h-6 w-6 text-white" />
               </div>
-              <div>
+              <div className="text-left">
                 <h3 className="font-semibold text-white">Edit Circuit</h3>
                 <p className="text-sm text-gray-400">
                   Design and modify your circuit
@@ -195,11 +195,11 @@ export const ProjectPage: React.FC = () => {
               </div>
             </Link>
 
-            <button className="group flex items-center p-6 bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 rounded-xl hover:shadow-lg hover:border-green-500/30 transition-all duration-200 transform hover:-translate-y-1">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-lg mr-4 group-hover:scale-110 transition-transform duration-200 shadow-lg">
+            <button className="group flex items-center p-6 rounded-xl transition-all duration-500 ease-out bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 hover:shadow-lg hover:border-green-500/30">
+              <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-lg mr-4 group-hover:scale-105 transition-transform duration-500 ease-out shadow-lg">
                 <ClockIcon className="h-6 w-6 text-white" />
               </div>
-              <div>
+              <div className="text-left">
                 <h3 className="font-semibold text-white">View History</h3>
                 <p className="text-sm text-gray-400">
                   See all circuit versions
@@ -207,11 +207,11 @@ export const ProjectPage: React.FC = () => {
               </div>
             </button>
 
-            <button className="group flex items-center p-6 bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 rounded-xl hover:shadow-lg hover:border-green-500/30 transition-all duration-200 transform hover:-translate-y-1">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-lg mr-4 group-hover:scale-110 transition-transform duration-200 shadow-lg">
+            <button className="group flex items-center p-6 rounded-xl transition-all duration-500 ease-out bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 hover:shadow-lg hover:border-green-500/30">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-lg mr-4 group-hover:scale-105 transition-transform duration-500 ease-out shadow-lg">
                 <FolderIcon className="h-6 w-6 text-white" />
               </div>
-              <div>
+              <div className="text-left">
                 <h3 className="font-semibold text-white">Export</h3>
                 <p className="text-sm text-gray-400">Download circuit files</p>
               </div>
