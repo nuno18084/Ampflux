@@ -113,18 +113,26 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-500 ease-out ${
+                      className={`inline-flex items-center px-3 py-2 text-sm font-medium transition-all duration-500 ease-out relative ${
                         isActive
                           ? theme === "dark"
-                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-green-100 text-green-700 border border-green-200"
+                            ? "text-green-400"
+                            : "text-green-700"
                           : theme === "dark"
-                          ? "text-gray-300 hover:text-green-400 hover:bg-gray-700/50"
-                          : "text-gray-600 hover:text-green-600 hover:bg-green-50"
+                          ? "text-gray-300 hover:text-green-400"
+                          : "text-gray-600 hover:text-green-600"
                       }`}
                     >
                       <item.icon className="h-5 w-5 mr-2" />
                       {item.name}
+                      {/* Active indicator line */}
+                      <div
+                        className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out ${
+                          isActive
+                            ? "w-full bg-green-500"
+                            : "w-0 bg-transparent"
+                        }`}
+                      />
                     </Link>
                   );
                 })}
