@@ -103,15 +103,22 @@ export const ProjectPage: React.FC = () => {
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
-            Circuit Versions
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900">
+              Circuit Versions
+            </h2>
+            {versions && versions.length > 0 && (
+              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                {versions.length} version{versions.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
           {versions && versions.length > 0 ? (
-            <div className="space-y-3">
+            <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
               {versions.map((version) => (
                 <div
                   key={version.id}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center">
                     <ClockIcon className="h-5 w-5 text-gray-400 mr-3" />
