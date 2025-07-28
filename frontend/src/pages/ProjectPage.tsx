@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingAnimation } from "../components/LoadingAnimation";
@@ -13,6 +13,16 @@ import {
 
 export const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
+  // Simulate page loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 1000); // Show loading for 1 second
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -20,11 +30,30 @@ export const ProjectPage: React.FC = () => {
     enabled: !!projectId,
   });
 
-  const { data: versions, isLoading: versionsLoading } = useQuery({
+  const {
+    data: versions,
+    isLoading: versionsLoading,
+    refetch: refetchVersions,
+  } = useQuery({
     queryKey: ["circuit-versions", projectId],
     queryFn: () => apiClient.getCircuitVersions(parseInt(projectId!)),
     enabled: !!projectId,
   });
+
+  // Refetch versions when page loads to get latest data
+  useEffect(() => {
+    if (!isPageLoading && projectId) {
+      refetchVersions();
+    }
+  }, [isPageLoading, projectId, refetchVersions]);
+
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-start justify-center pt-40">
+        <LoadingAnimation size="xl" showText={false} />
+      </div>
+    );
+  }
 
   if (projectLoading) {
     return (
