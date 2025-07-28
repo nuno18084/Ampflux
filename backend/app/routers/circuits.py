@@ -41,6 +41,16 @@ def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Se
     latest_version = db.query(models.CircuitVersion).filter_by(project_id=project_id).order_by(models.CircuitVersion.version_number.desc()).first()
     next_version_number = 1 if latest_version is None else latest_version.version_number + 1
     
+    # Debug logging
+    print(f"=== SAVE VERSION DEBUG ===")
+    print(f"Project ID: {project_id}")
+    print(f"Latest version found: {latest_version.version_number if latest_version else None}")
+    print(f"Next version number: {next_version_number}")
+    
+    # Check global max version number for comparison
+    global_max = db.query(models.CircuitVersion.version_number).order_by(models.CircuitVersion.version_number.desc()).first()
+    print(f"Global max version number: {global_max[0] if global_max else 0}")
+    
     version = models.CircuitVersion(
         project_id=project_id, 
         version_number=next_version_number,
@@ -49,6 +59,10 @@ def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Se
     db.add(version)
     db.commit()
     db.refresh(version)
+    
+    print(f"Created version: ID={version.id}, Version={version.version_number}")
+    print(f"=== END DEBUG ===")
+    
     return {"id": version.id, "version_number": version.version_number, "created_at": version.created_at}
 
 @router.get("/{project_id}/versions", response_model=List[dict])

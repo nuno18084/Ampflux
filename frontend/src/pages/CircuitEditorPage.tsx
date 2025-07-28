@@ -140,6 +140,24 @@ export const CircuitEditorPage: React.FC = () => {
 
   // Load saved circuit data
   useEffect(() => {
+    // First check if we have session storage data (current session)
+    const sessionData = sessionStorage.getItem(`circuit_${projectId}`);
+    if (sessionData) {
+      try {
+        const circuitData = JSON.parse(sessionData);
+        if (circuitData.components && circuitData.components.length > 0) {
+          setPlacedComponents(circuitData.components);
+        }
+        if (circuitData.connections && circuitData.connections.length > 0) {
+          setConnections(circuitData.connections);
+        }
+        return; // Don't load from saved versions if we have session data
+      } catch (error) {
+        console.error("Error parsing session data:", error);
+      }
+    }
+
+    // Load from saved versions if no session data
     if (savedCircuit && savedCircuit.length > 0 && !circuitLoading) {
       // The backend returns versions ordered by version_number DESC (newest first)
       // So the latest version is at index 0, not at the end
@@ -158,7 +176,7 @@ export const CircuitEditorPage: React.FC = () => {
         console.error("Error parsing saved circuit data:", error);
       }
     }
-  }, [savedCircuit, circuitLoading]);
+  }, [savedCircuit, circuitLoading, projectId]);
 
   // Debug component rendering - only log once when components change
   useEffect(() => {
@@ -221,18 +239,13 @@ export const CircuitEditorPage: React.FC = () => {
       });
     },
     onSuccess: (data) => {
-      // Only show success message for manual saves, not auto-saves
+      // Only show success message for version saves (when leaving editor)
       if (data && data.id) {
         setSaveSuccess(true);
         setTimeout(() => {
           setSaveSuccess(false);
         }, 3000);
       }
-
-      // Invalidate the circuit versions cache to force a fresh fetch
-      queryClient.invalidateQueries({
-        queryKey: ["circuitVersions", parseInt(projectId!)],
-      });
     },
     onError: (error: any) => {
       console.error("Save error:", error);
@@ -337,12 +350,9 @@ export const CircuitEditorPage: React.FC = () => {
           ? currentPositionsRef.current
           : placedComponents;
 
-      // Save the final position immediately
-      const circuitData = {
-        components: currentComponents,
-        connections: connections,
-      };
-      saveMutation.mutate(circuitData);
+      // Update the state with new positions
+      setPlacedComponents(currentComponents);
+      currentPositionsRef.current = currentComponents;
     }
     setDraggedComponent(null);
     setIsDragging(false);
@@ -397,13 +407,17 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log("Manual save triggered");
+    // Just save to memory during the session, don't create a version
     const circuitData = {
       components: placedComponents,
       connections: connections,
     };
-    console.log("Manual save circuit data:", circuitData);
-    saveMutation.mutate(circuitData);
+    // Store in session storage for persistence during the session
+    sessionStorage.setItem(`circuit_${projectId}`, JSON.stringify(circuitData));
+    setSaveSuccess(true);
+    setTimeout(() => {
+      setSaveSuccess(false);
+    }, 3000);
   };
 
   const handleSimulate = () => {
@@ -417,6 +431,19 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleBack = () => {
+    // Create a version when leaving the editor
+    const circuitData = {
+      components: placedComponents,
+      connections: connections,
+    };
+
+    // Save the current state as a version
+    saveMutation.mutate(circuitData);
+
+    // Clear session storage
+    sessionStorage.removeItem(`circuit_${projectId}`);
+
+    // Navigate back to projects
     navigate(`/projects/${projectId}`);
   };
 

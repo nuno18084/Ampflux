@@ -117,7 +117,7 @@ export const ProjectPage: React.FC = () => {
                     <ClockIcon className="h-5 w-5 text-gray-400 mr-3" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        Version {version.id}
+                        Version {version.version_number}
                       </p>
                       <p className="text-xs text-gray-500">
                         {new Date(version.created_at).toLocaleDateString()}
