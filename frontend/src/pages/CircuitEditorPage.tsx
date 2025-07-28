@@ -99,6 +99,7 @@ export const CircuitEditorPage: React.FC = () => {
     y: number;
   } | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -289,19 +290,29 @@ export const CircuitEditorPage: React.FC = () => {
     e.stopPropagation();
     const component = placedComponents.find((c) => c.id === componentId);
     if (component) {
-      setDragOffset({
-        x: e.clientX - component.x,
-        y: e.clientY - component.y,
-      });
-      setDraggedComponent(componentId);
+      // Add a small delay to distinguish between click and drag
+      const dragTimeout = setTimeout(() => {
+        setDraggedComponent(componentId);
+        setIsDragging(true);
+      }, 150); // 150ms delay before starting drag
+
+      // Store the timeout ID to clear it if needed
+      (e.currentTarget as any).dragTimeout = dragTimeout;
     }
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
+    // Track mouse position for connection line
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+
     if (draggedComponent) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      let x = e.clientX - rect.left - dragOffset.x;
-      let y = e.clientY - rect.top - dragOffset.y;
+      // Simple position calculation: mouse position relative to canvas
+      let x = e.clientX - rect.left - 60; // Center the component on mouse
+      let y = e.clientY - rect.top - 60;
 
       // Constrain to canvas boundaries
       const componentSize = 120;
@@ -334,10 +345,30 @@ export const CircuitEditorPage: React.FC = () => {
       saveMutation.mutate(circuitData);
     }
     setDraggedComponent(null);
+    setIsDragging(false);
   };
 
   const handleComponentClick = (component: PlacedComponent) => {
     setSelectedComponent(component);
+  };
+
+  const handleConnectionDotClick = (componentId: string) => {
+    if (!connectingFrom) {
+      // Start connection
+      setConnectingFrom(componentId);
+    } else if (connectingFrom !== componentId) {
+      // Complete connection
+      const newConnection: Connection = {
+        id: `conn_${Date.now()}`,
+        from: connectingFrom,
+        to: componentId,
+      };
+      setConnections((prev) => [...prev, newConnection]);
+      setConnectingFrom(null);
+    } else {
+      // Clicked the same dot, cancel connection
+      setConnectingFrom(null);
+    }
   };
 
   const handleComponentDelete = (componentId: string) => {
@@ -554,40 +585,89 @@ export const CircuitEditorPage: React.FC = () => {
             onMouseUp={handleCanvasMouseUp}
             style={{
               cursor: draggedComponent ? "grabbing" : "default",
+              userSelect: "none", // Disable text selection on canvas
             }}
           >
             {/* Placed Components */}
             {placedComponents.map((component, index) => (
-              <div
-                key={component.id}
-                style={{
-                  position: "absolute",
-                  left: component.x,
-                  top: component.y,
-                  width: "120px",
-                  height: "120px",
-                  backgroundColor: "#f3f4f6",
-                  border: "2px solid #d1d5db",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 1000,
-                  color: "#374151",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  textAlign: "center",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  cursor: "move",
-                }}
-                onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
-                onClick={() => handleComponentClick(component)}
-              >
-                <div>
-                  <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                    {component.name}
+              <div key={component.id}>
+                {/* Component */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: component.x,
+                    top: component.y,
+                    width: "120px",
+                    height: "120px",
+                    backgroundColor: "#f3f4f6",
+                    border: "2px solid #d1d5db",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000,
+                    color: "#374151",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    textAlign: "center",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    cursor: "move",
+                    userSelect: "none", // Disable text selection
+                  }}
+                  onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
+                  onMouseUp={(e) => {
+                    // Clear drag timeout if mouse is released before drag starts
+                    if ((e.currentTarget as any).dragTimeout) {
+                      clearTimeout((e.currentTarget as any).dragTimeout);
+                      (e.currentTarget as any).dragTimeout = null;
+                    }
+                  }}
+                  onClick={(e) => {
+                    // Clear any pending drag timeout
+                    if ((e.currentTarget as any).dragTimeout) {
+                      clearTimeout((e.currentTarget as any).dragTimeout);
+                      (e.currentTarget as any).dragTimeout = null;
+                    }
+
+                    // Only trigger click if we didn't just drag
+                    if (!isDragging) {
+                      handleComponentClick(component);
+                    }
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: "12px", marginBottom: "5px" }}>
+                      {component.name}
+                    </div>
                   </div>
                 </div>
+
+                {/* Connection dots */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: component.x + 55, // Center below component
+                    top: component.y + 125, // Below component
+                    width: "10px",
+                    height: "10px",
+                    backgroundColor:
+                      connectingFrom === component.id ? "#ef4444" : "#3b82f6",
+                    borderRadius: "50%",
+                    cursor: "pointer",
+                    zIndex: 1001,
+                    border: "2px solid white",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConnectionDotClick(component.id);
+                  }}
+                  title={
+                    connectingFrom === component.id
+                      ? "Click to cancel connection"
+                      : "Click to start connection"
+                  }
+                />
               </div>
             ))}
 
@@ -597,6 +677,7 @@ export const CircuitEditorPage: React.FC = () => {
               width="100%"
               height="100%"
             >
+              {/* Existing connections */}
               {connections.map((connection) => {
                 const fromComponent = placedComponents.find(
                   (c) => c.id === connection.from
@@ -610,15 +691,38 @@ export const CircuitEditorPage: React.FC = () => {
                 return (
                   <line
                     key={connection.id}
-                    x1={fromComponent.x + 50}
-                    y1={fromComponent.y + 50}
-                    x2={toComponent.x + 50}
-                    y2={toComponent.y + 50}
+                    x1={fromComponent.x + 60}
+                    y1={fromComponent.y + 130}
+                    x2={toComponent.x + 60}
+                    y2={toComponent.y + 130}
                     stroke="green"
                     strokeWidth="3"
                   />
                 );
               })}
+
+              {/* Active connection line following mouse */}
+              {connectingFrom && mousePosition && (
+                <line
+                  x1={(() => {
+                    const fromComponent = placedComponents.find(
+                      (c) => c.id === connectingFrom
+                    );
+                    return fromComponent ? fromComponent.x + 60 : 0;
+                  })()}
+                  y1={(() => {
+                    const fromComponent = placedComponents.find(
+                      (c) => c.id === connectingFrom
+                    );
+                    return fromComponent ? fromComponent.y + 130 : 0;
+                  })()}
+                  x2={mousePosition.x}
+                  y2={mousePosition.y}
+                  stroke="green"
+                  strokeWidth="3"
+                  strokeDasharray="5,5"
+                />
+              )}
             </svg>
           </div>
         </div>
