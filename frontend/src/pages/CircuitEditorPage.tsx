@@ -12,6 +12,7 @@ import {
   BoltIcon,
   MinusIcon,
   PlusIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { apiClient } from "../lib/api";
 import { LoadingAnimation } from "../components/LoadingAnimation";
@@ -72,6 +73,7 @@ export const CircuitEditorPage: React.FC = () => {
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const [showInstructions, setShowInstructions] = useState(true);
   const [showGettingStarted, setShowGettingStarted] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Zoom and Pan state
   const [zoom, setZoom] = useState(1);
@@ -286,6 +288,11 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
+    // Only process if mouse is actually over the canvas
+    if (!e.currentTarget.contains(e.target as Node)) {
+      return;
+    }
+
     // Track mouse position for connection line
     const rect = e.currentTarget.getBoundingClientRect();
     setMousePosition({
@@ -321,6 +328,10 @@ export const CircuitEditorPage: React.FC = () => {
 
   // Zoom and Pan handlers
   const handleWheel = (e: React.WheelEvent) => {
+    // Only process if mouse is actually over the canvas
+    if (!e.currentTarget.contains(e.target as Node)) {
+      return;
+    }
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(0.1, Math.min(3, zoom * delta));
@@ -328,6 +339,10 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Only process if mouse is actually over the canvas
+    if (!e.currentTarget.contains(e.target as Node)) {
+      return;
+    }
     if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
       // Middle mouse or Ctrl+Left
       e.preventDefault();
@@ -337,6 +352,10 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Only process if mouse is actually over the canvas
+    if (!e.currentTarget.contains(e.target as Node)) {
+      return;
+    }
     if (isPanning && panStart) {
       setPan({
         x: e.clientX - panStart.x,
@@ -1297,6 +1316,95 @@ export const CircuitEditorPage: React.FC = () => {
     },
   ];
 
+  // Independent search component that filters locally
+  const IndependentSearchInput = React.memo(() => {
+    const [searchValue, setSearchValue] = React.useState("");
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const { theme } = useTheme();
+
+    // Filter components locally
+    const filteredComponentsLocal = React.useMemo(() => {
+      return circuitComponents.filter((component) =>
+        component.name.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    }, [searchValue]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      const newValue = e.target.value;
+      setSearchValue(newValue);
+      console.log("Search input changed:", newValue);
+    };
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      console.log("Search input focused");
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      console.log("Search input blurred");
+    };
+
+    return (
+      <>
+        <div className="relative mb-4">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search components..."
+            value={searchValue}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onKeyDown={(e) => e.stopPropagation()}
+            onKeyUp={(e) => e.stopPropagation()}
+            className={`w-full pl-10 pr-3 py-2 text-sm border rounded-lg transition-colors duration-200 ${
+              theme === "dark"
+                ? "bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-400 focus:ring-green-500 focus:border-green-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
+            autoComplete="off"
+            spellCheck="false"
+            style={{ userSelect: "text" }}
+          />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {filteredComponentsLocal.map((component) => (
+            <div
+              key={component.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, component)}
+              className={`border rounded-lg p-3 cursor-move transition-colors duration-200 ${
+                theme === "dark"
+                  ? "bg-gray-700/50 border-gray-600/50 hover:bg-gray-600/50"
+                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex flex-col items-center text-center">
+                <component.icon
+                  className={`h-8 w-8 mb-2 transition-colors duration-200 ${
+                    theme === "dark" ? "text-green-400" : "text-blue-600"
+                  }`}
+                />
+                <span
+                  className={`text-xs font-medium transition-colors duration-200 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
+                  {component.name}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  });
+
+  IndependentSearchInput.displayName = "IndependentSearchInput";
+
   return (
     <div
       key={remountKey}
@@ -1313,6 +1421,11 @@ export const CircuitEditorPage: React.FC = () => {
             ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
             : "bg-white/90 backdrop-blur-sm border-gray-200/50"
         }`}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseMove={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        onKeyUp={(e) => e.stopPropagation()}
       >
         {/* Logo at top */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -1349,35 +1462,7 @@ export const CircuitEditorPage: React.FC = () => {
           <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
             Components
           </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {circuitComponents.map((component) => (
-              <div
-                key={component.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, component)}
-                className={`border rounded-lg p-3 cursor-move transition-colors duration-200 ${
-                  theme === "dark"
-                    ? "bg-gray-700/50 border-gray-600/50 hover:bg-gray-600/50"
-                    : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                }`}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <component.icon
-                    className={`h-8 w-8 mb-2 transition-colors duration-200 ${
-                      theme === "dark" ? "text-green-400" : "text-blue-600"
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-medium transition-colors duration-200 ${
-                      theme === "dark" ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    {component.name}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <IndependentSearchInput />
         </div>
 
         {/* Starting Guide at bottom */}
@@ -1514,17 +1599,8 @@ export const CircuitEditorPage: React.FC = () => {
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={(e) => {
-              handleCanvasMouseUp();
-              handleMouseUp();
-            }}
-            onWheel={handleWheel}
-            onMouseDown={handleMouseDown}
-            onKeyDown={handleKeyDown}
             style={{
               cursor: draggedComponent ? "grabbing" : "default",
-              userSelect: "none", // Disable text selection on canvas
             }}
           >
             {/* Canvas Content Container - Fixed workable area */}
@@ -1534,6 +1610,13 @@ export const CircuitEditorPage: React.FC = () => {
                 width: "100%",
                 height: "100%",
               }}
+              onMouseMove={handleCanvasMouseMove}
+              onMouseUp={(e) => {
+                handleCanvasMouseUp();
+                handleMouseUp();
+              }}
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
             >
               {/* Placed components */}
               {placedComponents.map((component) => (
