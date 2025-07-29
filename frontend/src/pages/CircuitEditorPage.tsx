@@ -74,6 +74,7 @@ export const CircuitEditorPage: React.FC = () => {
   const [showInstructions, setShowInstructions] = useState(true);
   const [showGettingStarted, setShowGettingStarted] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Zoom and Pan state
   const [zoom, setZoom] = useState(1);
@@ -1443,7 +1444,9 @@ export const CircuitEditorPage: React.FC = () => {
     >
       {/* Sidebar */}
       <div
-        className={`w-64 h-full border-r transition-all duration-500 ease-out flex flex-col ${
+        className={`${
+          isSidebarCollapsed ? "w-24" : "w-64"
+        } h-full border-r transition-all duration-500 ease-out flex flex-col ${
           theme === "dark"
             ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
             : "bg-white/90 backdrop-blur-sm border-gray-200/50"
@@ -1455,85 +1458,157 @@ export const CircuitEditorPage: React.FC = () => {
         onKeyUp={(e) => e.stopPropagation()}
       >
         {/* Logo at top */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="flex items-center space-x-3">
-            <div className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-              <svg
-                className="h-7 w-7 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        <div className="pl-4 pr-2 py-4 pb-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 relative">
+          {!isSidebarCollapsed ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <svg
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+                  AmpFlux
+                </span>
+              </div>
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className={`p-1 rounded-lg transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "text-gray-400 hover:text-white hover:bg-gray-700/50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+                title="Collapse sidebar"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                  />
+                </svg>
+              </button>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
-              AmpFlux
-            </span>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="h-10 w-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                <svg
+                  className="h-5 w-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className={`p-1 rounded-lg transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "text-gray-400 hover:text-white hover:bg-gray-700/50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+                title="Expand sidebar"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Components section - scrollable */}
-        <div
-          className={`transition-all duration-[2000ms] ease-in-out ${
-            showGettingStarted
-              ? "flex-1 overflow-y-auto px-4 pb-4"
-              : "h-full overflow-y-auto px-4 pb-4"
-          }`}
-        >
-          <IndependentSearchInput />
-        </div>
+        {!isSidebarCollapsed && (
+          <div
+            className={`transition-all duration-[2000ms] ease-in-out ${
+              showGettingStarted
+                ? "flex-1 overflow-y-auto px-4 pb-4"
+                : "h-full overflow-y-auto px-4 pb-4"
+            }`}
+          >
+            <IndependentSearchInput />
+          </div>
+        )}
 
         {/* Starting Guide at bottom */}
-        <div
-          className={`flex-shrink-0 border-t border-gray-200 dark:border-gray-700 transition-all duration-[2000ms] ease-in-out ${
-            showGettingStarted
-              ? "max-h-48 opacity-100 transform translate-y-0"
-              : "max-h-0 opacity-0 transform translate-y-full overflow-hidden"
-          }`}
-        >
-          <div className="p-4">
-            <div
-              className={`p-3 rounded-lg relative ${
-                theme === "dark" ? "bg-blue-900/20" : "bg-blue-50"
-              }`}
-            >
-              <button
-                onClick={() => setShowGettingStarted(false)}
-                className={`absolute top-1 right-1 p-2 rounded-full transition-all duration-300 ease-in-out ${
-                  theme === "dark"
-                    ? "text-blue-200 hover:text-white hover:bg-blue-600 shadow-lg"
-                    : "text-blue-600 hover:text-white hover:bg-blue-500 shadow-lg"
-                }`}
-                title="Close getting started guide"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-              <h4
-                className={`text-sm font-medium mb-2 pr-8 ${
-                  theme === "dark" ? "text-blue-300" : "text-blue-900"
+        {!isSidebarCollapsed && (
+          <div
+            className={`flex-shrink-0 border-t border-gray-200 dark:border-gray-700 transition-all duration-[2000ms] ease-in-out ${
+              showGettingStarted
+                ? "max-h-48 opacity-100 transform translate-y-0"
+                : "max-h-0 opacity-0 transform translate-y-full overflow-hidden"
+            }`}
+          >
+            <div className="p-4">
+              <div
+                className={`p-3 rounded-lg relative ${
+                  theme === "dark" ? "bg-blue-900/20" : "bg-blue-50"
                 }`}
               >
-                Getting Started
-              </h4>
-              <ul
-                className={`text-xs space-y-1 ${
-                  theme === "dark" ? "text-blue-200" : "text-blue-700"
-                }`}
-              >
-                <li>• Drag components to the canvas</li>
-                <li>• Click components to edit properties</li>
-                <li>• Drag components to move them</li>
-                <li>• Connect components with dots</li>
-              </ul>
+                <button
+                  onClick={() => setShowGettingStarted(false)}
+                  className={`absolute top-1 right-1 p-2 rounded-full transition-all duration-300 ease-in-out ${
+                    theme === "dark"
+                      ? "text-blue-200 hover:text-white hover:bg-blue-600 shadow-lg"
+                      : "text-blue-600 hover:text-white hover:bg-blue-500 shadow-lg"
+                  }`}
+                  title="Close getting started guide"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+                <h4
+                  className={`text-sm font-medium mb-2 pr-8 ${
+                    theme === "dark" ? "text-blue-300" : "text-blue-900"
+                  }`}
+                >
+                  Getting Started
+                </h4>
+                <ul
+                  className={`text-xs space-y-1 ${
+                    theme === "dark" ? "text-blue-200" : "text-blue-700"
+                  }`}
+                >
+                  <li>• Drag components to the canvas</li>
+                  <li>• Click components to edit properties</li>
+                  <li>• Drag components to move them</li>
+                  <li>• Connect components with dots</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Main Canvas Area */}
