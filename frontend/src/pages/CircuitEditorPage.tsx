@@ -1359,7 +1359,7 @@ export const CircuitEditorPage: React.FC = () => {
             onBlur={handleBlur}
             onKeyDown={(e) => e.stopPropagation()}
             onKeyUp={(e) => e.stopPropagation()}
-            className={`w-full pl-10 pr-3 py-2 text-sm border rounded-lg transition-colors duration-200 ${
+            className={`w-full pl-10 pr-8 py-2 text-sm border rounded-lg transition-colors duration-200 ${
               theme === "dark"
                 ? "bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-400 focus:ring-green-500 focus:border-green-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -1369,6 +1369,22 @@ export const CircuitEditorPage: React.FC = () => {
             style={{ userSelect: "text" }}
           />
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          {searchValue && (
+            <button
+              onClick={() => {
+                setSearchValue("");
+                inputRef.current?.focus();
+              }}
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors duration-200 ${
+                theme === "dark"
+                  ? "text-gray-400 hover:text-gray-200 hover:bg-gray-600/50"
+                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              }`}
+              title="Clear search"
+            >
+              <XMarkIcon className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-3">
           {filteredComponentsLocal.map((component) => (
