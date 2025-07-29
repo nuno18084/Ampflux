@@ -1348,44 +1348,55 @@ export const CircuitEditorPage: React.FC = () => {
 
     return (
       <>
-        <div className="relative mb-4">
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search components..."
-            value={searchValue}
-            onChange={handleChange}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onKeyDown={(e) => e.stopPropagation()}
-            onKeyUp={(e) => e.stopPropagation()}
-            className={`w-full pl-10 pr-8 py-2 text-sm border rounded-lg transition-colors duration-200 ${
-              theme === "dark"
-                ? "bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-400 focus:ring-green-500 focus:border-green-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
-            autoComplete="off"
-            spellCheck="false"
-            style={{ userSelect: "text" }}
-          />
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-          {searchValue && (
-            <button
-              onClick={() => {
-                setSearchValue("");
-                inputRef.current?.focus();
-              }}
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors duration-200 ${
+        {/* Sticky header */}
+        <div
+          className="sticky top-0 pt-3 pb-2 z-10"
+          style={{ backgroundColor: "rgb(27, 34, 48)" }}
+        >
+          <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
+            Components
+          </h3>
+          <div className="relative mb-2">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search components..."
+              value={searchValue}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onKeyDown={(e) => e.stopPropagation()}
+              onKeyUp={(e) => e.stopPropagation()}
+              className={`w-full pl-10 pr-8 py-2 text-sm border rounded-lg transition-colors duration-200 ${
                 theme === "dark"
-                  ? "text-gray-400 hover:text-gray-200 hover:bg-gray-600/50"
-                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                  ? "bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-400 focus:ring-green-500 focus:border-green-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
-              title="Clear search"
-            >
-              <XMarkIcon className="h-4 w-4" />
-            </button>
-          )}
+              autoComplete="off"
+              spellCheck="false"
+              style={{ userSelect: "text" }}
+            />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            {searchValue && (
+              <button
+                onClick={() => {
+                  setSearchValue("");
+                  inputRef.current?.focus();
+                }}
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-600/50"
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                }`}
+                title="Clear search"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Scrollable components list */}
         <div className="grid grid-cols-2 gap-3">
           {filteredComponentsLocal.map((component) => (
             <div
@@ -1471,13 +1482,10 @@ export const CircuitEditorPage: React.FC = () => {
         <div
           className={`transition-all duration-[2000ms] ease-in-out ${
             showGettingStarted
-              ? "flex-1 overflow-y-auto p-4 pb-4"
-              : "h-full overflow-y-auto p-4 pb-4"
+              ? "flex-1 overflow-y-auto px-4 pb-4"
+              : "h-full overflow-y-auto px-4 pb-4"
           }`}
         >
-          <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
-            Components
-          </h3>
           <IndependentSearchInput />
         </div>
 
