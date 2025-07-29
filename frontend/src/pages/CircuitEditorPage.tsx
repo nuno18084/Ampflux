@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { apiClient } from "../lib/api";
 import { LoadingAnimation } from "../components/LoadingAnimation";
+import { useTheme } from "../contexts/ThemeProvider";
 
 interface CircuitComponent {
   id: string;
@@ -81,6 +82,7 @@ export const CircuitEditorPage: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const currentPositionsRef = useRef<PlacedComponent[]>([]); // Track current positions during drag
+  const { theme } = useTheme();
 
   // Force remount on every page load to reset state
   const remountKey = Date.now();
@@ -449,19 +451,54 @@ export const CircuitEditorPage: React.FC = () => {
 
   if (projectLoading || circuitLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-start justify-center pt-40">
+      <div
+        className={`min-h-screen flex items-start justify-center pt-40 transition-colors duration-200 ${
+          theme === "dark"
+            ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+            : "bg-gradient-to-br from-green-50 via-white to-emerald-50"
+        }`}
+      >
         <LoadingAnimation size="xl" showText={false} />
       </div>
     );
   }
 
   return (
-    <div key={remountKey} className="h-screen flex bg-gray-50">
+    <div
+      key={remountKey}
+      className={`h-screen flex transition-colors duration-200 ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+          : "bg-gray-50"
+      }`}
+    >
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Components</h2>
-          <p className="text-sm text-gray-500">Drag to add to circuit</p>
+      <div
+        className={`w-64 flex flex-col transition-colors duration-200 ${
+          theme === "dark"
+            ? "bg-gray-800/50 backdrop-blur-sm border-r border-gray-700/50"
+            : "bg-white border-r border-gray-200"
+        }`}
+      >
+        <div
+          className={`p-4 border-b transition-colors duration-200 ${
+            theme === "dark" ? "border-gray-700/50" : "border-gray-200"
+          }`}
+        >
+          <h2
+            className={`text-lg font-semibold transition-colors duration-200 ${
+              theme === "dark" ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Components
+          </h2>
+          <p
+            className={`text-sm transition-colors duration-200 ${
+              theme === "dark" ? "text-gray-300" : "text-gray-500"
+            }`}
+          >
+            Drag to add to circuit
+          </p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
@@ -471,11 +508,23 @@ export const CircuitEditorPage: React.FC = () => {
                 key={component.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, component)}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-3 cursor-move hover:bg-gray-100 transition-colors duration-200"
+                className={`border rounded-lg p-3 cursor-move transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "bg-gray-700/50 border-gray-600/50 hover:bg-gray-600/50"
+                    : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                }`}
               >
                 <div className="flex flex-col items-center text-center">
-                  <component.icon className="h-8 w-8 text-blue-600 mb-2" />
-                  <span className="text-xs font-medium text-gray-700">
+                  <component.icon
+                    className={`h-8 w-8 mb-2 transition-colors duration-200 ${
+                      theme === "dark" ? "text-green-400" : "text-blue-600"
+                    }`}
+                  />
+                  <span
+                    className={`text-xs font-medium transition-colors duration-200 ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
                     {component.name}
                   </span>
                 </div>
@@ -486,14 +535,22 @@ export const CircuitEditorPage: React.FC = () => {
 
         {/* Properties Panel */}
         {selectedComponent && (
-          <div className="border-t border-gray-200 p-4">
+          <div
+            className={`border-t p-4 transition-colors duration-200 ${
+              theme === "dark" ? "border-gray-700/50" : "border-gray-200"
+            }`}
+          >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-900">
+              <h3
+                className={`text-sm font-medium transition-colors duration-200 ${
+                  theme === "dark" ? "text-white" : "text-gray-900"
+                }`}
+              >
                 {selectedComponent.name} Properties
               </h3>
               <button
                 onClick={() => handleComponentDelete(selectedComponent.id)}
-                className="text-red-600 hover:text-red-700 p-1"
+                className="text-red-600 hover:text-red-700 p-1 transition-colors duration-200"
                 title="Delete component"
               >
                 <TrashIcon className="h-4 w-4" />
@@ -503,7 +560,11 @@ export const CircuitEditorPage: React.FC = () => {
               {Object.entries(selectedComponent.properties).map(
                 ([key, value]) => (
                   <div key={key}>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label
+                      className={`block text-xs font-medium mb-1 transition-colors duration-200 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       {key
                         .replace(/_/g, " ")
                         .replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -523,7 +584,11 @@ export const CircuitEditorPage: React.FC = () => {
                           newValue
                         );
                       }}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full px-2 py-1 text-xs border rounded focus:ring-1 transition-colors duration-200 ${
+                        theme === "dark"
+                          ? "bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-400 focus:ring-green-500 focus:border-green-500"
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      }`}
                     />
                   </div>
                 )
@@ -534,13 +599,27 @@ export const CircuitEditorPage: React.FC = () => {
 
         {/* Instructions */}
         {showInstructions && (
-          <div className="border-t border-gray-200 p-4 bg-blue-50">
+          <div
+            className={`border-t p-4 transition-colors duration-200 ${
+              theme === "dark"
+                ? "border-gray-700/50 bg-blue-900/20"
+                : "border-gray-200 bg-blue-50"
+            }`}
+          >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h4 className="text-sm font-medium text-blue-900 mb-1">
+                <h4
+                  className={`text-sm font-medium mb-1 transition-colors duration-200 ${
+                    theme === "dark" ? "text-blue-300" : "text-blue-900"
+                  }`}
+                >
                   Getting Started
                 </h4>
-                <ul className="text-xs text-blue-700 space-y-1">
+                <ul
+                  className={`text-xs space-y-1 transition-colors duration-200 ${
+                    theme === "dark" ? "text-blue-200" : "text-blue-700"
+                  }`}
+                >
                   <li>• Drag components to the canvas</li>
                   <li>• Click components to edit properties</li>
                   <li>• Drag components to move them</li>
@@ -548,7 +627,7 @@ export const CircuitEditorPage: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowInstructions(false)}
-                className="text-blue-500 hover:text-blue-700"
+                className="text-blue-500 hover:text-blue-700 transition-colors duration-200"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>
@@ -560,28 +639,52 @@ export const CircuitEditorPage: React.FC = () => {
       {/* Main Canvas Area */}
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div
+          className={`border-b px-6 py-4 transition-colors duration-200 ${
+            theme === "dark"
+              ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleBack}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className={`inline-flex items-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50 focus:ring-green-500"
+                    : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
+                }`}
               >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Back to Project
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1
+                  className={`text-xl font-semibold transition-colors duration-200 ${
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   {project?.name} - Circuit Editor
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p
+                  className={`text-sm transition-colors duration-200 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-500"
+                  }`}
+                >
                   Build your circuit by dragging components
                 </p>
               </div>
             </div>
             <div className="flex space-x-3">
               {saveSuccess && (
-                <div className="flex items-center px-3 py-2 text-sm text-green-600 bg-green-50 rounded-md">
+                <div
+                  className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors duration-200 ${
+                    theme === "dark"
+                      ? "text-green-400 bg-green-900/20"
+                      : "text-green-600 bg-green-50"
+                  }`}
+                >
                   <CheckIcon className="h-4 w-4 mr-2" />
                   Saved successfully!
                 </div>
@@ -589,7 +692,11 @@ export const CircuitEditorPage: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isSaving || placedComponents.length === 0}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50 focus:ring-green-500"
+                    : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
+                }`}
               >
                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
                 {isSaving ? "Saving..." : "Save"}
@@ -597,7 +704,7 @@ export const CircuitEditorPage: React.FC = () => {
               <button
                 onClick={handleSimulate}
                 disabled={isSimulating || placedComponents.length === 0}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors duration-200"
               >
                 <PlayIcon className="h-4 w-4 mr-2" />
                 {isSimulating ? "Simulating..." : "Simulate"}
@@ -609,7 +716,11 @@ export const CircuitEditorPage: React.FC = () => {
         {/* Canvas */}
         <div className="flex-1 p-6 relative">
           <div
-            className="w-full h-full bg-white border-2 border-dashed border-gray-300 rounded-lg relative overflow-hidden"
+            className={`w-full h-full border-2 border-dashed rounded-lg relative overflow-hidden transition-colors duration-200 ${
+              theme === "dark"
+                ? "bg-gray-800/50 backdrop-blur-sm border-gray-600/50"
+                : "bg-white border-gray-300"
+            }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onMouseMove={handleCanvasMouseMove}
@@ -630,18 +741,23 @@ export const CircuitEditorPage: React.FC = () => {
                     top: component.y,
                     width: "120px",
                     height: "120px",
-                    backgroundColor: "#f3f4f6",
-                    border: "2px solid #d1d5db",
+                    backgroundColor: theme === "dark" ? "#374151" : "#f3f4f6",
+                    border: `2px solid ${
+                      theme === "dark" ? "#4b5563" : "#d1d5db"
+                    }`,
                     borderRadius: "8px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     zIndex: 1000,
-                    color: "#374151",
+                    color: theme === "dark" ? "#e5e7eb" : "#374151",
                     fontWeight: "bold",
                     fontSize: "14px",
                     textAlign: "center",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    boxShadow:
+                      theme === "dark"
+                        ? "0 2px 4px rgba(0,0,0,0.3)"
+                        : "0 2px 4px rgba(0,0,0,0.1)",
                     cursor: "move",
                     userSelect: "none", // Disable text selection
                   }}
@@ -652,16 +768,8 @@ export const CircuitEditorPage: React.FC = () => {
                       clearTimeout((e.currentTarget as any).dragTimeout);
                       (e.currentTarget as any).dragTimeout = null;
                     }
-                  }}
-                  onClick={(e) => {
-                    // Clear any pending drag timeout
-                    if ((e.currentTarget as any).dragTimeout) {
-                      clearTimeout((e.currentTarget as any).dragTimeout);
-                      (e.currentTarget as any).dragTimeout = null;
-                    }
-
-                    // Only trigger click if we didn't just drag
-                    if (!isDragging) {
+                    // Handle component click if not dragging
+                    if (!draggedComponent) {
                       handleComponentClick(component);
                     }
                   }}
@@ -686,8 +794,13 @@ export const CircuitEditorPage: React.FC = () => {
                     borderRadius: "50%",
                     cursor: "pointer",
                     zIndex: 1001,
-                    border: "2px solid white",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                    border: `2px solid ${
+                      theme === "dark" ? "#1f2937" : "white"
+                    }`,
+                    boxShadow:
+                      theme === "dark"
+                        ? "0 2px 4px rgba(0,0,0,0.4)"
+                        : "0 2px 4px rgba(0,0,0,0.2)",
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
