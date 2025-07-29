@@ -16,6 +16,8 @@ export interface UserCreate {
   name: string;
   email: string;
   password: string;
+  company_name?: string;
+  is_company?: boolean;
 }
 
 export interface UserLogin {

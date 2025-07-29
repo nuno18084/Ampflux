@@ -6,7 +6,13 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    isCompany?: boolean,
+    companyName?: string
+  ) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -52,10 +58,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    isCompany: boolean = false,
+    companyName: string = ""
+  ) => {
     try {
-      const newUser = await apiClient.register({ name, email, password });
-      setUser(newUser);
+      // First register the user
+      await apiClient.register({
+        name,
+        email,
+        password,
+        is_company: isCompany,
+        company_name: companyName,
+      });
+      // Then automatically log in to get the tokens
+      const token = await apiClient.login({ email, password });
+      apiClient.setTokens(token);
+      const currentUser = await apiClient.getCurrentUser();
+      setUser(currentUser);
     } catch (error) {
       console.error("Registration failed:", error);
       throw error;

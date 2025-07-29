@@ -23,14 +23,26 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     if user:
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed_pw = hash_password(user_in.password)
-    # Create unique company name
-    company_name = f"{user_in.name}'s Company"
-    # Check if company name exists and make it unique
-    existing_company = db.query(models.Company).filter(models.Company.name == company_name).first()
-    if existing_company:
-        # Add a unique suffix to make the name unique
-        unique_suffix = str(uuid.uuid4())[:8]
-        company_name = f"{user_in.name}'s Company ({unique_suffix})"
+    
+    # Handle company creation
+    if user_in.is_company and user_in.company_name:
+        # Use provided company name
+        company_name = user_in.company_name
+        # Check if company name exists and make it unique
+        existing_company = db.query(models.Company).filter(models.Company.name == company_name).first()
+        if existing_company:
+            # Add a unique suffix to make the name unique
+            unique_suffix = str(uuid.uuid4())[:8]
+            company_name = f"{company_name} ({unique_suffix})"
+    else:
+        # Create default company name for individual users
+        company_name = f"{user_in.name}'s Company"
+        # Check if company name exists and make it unique
+        existing_company = db.query(models.Company).filter(models.Company.name == company_name).first()
+        if existing_company:
+            # Add a unique suffix to make the name unique
+            unique_suffix = str(uuid.uuid4())[:8]
+            company_name = f"{user_in.name}'s Company ({unique_suffix})"
     
     company = models.Company(name=company_name)
     db.add(company)

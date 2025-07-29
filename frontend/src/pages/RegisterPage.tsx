@@ -9,6 +9,7 @@ import {
   LockClosedIcon,
   EyeIcon,
   EyeSlashIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 
 export const RegisterPage: React.FC = () => {
@@ -16,6 +17,8 @@ export const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isCompany, setIsCompany] = useState(false);
+  const [companyName, setCompanyName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,7 +41,7 @@ export const RegisterPage: React.FC = () => {
     setError("");
 
     try {
-      await register(name, email, password);
+      await register(name, email, password, isCompany, companyName);
       navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Registration failed");
@@ -70,12 +73,12 @@ export const RegisterPage: React.FC = () => {
           : "bg-gradient-to-br from-green-50 via-white to-emerald-50"
       }`}
     >
-      <div className="max-w-md w-full space-y-8">
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-3 sm:space-y-4 lg:space-y-5">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+          <div className="mx-auto h-12 w-12 sm:h-14 sm:w-14 lg:h-14 lg:w-14 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-3 sm:mb-4 lg:mb-4 shadow-lg">
             <svg
-              className="h-8 w-8 text-white"
+              className="h-6 w-6 sm:h-7 sm:w-7 lg:h-7 lg:w-7 text-white"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -89,7 +92,7 @@ export const RegisterPage: React.FC = () => {
             </svg>
           </div>
           <h2
-            className={`text-3xl font-bold mb-2 ${
+            className={`text-xl sm:text-2xl lg:text-2xl font-bold mb-1 sm:mb-2 lg:mb-1 ${
               theme === "dark"
                 ? "bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent"
                 : "bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent"
@@ -98,7 +101,7 @@ export const RegisterPage: React.FC = () => {
             Join AmpFlux
           </h2>
           <p
-            className={`${
+            className={`text-sm sm:text-base lg:text-sm ${
               theme === "dark" ? "text-gray-300" : "text-gray-600"
             }`}
           >
@@ -119,23 +122,26 @@ export const RegisterPage: React.FC = () => {
         {/* Form */}
         {!isLoading && (
           <div
-            className={`transition-all duration-200 rounded-2xl shadow-2xl p-8 border ${
+            className={`transition-all duration-200 rounded-lg sm:rounded-xl lg:rounded-xl shadow-lg sm:shadow-xl lg:shadow-xl p-4 sm:p-6 lg:p-6 border ${
               theme === "dark"
                 ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
                 : "bg-white/90 backdrop-blur-sm border-green-200/50"
             }`}
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-3 sm:space-y-4 lg:space-y-4"
+            >
               {error && (
                 <div
-                  className={`rounded-lg p-4 ${
+                  className={`rounded-lg p-3 sm:p-4 lg:p-3 ${
                     theme === "dark"
                       ? "bg-red-900/50 border border-red-500/50"
                       : "bg-red-50 border border-red-200"
                   }`}
                 >
                   <p
-                    className={`text-sm ${
+                    className={`text-xs sm:text-sm lg:text-xs ${
                       theme === "dark" ? "text-red-300" : "text-red-600"
                     }`}
                   >
@@ -143,19 +149,20 @@ export const RegisterPage: React.FC = () => {
                   </p>
                 </div>
               )}
+
               <div>
                 <label
                   htmlFor="name"
-                  className={`block text-sm font-medium mb-2 ${
+                  className={`block text-xs sm:text-sm lg:text-xs font-medium mb-1 sm:mb-2 lg:mb-1 ${
                     theme === "dark" ? "text-gray-300" : "text-gray-700"
                   }`}
                 >
                   Full name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-3 flex items-center pointer-events-none">
                     <UserIcon
-                      className={`h-5 w-5 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
                         theme === "dark" ? "text-gray-400" : "text-gray-500"
                       }`}
                     />
@@ -168,7 +175,7 @@ export const RegisterPage: React.FC = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-3 rounded-lg transition-all duration-200 ${
+                    className={`block w-full pl-8 sm:pl-10 lg:pl-10 pr-3 py-2 sm:py-3 lg:py-2.5 text-sm rounded-lg transition-all duration-200 ${
                       theme === "dark"
                         ? "bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50"
                         : "border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
@@ -177,19 +184,20 @@ export const RegisterPage: React.FC = () => {
                   />
                 </div>
               </div>
+
               <div>
                 <label
                   htmlFor="email"
-                  className={`block text-sm font-medium mb-2 ${
+                  className={`block text-xs sm:text-sm lg:text-xs font-medium mb-1 sm:mb-2 lg:mb-1 ${
                     theme === "dark" ? "text-gray-300" : "text-gray-700"
                   }`}
                 >
                   Email address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-3 flex items-center pointer-events-none">
                     <EnvelopeIcon
-                      className={`h-5 w-5 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
                         theme === "dark" ? "text-gray-400" : "text-gray-500"
                       }`}
                     />
@@ -202,7 +210,7 @@ export const RegisterPage: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-3 rounded-lg transition-all duration-200 ${
+                    className={`block w-full pl-8 sm:pl-10 lg:pl-10 pr-3 py-2 sm:py-3 lg:py-2.5 text-sm rounded-lg transition-all duration-200 ${
                       theme === "dark"
                         ? "bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50"
                         : "border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
@@ -211,19 +219,20 @@ export const RegisterPage: React.FC = () => {
                   />
                 </div>
               </div>
+
               <div>
                 <label
                   htmlFor="password"
-                  className={`block text-sm font-medium mb-2 ${
+                  className={`block text-xs sm:text-sm lg:text-xs font-medium mb-1 sm:mb-2 lg:mb-1 ${
                     theme === "dark" ? "text-gray-300" : "text-gray-700"
                   }`}
                 >
                   Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-3 flex items-center pointer-events-none">
                     <LockClosedIcon
-                      className={`h-5 w-5 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
                         theme === "dark" ? "text-gray-400" : "text-gray-500"
                       }`}
                     />
@@ -236,7 +245,7 @@ export const RegisterPage: React.FC = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`block w-full pl-10 pr-10 py-3 rounded-lg transition-all duration-200 ${
+                    className={`block w-full pl-8 sm:pl-10 lg:pl-10 pr-8 sm:pr-10 lg:pr-10 py-2 sm:py-3 lg:py-2.5 text-sm rounded-lg transition-all duration-200 ${
                       theme === "dark"
                         ? "bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50"
                         : "border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
@@ -245,18 +254,18 @@ export const RegisterPage: React.FC = () => {
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-2 sm:pr-3 lg:pr-3 flex items-center"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
                       <EyeSlashIcon
-                        className={`h-5 w-5 ${
+                        className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
                           theme === "dark" ? "text-gray-400" : "text-gray-500"
                         }`}
                       />
                     ) : (
                       <EyeIcon
-                        className={`h-5 w-5 ${
+                        className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
                           theme === "dark" ? "text-gray-400" : "text-gray-500"
                         }`}
                       />
@@ -264,14 +273,77 @@ export const RegisterPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Company Registration Section */}
+              <div className="space-y-2 sm:space-y-3 lg:space-y-2">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isCompany"
+                    checked={isCompany}
+                    onChange={(e) => setIsCompany(e.target.checked)}
+                    className={`h-3 w-3 sm:h-4 sm:w-4 lg:h-3 lg:w-3 rounded border-gray-300 text-green-600 focus:ring-green-500 ${
+                      theme === "dark"
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                  <label
+                    htmlFor="isCompany"
+                    className={`ml-2 block text-xs sm:text-sm lg:text-xs font-medium ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Register as a company
+                  </label>
+                </div>
+
+                {isCompany && (
+                  <div>
+                    <label
+                      htmlFor="companyName"
+                      className={`block text-xs sm:text-sm lg:text-xs font-medium mb-1 sm:mb-2 lg:mb-1 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      Company name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-3 flex items-center pointer-events-none">
+                        <BuildingOfficeIcon
+                          className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
+                            theme === "dark" ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        />
+                      </div>
+                      <input
+                        id="companyName"
+                        name="companyName"
+                        type="text"
+                        autoComplete="organization"
+                        required={isCompany}
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className={`block w-full pl-8 sm:pl-10 lg:pl-10 pr-3 py-2 sm:py-3 lg:py-2.5 text-sm rounded-lg transition-all duration-200 ${
+                          theme === "dark"
+                            ? "bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50"
+                            : "border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        }`}
+                        placeholder="Enter your company name"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl border border-green-500/20"
+                className="group relative w-full flex justify-center py-2 sm:py-3 lg:py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl border border-green-500/20"
               >
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                <span className="absolute left-0 inset-y-0 flex items-center pl-2 sm:pl-3 lg:pl-3">
                   <svg
-                    className="h-5 w-5 text-green-300 group-hover:text-green-200"
+                    className="h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 text-green-300 group-hover:text-green-200"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -287,9 +359,9 @@ export const RegisterPage: React.FC = () => {
                 Create account
               </button>
             </form>
-            <div className="mt-6 text-center">
+            <div className="mt-3 sm:mt-4 lg:mt-3 text-center">
               <p
-                className={`text-sm ${
+                className={`text-xs sm:text-sm lg:text-xs ${
                   theme === "dark" ? "text-gray-400" : "text-gray-600"
                 }`}
               >

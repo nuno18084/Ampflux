@@ -1,8 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types";
 import { apiClient } from "../lib/api";
-import { AuthContext } from "./auth";
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    isCompany?: boolean,
+    companyName?: string
+  ) => Promise<void>;
+  logout: () => void;
+  isAuthenticated: boolean;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -54,10 +72,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    isCompany: boolean = false,
+    companyName: string = ""
+  ) => {
     try {
       // First register the user
-      await apiClient.register({ name, email, password });
+      await apiClient.register({
+        name,
+        email,
+        password,
+        is_company: isCompany,
+        company_name: companyName,
+      });
       // Then automatically log in to get the tokens
       const token = await apiClient.login({ email, password });
       apiClient.setTokens(token);

@@ -10,6 +10,8 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    company_name: Optional[str] = None
+    is_company: bool = False
 
 class CompanyRead(BaseModel):
     id: int
