@@ -95,18 +95,21 @@ export const CircuitEditorPage: React.FC = () => {
   const [selectedComponent, setSelectedComponent] =
     useState<PlacedComponent | null>(null);
   const [draggedComponent, setDraggedComponent] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{
     x: number;
     y: number;
   } | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const [showInstructions, setShowInstructions] = useState(true);
+
+  // Zoom and Pan state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
 
   // Queries
   const { data: project, isLoading: projectLoading } = useQuery({
@@ -345,20 +348,55 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleCanvasMouseUp = () => {
-    if (draggedComponent) {
-      // Use the ref to get the most current positions
-      const currentComponents =
-        currentPositionsRef.current.length > 0
-          ? currentPositionsRef.current
-          : placedComponents;
-
-      // Update the state with new positions
-      setPlacedComponents(currentComponents);
-      currentPositionsRef.current = currentComponents;
-    }
     setDraggedComponent(null);
     setIsDragging(false);
+    setConnectingFrom(null);
   };
+
+  // Zoom and Pan handlers
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(0.1, Math.min(3, zoom * delta));
+    setZoom(newZoom);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
+      // Middle mouse or Ctrl+Left
+      e.preventDefault();
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isPanning && panStart) {
+      setPan({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+    setPanStart(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "0" && e.ctrlKey) {
+      e.preventDefault();
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+    }
+  };
+
+  // Add panning state
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   const handleComponentClick = (component: PlacedComponent) => {
     setSelectedComponent(component);
@@ -724,150 +762,230 @@ export const CircuitEditorPage: React.FC = () => {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
+            onMouseUp={(e) => {
+              handleCanvasMouseUp();
+              handleMouseUp();
+            }}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onKeyDown={handleKeyDown}
             style={{
               cursor: draggedComponent ? "grabbing" : "default",
               userSelect: "none", // Disable text selection on canvas
             }}
           >
-            {/* Placed Components */}
-            {placedComponents.map((component, index) => (
-              <div key={component.id}>
-                {/* Component */}
-                <div
-                  style={{
-                    position: "absolute",
-                    left: component.x,
-                    top: component.y,
-                    width: "120px",
-                    height: "120px",
-                    backgroundColor: theme === "dark" ? "#374151" : "#f3f4f6",
-                    border: `2px solid ${
-                      theme === "dark" ? "#4b5563" : "#d1d5db"
-                    }`,
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 1000,
-                    color: theme === "dark" ? "#e5e7eb" : "#374151",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                    textAlign: "center",
-                    boxShadow:
-                      theme === "dark"
-                        ? "0 2px 4px rgba(0,0,0,0.3)"
-                        : "0 2px 4px rgba(0,0,0,0.1)",
-                    cursor: "move",
-                    userSelect: "none", // Disable text selection
-                  }}
-                  onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
-                  onMouseUp={(e) => {
-                    // Clear drag timeout if mouse is released before drag starts
-                    if ((e.currentTarget as any).dragTimeout) {
-                      clearTimeout((e.currentTarget as any).dragTimeout);
-                      (e.currentTarget as any).dragTimeout = null;
+            {/* Canvas Content Container - Fixed workable area */}
+            <div
+              className="absolute inset-0"
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              {/* Placed Components */}
+              {placedComponents.map((component, index) => (
+                <div key={component.id}>
+                  {/* Component */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: component.x,
+                      top: component.y,
+                      width: "120px",
+                      height: "120px",
+                      backgroundColor: theme === "dark" ? "#374151" : "#f3f4f6",
+                      border: `2px solid ${
+                        theme === "dark" ? "#4b5563" : "#d1d5db"
+                      }`,
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 1000,
+                      color: theme === "dark" ? "#e5e7eb" : "#374151",
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                      textAlign: "center",
+                      boxShadow:
+                        theme === "dark"
+                          ? "0 2px 4px rgba(0,0,0,0.3)"
+                          : "0 2px 4px rgba(0,0,0,0.1)",
+                      cursor: "move",
+                      userSelect: "none", // Disable text selection
+                      transform: `scale(${zoom})`,
+                      transformOrigin: "top left",
+                    }}
+                    onMouseDown={(e) =>
+                      handleComponentMouseDown(e, component.id)
                     }
-                    // Handle component click if not dragging
-                    if (!draggedComponent) {
-                      handleComponentClick(component);
-                    }
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: "12px", marginBottom: "5px" }}>
-                      {component.name}
+                    onMouseUp={(e) => {
+                      // Clear drag timeout if mouse is released before drag starts
+                      if ((e.currentTarget as any).dragTimeout) {
+                        clearTimeout((e.currentTarget as any).dragTimeout);
+                        (e.currentTarget as any).dragTimeout = null;
+                      }
+                      // Handle component click if not dragging
+                      if (!draggedComponent) {
+                        handleComponentClick(component);
+                      }
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: "12px", marginBottom: "5px" }}>
+                        {component.name}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Connection dots */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: component.x + 55 - 50 * (1 - zoom), // Move very close
+                      top: component.y + 125 - 50 * (1 - zoom), // Move very close
+                      width: "10px",
+                      height: "10px",
+                      backgroundColor:
+                        connectingFrom === component.id ? "#ef4444" : "#3b82f6",
+                      borderRadius: "50%",
+                      cursor: "pointer",
+                      zIndex: 1001,
+                      border: `2px solid ${
+                        theme === "dark" ? "#1f2937" : "white"
+                      }`,
+                      boxShadow:
+                        theme === "dark"
+                          ? "0 2px 4px rgba(0,0,0,0.4)"
+                          : "0 2px 4px rgba(0,0,0,0.2)",
+                      transform: `scale(${zoom})`,
+                      transformOrigin: "top left",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleConnectionDotClick(component.id);
+                    }}
+                    title={
+                      connectingFrom === component.id
+                        ? "Click to cancel connection"
+                        : "Click to start connection"
+                    }
+                  />
                 </div>
+              ))}
 
-                {/* Connection dots */}
-                <div
-                  style={{
-                    position: "absolute",
-                    left: component.x + 55, // Center below component
-                    top: component.y + 125, // Below component
-                    width: "10px",
-                    height: "10px",
-                    backgroundColor:
-                      connectingFrom === component.id ? "#ef4444" : "#3b82f6",
-                    borderRadius: "50%",
-                    cursor: "pointer",
-                    zIndex: 1001,
-                    border: `2px solid ${
-                      theme === "dark" ? "#1f2937" : "white"
-                    }`,
-                    boxShadow:
-                      theme === "dark"
-                        ? "0 2px 4px rgba(0,0,0,0.4)"
-                        : "0 2px 4px rgba(0,0,0,0.2)",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleConnectionDotClick(component.id);
-                  }}
-                  title={
-                    connectingFrom === component.id
-                      ? "Click to cancel connection"
-                      : "Click to start connection"
-                  }
-                />
-              </div>
-            ))}
+              {/* Connection lines - Follow the dots */}
+              <svg
+                className="absolute inset-0 pointer-events-none"
+                width="100%"
+                height="100%"
+              >
+                {/* Existing connections */}
+                {connections.map((connection) => {
+                  const fromComponent = placedComponents.find(
+                    (c) => c.id === connection.from
+                  );
+                  const toComponent = placedComponents.find(
+                    (c) => c.id === connection.to
+                  );
 
-            {/* Connection lines */}
-            <svg
-              className="absolute inset-0 pointer-events-none"
-              width="100%"
-              height="100%"
-            >
-              {/* Existing connections */}
-              {connections.map((connection) => {
-                const fromComponent = placedComponents.find(
-                  (c) => c.id === connection.from
-                );
-                const toComponent = placedComponents.find(
-                  (c) => c.id === connection.to
-                );
+                  if (!fromComponent || !toComponent) return null;
 
-                if (!fromComponent || !toComponent) return null;
+                  return (
+                    <line
+                      key={connection.id}
+                      x1={fromComponent.x + 55 - 50 * (1 - zoom) + 5}
+                      y1={fromComponent.y + 125 - 50 * (1 - zoom) + 5}
+                      x2={toComponent.x + 55 - 50 * (1 - zoom) + 5}
+                      y2={toComponent.y + 125 - 50 * (1 - zoom) + 5}
+                      stroke="green"
+                      strokeWidth="3"
+                    />
+                  );
+                })}
 
-                return (
+                {/* Active connection line following mouse */}
+                {connectingFrom && mousePosition && (
                   <line
-                    key={connection.id}
-                    x1={fromComponent.x + 60}
-                    y1={fromComponent.y + 130}
-                    x2={toComponent.x + 60}
-                    y2={toComponent.y + 130}
+                    x1={(() => {
+                      const fromComponent = placedComponents.find(
+                        (c) => c.id === connectingFrom
+                      );
+                      return fromComponent
+                        ? fromComponent.x + 55 - 50 * (1 - zoom) + 5
+                        : 0;
+                    })()}
+                    y1={(() => {
+                      const fromComponent = placedComponents.find(
+                        (c) => c.id === connectingFrom
+                      );
+                      return fromComponent
+                        ? fromComponent.y + 125 - 50 * (1 - zoom) + 5
+                        : 0;
+                    })()}
+                    x2={mousePosition.x}
+                    y2={mousePosition.y}
                     stroke="green"
                     strokeWidth="3"
+                    strokeDasharray="5,5"
                   />
-                );
-              })}
+                )}
+              </svg>
+            </div>
 
-              {/* Active connection line following mouse */}
-              {connectingFrom && mousePosition && (
-                <line
-                  x1={(() => {
-                    const fromComponent = placedComponents.find(
-                      (c) => c.id === connectingFrom
-                    );
-                    return fromComponent ? fromComponent.x + 60 : 0;
-                  })()}
-                  y1={(() => {
-                    const fromComponent = placedComponents.find(
-                      (c) => c.id === connectingFrom
-                    );
-                    return fromComponent ? fromComponent.y + 130 : 0;
-                  })()}
-                  x2={mousePosition.x}
-                  y2={mousePosition.y}
-                  stroke="green"
-                  strokeWidth="3"
-                  strokeDasharray="5,5"
-                />
-              )}
-            </svg>
+            {/* Zoom Controls - Bottom Right Corner */}
+            <div className="absolute bottom-4 right-4 flex flex-col space-y-2">
+              <div
+                className={`flex items-center space-x-2 p-2 rounded-lg backdrop-blur-sm transition-colors duration-200 ${
+                  theme === "dark"
+                    ? "bg-gray-800/80 border border-gray-700/50"
+                    : "bg-white/90 border border-gray-200/50"
+                }`}
+              >
+                <button
+                  onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
+                  className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 ${
+                    theme === "dark"
+                      ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
+                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
+                  title="Zoom Out"
+                >
+                  -
+                </button>
+                <span
+                  className={`text-sm font-medium px-2 transition-colors duration-200 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={() => setZoom(Math.min(3, zoom + 0.1))}
+                  className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 ${
+                    theme === "dark"
+                      ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
+                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
+                  title="Zoom In"
+                >
+                  +
+                </button>
+                <button
+                  onClick={() => {
+                    setZoom(1);
+                    setPan({ x: 0, y: 0 });
+                  }}
+                  className={`px-2 py-1 text-xs rounded border transition-colors duration-200 ${
+                    theme === "dark"
+                      ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
+                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
+                  title="Reset View (Ctrl+0)"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
