@@ -153,7 +153,10 @@ export const CircuitSidebar: React.FC<CircuitSidebarProps> = ({
       onKeyUp={(e) => e.stopPropagation()}
     >
       {/* Logo at top */}
-      <div className="pl-4 pr-2 py-4 pb-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 relative">
+      <div
+        className="pl-4 pr-2 py-4 pb-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 relative"
+        style={{ paddingBottom: "0.85rem" }}
+      >
         {!isSidebarCollapsed ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
