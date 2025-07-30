@@ -44,6 +44,8 @@ export const CircuitEditorPage: React.FC = () => {
   const [showGettingStarted, setShowGettingStarted] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isPropertiesPanelCollapsed, setIsPropertiesPanelCollapsed] =
+    useState(false);
 
   // Zoom and Pan state
   const [zoom, setZoom] = useState(1);
@@ -525,6 +527,8 @@ export const CircuitEditorPage: React.FC = () => {
       <CircuitPropertiesPanel
         selectedComponent={selectedComponent}
         handlePropertyChange={handlePropertyChange}
+        isPropertiesPanelCollapsed={isPropertiesPanelCollapsed}
+        setIsPropertiesPanelCollapsed={setIsPropertiesPanelCollapsed}
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../contexts/ThemeProvider";
 import type { PlacedComponent } from "../types/circuit";
 
@@ -9,24 +10,36 @@ interface CircuitPropertiesPanelProps {
     property: string,
     value: number | boolean | string
   ) => void;
+  isPropertiesPanelCollapsed: boolean;
+  setIsPropertiesPanelCollapsed: (collapsed: boolean) => void;
 }
 
 export const CircuitPropertiesPanel: React.FC<CircuitPropertiesPanelProps> = ({
   selectedComponent,
   handlePropertyChange,
+  isPropertiesPanelCollapsed,
+  setIsPropertiesPanelCollapsed,
 }) => {
   const { theme } = useTheme();
 
   if (!selectedComponent) {
     return (
       <div
-        className={`w-80 h-full border-l transition-colors duration-200 ${
+        className={`${
+          isPropertiesPanelCollapsed ? "w-16" : "w-80"
+        } h-full border-l transition-all duration-500 ease-out ${
           theme === "dark"
             ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
             : "bg-white/90 backdrop-blur-sm border-gray-200/50"
         }`}
       >
-        <div className="p-6">
+        <div
+          className={`p-6 ${
+            isPropertiesPanelCollapsed
+              ? "opacity-0 pointer-events-none"
+              : "opacity-100"
+          }`}
+        >
           <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">
             Properties
           </h3>
@@ -38,19 +51,50 @@ export const CircuitPropertiesPanel: React.FC<CircuitPropertiesPanelProps> = ({
             Select a component to edit its properties
           </p>
         </div>
+
+        {/* Collapse toggle button */}
+        <button
+          onClick={() =>
+            setIsPropertiesPanelCollapsed(!isPropertiesPanelCollapsed)
+          }
+          className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 p-2 rounded-full shadow-lg transition-all duration-200 ${
+            theme === "dark"
+              ? "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border border-gray-600"
+              : "bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-800 border border-gray-300"
+          }`}
+          title={
+            isPropertiesPanelCollapsed
+              ? "Expand Properties"
+              : "Collapse Properties"
+          }
+        >
+          {isPropertiesPanelCollapsed ? (
+            <ChevronLeftIcon className="h-4 w-4" />
+          ) : (
+            <ChevronRightIcon className="h-4 w-4" />
+          )}
+        </button>
       </div>
     );
   }
 
   return (
     <div
-      className={`w-80 h-full border-l transition-colors duration-200 ${
+      className={`${
+        isPropertiesPanelCollapsed ? "w-16" : "w-80"
+      } h-full border-l transition-all duration-500 ease-out relative ${
         theme === "dark"
           ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
           : "bg-white/90 backdrop-blur-sm border-gray-200/50"
       }`}
     >
-      <div className="p-6">
+      <div
+        className={`p-6 ${
+          isPropertiesPanelCollapsed
+            ? "opacity-0 pointer-events-none"
+            : "opacity-100"
+        }`}
+      >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
             Properties
@@ -167,6 +211,29 @@ export const CircuitPropertiesPanel: React.FC<CircuitPropertiesPanelProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Collapse toggle button */}
+      <button
+        onClick={() =>
+          setIsPropertiesPanelCollapsed(!isPropertiesPanelCollapsed)
+        }
+        className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 p-2 rounded-full shadow-lg transition-all duration-200 ${
+          theme === "dark"
+            ? "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border border-gray-600"
+            : "bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-800 border border-gray-300"
+        }`}
+        title={
+          isPropertiesPanelCollapsed
+            ? "Expand Properties"
+            : "Collapse Properties"
+        }
+      >
+        {isPropertiesPanelCollapsed ? (
+          <ChevronLeftIcon className="h-4 w-4" />
+        ) : (
+          <ChevronRightIcon className="h-4 w-4" />
+        )}
+      </button>
     </div>
   );
 };
