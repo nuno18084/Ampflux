@@ -1,0 +1,453 @@
+import {
+  CogIcon,
+  BoltIcon,
+  MinusIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
+import type { CircuitComponent } from "../types/circuit";
+
+export const circuitComponents: CircuitComponent[] = [
+  // Power Components
+  {
+    id: "battery",
+    type: "battery",
+    name: "Battery",
+    icon: BoltIcon,
+    properties: { voltage: 12, capacity: 100 },
+  },
+  {
+    id: "solar_panel",
+    type: "solar_panel",
+    name: "Solar Panel",
+    icon: BoltIcon,
+    properties: { power: 100, efficiency: 0.85 },
+  },
+  {
+    id: "generator",
+    type: "generator",
+    name: "Generator",
+    icon: BoltIcon,
+    properties: { power: 500, fuel_consumption: 10 },
+  },
+  {
+    id: "capacitor",
+    type: "capacitor",
+    name: "Capacitor",
+    icon: BoltIcon,
+    properties: { capacitance: 1000, voltage: 50 },
+  },
+  {
+    id: "inductor",
+    type: "inductor",
+    name: "Inductor",
+    icon: BoltIcon,
+    properties: { inductance: 100, current: 5 },
+  },
+
+  // Control Components
+  {
+    id: "switch",
+    type: "switch",
+    name: "Switch",
+    icon: CogIcon,
+    properties: { is_on: false, max_current: 10 },
+  },
+  {
+    id: "relay",
+    type: "relay",
+    name: "Relay",
+    icon: CogIcon,
+    properties: { is_activated: false, coil_voltage: 12 },
+  },
+  {
+    id: "transistor",
+    type: "transistor",
+    name: "Transistor",
+    icon: CogIcon,
+    properties: { gain: 100, max_current: 1 },
+  },
+  {
+    id: "diode",
+    type: "diode",
+    name: "Diode",
+    icon: CogIcon,
+    properties: { forward_voltage: 0.7, max_current: 1 },
+  },
+  {
+    id: "resistor",
+    type: "resistor",
+    name: "Resistor",
+    icon: CogIcon,
+    properties: { resistance: 100, power_rating: 0.25 },
+  },
+
+  // Sensor Components
+  {
+    id: "temperature_sensor",
+    type: "temperature_sensor",
+    name: "Temp Sensor",
+    icon: CogIcon,
+    properties: { temperature: 25, accuracy: 0.5 },
+  },
+  {
+    id: "pressure_sensor",
+    type: "pressure_sensor",
+    name: "Pressure Sensor",
+    icon: CogIcon,
+    properties: { pressure: 101.3, range: 1000 },
+  },
+  {
+    id: "flow_sensor",
+    type: "flow_sensor",
+    name: "Flow Sensor",
+    icon: CogIcon,
+    properties: { flow_rate: 0, max_flow: 100 },
+  },
+  {
+    id: "level_sensor",
+    type: "level_sensor",
+    name: "Level Sensor",
+    icon: CogIcon,
+    properties: { level: 50, max_level: 100 },
+  },
+  {
+    id: "current_sensor",
+    type: "current_sensor",
+    name: "Current Sensor",
+    icon: CogIcon,
+    properties: { current: 0, max_current: 10 },
+  },
+
+  // Actuator Components
+  {
+    id: "motor",
+    type: "motor",
+    name: "Motor",
+    icon: CogIcon,
+    properties: { speed: 1000, torque: 10 },
+  },
+  {
+    id: "servo",
+    type: "servo",
+    name: "Servo",
+    icon: CogIcon,
+    properties: { angle: 90, max_angle: 180 },
+  },
+  {
+    id: "solenoid",
+    type: "solenoid",
+    name: "Solenoid",
+    icon: CogIcon,
+    properties: { is_activated: false, force: 50 },
+  },
+  {
+    id: "pneumatic_cylinder",
+    type: "pneumatic_cylinder",
+    name: "Pneumatic Cylinder",
+    icon: CogIcon,
+    properties: { stroke: 100, pressure: 6 },
+  },
+  {
+    id: "hydraulic_cylinder",
+    type: "hydraulic_cylinder",
+    name: "Hydraulic Cylinder",
+    icon: CogIcon,
+    properties: { stroke: 200, pressure: 200 },
+  },
+
+  // Communication Components
+  {
+    id: "wifi_module",
+    type: "wifi_module",
+    name: "WiFi Module",
+    icon: CogIcon,
+    properties: { signal_strength: 80, data_rate: 54 },
+  },
+  {
+    id: "bluetooth_module",
+    type: "bluetooth_module",
+    name: "Bluetooth Module",
+    icon: CogIcon,
+    properties: { is_connected: false, range: 100 },
+  },
+  {
+    id: "ethernet_module",
+    type: "ethernet_module",
+    name: "Ethernet Module",
+    icon: CogIcon,
+    properties: { speed: 1000, is_connected: false },
+  },
+  {
+    id: "gps_module",
+    type: "gps_module",
+    name: "GPS Module",
+    icon: CogIcon,
+    properties: { latitude: 0, longitude: 0, satellites: 0 },
+  },
+  {
+    id: "rf_module",
+    type: "rf_module",
+    name: "RF Module",
+    icon: CogIcon,
+    properties: { frequency: 433, power: 10 },
+  },
+
+  // Display Components
+  {
+    id: "led",
+    type: "led",
+    name: "LED",
+    icon: CogIcon,
+    properties: { brightness: 100, color: "red" },
+  },
+  {
+    id: "lcd_display",
+    type: "lcd_display",
+    name: "LCD Display",
+    icon: CogIcon,
+    properties: { text: "Hello", backlight: true },
+  },
+  {
+    id: "oled_display",
+    type: "oled_display",
+    name: "OLED Display",
+    icon: CogIcon,
+    properties: { text: "Hello", contrast: 128 },
+  },
+  {
+    id: "seven_segment",
+    type: "seven_segment",
+    name: "7-Segment Display",
+    icon: CogIcon,
+    properties: { digit: 0, brightness: 100 },
+  },
+  {
+    id: "dot_matrix",
+    type: "dot_matrix",
+    name: "Dot Matrix",
+    icon: CogIcon,
+    properties: { text: "HI", brightness: 100 },
+  },
+
+  // Processing Components
+  {
+    id: "microcontroller",
+    type: "microcontroller",
+    name: "Microcontroller",
+    icon: CogIcon,
+    properties: { clock_speed: 16, memory: 32 },
+  },
+  {
+    id: "fpga",
+    type: "fpga",
+    name: "FPGA",
+    icon: CogIcon,
+    properties: { logic_cells: 1000, clock_speed: 100 },
+  },
+  {
+    id: "dsp",
+    type: "dsp",
+    name: "DSP",
+    icon: CogIcon,
+    properties: { mips: 1000, memory: 64 },
+  },
+  {
+    id: "plc",
+    type: "plc",
+    name: "PLC",
+    icon: CogIcon,
+    properties: { inputs: 16, outputs: 16 },
+  },
+  {
+    id: "raspberry_pi",
+    type: "raspberry_pi",
+    name: "Raspberry Pi",
+    icon: CogIcon,
+    properties: { cpu_cores: 4, memory: 4 },
+  },
+
+  // Storage Components
+  {
+    id: "sd_card",
+    type: "sd_card",
+    name: "SD Card",
+    icon: CogIcon,
+    properties: { capacity: 32, speed_class: 10 },
+  },
+  {
+    id: "eeprom",
+    type: "eeprom",
+    name: "EEPROM",
+    icon: CogIcon,
+    properties: { capacity: 1024, write_cycles: 100000 },
+  },
+  {
+    id: "flash_memory",
+    type: "flash_memory",
+    name: "Flash Memory",
+    icon: CogIcon,
+    properties: { capacity: 8192, write_cycles: 10000 },
+  },
+  {
+    id: "ram",
+    type: "ram",
+    name: "RAM",
+    icon: CogIcon,
+    properties: { capacity: 512, speed: 1600 },
+  },
+  {
+    id: "rom",
+    type: "rom",
+    name: "ROM",
+    icon: CogIcon,
+    properties: { capacity: 1024, access_time: 100 },
+  },
+
+  // Interface Components
+  {
+    id: "usb_interface",
+    type: "usb_interface",
+    name: "USB Interface",
+    icon: CogIcon,
+    properties: { version: "2.0", speed: 480 },
+  },
+  {
+    id: "serial_interface",
+    type: "serial_interface",
+    name: "Serial Interface",
+    icon: CogIcon,
+    properties: { baud_rate: 9600, data_bits: 8 },
+  },
+  {
+    id: "i2c_interface",
+    type: "i2c_interface",
+    name: "I2C Interface",
+    icon: CogIcon,
+    properties: { clock_speed: 100, address: 0x48 },
+  },
+  {
+    id: "spi_interface",
+    type: "spi_interface",
+    name: "SPI Interface",
+    icon: CogIcon,
+    properties: { clock_speed: 1000000, mode: 0 },
+  },
+  {
+    id: "can_interface",
+    type: "can_interface",
+    name: "CAN Interface",
+    icon: CogIcon,
+    properties: { baud_rate: 500000, id: 0x123 },
+  },
+
+  // Power Management Components
+  {
+    id: "voltage_regulator",
+    type: "voltage_regulator",
+    name: "Voltage Regulator",
+    icon: CogIcon,
+    properties: { input_voltage: 12, output_voltage: 5 },
+  },
+  {
+    id: "dc_dc_converter",
+    type: "dc_dc_converter",
+    name: "DC-DC Converter",
+    icon: CogIcon,
+    properties: { input_voltage: 24, output_voltage: 5, efficiency: 0.9 },
+  },
+  {
+    id: "ac_dc_converter",
+    type: "ac_dc_converter",
+    name: "AC-DC Converter",
+    icon: CogIcon,
+    properties: { input_voltage: 230, output_voltage: 12, power: 100 },
+  },
+  {
+    id: "inverter",
+    type: "inverter",
+    name: "Inverter",
+    icon: CogIcon,
+    properties: { input_voltage: 12, output_voltage: 230, frequency: 50 },
+  },
+  {
+    id: "charger",
+    type: "charger",
+    name: "Charger",
+    icon: CogIcon,
+    properties: { input_voltage: 12, output_voltage: 4.2, current: 1 },
+  },
+
+  // Protection Components
+  {
+    id: "fuse",
+    type: "fuse",
+    name: "Fuse",
+    icon: CogIcon,
+    properties: { current_rating: 5, is_blown: false },
+  },
+  {
+    id: "circuit_breaker",
+    type: "circuit_breaker",
+    name: "Circuit Breaker",
+    icon: CogIcon,
+    properties: { current_rating: 20, is_tripped: false },
+  },
+  {
+    id: "surge_protector",
+    type: "surge_protector",
+    name: "Surge Protector",
+    icon: CogIcon,
+    properties: { max_voltage: 400, response_time: 1 },
+  },
+  {
+    id: "esd_protection",
+    type: "esd_protection",
+    name: "ESD Protection",
+    icon: CogIcon,
+    properties: { breakdown_voltage: 15, capacitance: 3 },
+  },
+  {
+    id: "emc_filter",
+    type: "emc_filter",
+    name: "EMC Filter",
+    icon: CogIcon,
+    properties: { frequency_range: "1MHz-100MHz", attenuation: 40 },
+  },
+
+  // Mechanical
+  {
+    id: "fan",
+    type: "fan",
+    name: "Fan",
+    icon: CogIcon,
+    properties: { speed: 2000 },
+  },
+  {
+    id: "pump",
+    type: "pump",
+    name: "Pump",
+    icon: CogIcon,
+    properties: { flow_rate: 1 },
+  },
+  {
+    id: "valve",
+    type: "valve",
+    name: "Valve",
+    icon: CogIcon,
+    properties: { is_open: false },
+  },
+  {
+    id: "heater",
+    type: "heater",
+    name: "Heater",
+    icon: CogIcon,
+    properties: { power: 100 },
+  },
+  {
+    id: "cooler",
+    type: "cooler",
+    name: "Cooler",
+    icon: CogIcon,
+    properties: { power: 50 },
+  },
+];
