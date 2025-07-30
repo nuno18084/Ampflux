@@ -23,7 +23,7 @@ interface CircuitComponent {
   type: string;
   name: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  properties: Record<string, number | boolean>;
+  properties: Record<string, number | boolean | string>;
 }
 
 interface PlacedComponent {
@@ -33,7 +33,7 @@ interface PlacedComponent {
   name: string;
   x: number;
   y: number;
-  properties: Record<string, number | boolean>;
+  properties: Record<string, number | boolean | string>;
 }
 
 interface Connection {
@@ -180,6 +180,12 @@ export const CircuitEditorPage: React.FC = () => {
       console.log("ALL COMPONENT POSITIONS:");
       placedComponents.forEach((comp, index) => {
         console.log(`${index + 1}. ${comp.name}: (${comp.x}, ${comp.y})`);
+        // Check for components with very large coordinates
+        if (comp.x > 1000 || comp.y > 1000) {
+          console.warn(
+            `⚠️ Component ${comp.name} has large coordinates: (${comp.x}, ${comp.y})`
+          );
+        }
       });
     }
   }, [placedComponents.length]); // Only trigger when length changes, not on every render
@@ -418,7 +424,7 @@ export const CircuitEditorPage: React.FC = () => {
   const handlePropertyChange = (
     componentId: string,
     property: string,
-    value: number | boolean
+    value: number | boolean | string
   ) => {
     setPlacedComponents((prev) =>
       prev.map((component) =>
@@ -1348,7 +1354,7 @@ export const CircuitEditorPage: React.FC = () => {
     };
 
     return (
-      <>
+      <div>
         {/* Sticky header */}
         <div
           className="sticky top-0 pt-3 pb-2 z-10"
@@ -1427,7 +1433,7 @@ export const CircuitEditorPage: React.FC = () => {
             </div>
           ))}
         </div>
-      </>
+      </div>
     );
   });
 
@@ -1689,7 +1695,7 @@ export const CircuitEditorPage: React.FC = () => {
         </div>
 
         {/* Canvas */}
-        <div className="flex-1 p-6 relative">
+        <div className="flex-1 p-6 relative overflow-hidden">
           <div
             className={`w-full h-full border-2 border-dashed rounded-lg relative overflow-hidden transition-colors duration-200 ${
               theme === "dark"
@@ -1704,7 +1710,7 @@ export const CircuitEditorPage: React.FC = () => {
           >
             {/* Canvas Content Container - Fixed workable area */}
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 overflow-hidden"
               style={{
                 width: "100%",
                 height: "100%",
