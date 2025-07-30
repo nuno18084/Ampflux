@@ -1638,7 +1638,7 @@ export const CircuitEditorPage: React.FC = () => {
                 }`}
               >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                Back to Project
+                Project
               </button>
               <div>
                 <h1
@@ -1648,13 +1648,6 @@ export const CircuitEditorPage: React.FC = () => {
                 >
                   {project?.name} - Circuit Editor
                 </h1>
-                <p
-                  className={`text-sm transition-colors duration-200 ${
-                    theme === "dark" ? "text-gray-300" : "text-gray-500"
-                  }`}
-                >
-                  Build your circuit by dragging components
-                </p>
               </div>
             </div>
             <div className="flex space-x-3">
