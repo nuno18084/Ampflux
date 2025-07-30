@@ -2,22 +2,18 @@ import React, { useRef, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeftIcon,
-  DocumentArrowDownIcon,
-  PlayIcon,
   CogIcon,
-  XMarkIcon,
-  CheckIcon,
-  TrashIcon,
   BoltIcon,
   MinusIcon,
   PlusIcon,
-  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { apiClient } from "../lib/api";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useTheme } from "../contexts/ThemeProvider";
 import { CircuitSidebar } from "../components/CircuitSidebar";
+import { CircuitToolbar } from "../components/CircuitToolbar";
+import { CircuitCanvas } from "../components/CircuitCanvas";
+import { CircuitPropertiesPanel } from "../components/CircuitPropertiesPanel";
 import type {
   CircuitComponent,
   PlacedComponent,
@@ -1327,345 +1323,48 @@ export const CircuitEditorPage: React.FC = () => {
       {/* Main Canvas Area */}
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div
-          className={`border-b px-6 py-4 transition-colors duration-200 ${
-            theme === "dark"
-              ? "bg-gray-800/50 backdrop-blur-sm border-gray-700/50"
-              : "bg-white border-gray-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBack}
-                className={`inline-flex items-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
-                  theme === "dark"
-                    ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50 focus:ring-green-500"
-                    : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
-                }`}
-              >
-                <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                Project
-              </button>
-              <div>
-                <h1
-                  className={`text-xl font-semibold transition-colors duration-200 ${
-                    theme === "dark" ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {project?.name} - Circuit Editor
-                </h1>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              {saveSuccess && (
-                <div
-                  className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors duration-200 ${
-                    theme === "dark"
-                      ? "text-green-400 bg-green-900/20"
-                      : "text-green-600 bg-green-50"
-                  }`}
-                >
-                  <CheckIcon className="h-4 w-4 mr-2" />
-                  Saved successfully!
-                </div>
-              )}
-              <button
-                onClick={handleSave}
-                disabled={isSaving || placedComponents.length === 0}
-                className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200 ${
-                  theme === "dark"
-                    ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50 focus:ring-green-500"
-                    : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
-                }`}
-              >
-                <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
-                {isSaving ? "Saving..." : "Save"}
-              </button>
-              <button
-                onClick={handleSimulate}
-                disabled={isSimulating || placedComponents.length === 0}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors duration-200"
-              >
-                <PlayIcon className="h-4 w-4 mr-2" />
-                {isSimulating ? "Simulating..." : "Simulate"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <CircuitToolbar
+          project={project}
+          handleBack={handleBack}
+          handleSave={handleSave}
+          handleSimulate={handleSimulate}
+          isSaving={isSaving}
+          isSimulating={isSimulating}
+          saveSuccess={saveSuccess}
+          placedComponents={placedComponents}
+        />
 
         {/* Canvas */}
-        <div className="flex-1 p-6 relative overflow-hidden">
-          <div
-            className={`w-full h-full border-2 border-dashed rounded-lg relative overflow-hidden transition-colors duration-200 ${
-              theme === "dark"
-                ? "bg-gray-800/50 backdrop-blur-sm border-gray-600/50"
-                : "bg-white border-gray-300"
-            }`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            style={{
-              cursor: draggedComponent ? "grabbing" : "default",
-            }}
-          >
-            {/* Canvas Content Container - Fixed workable area */}
-            <div
-              className="absolute inset-0 overflow-hidden"
-              style={{
-                width: "100%",
-                height: "100%",
-              }}
-              onMouseMove={handleCanvasMouseMove}
-              onMouseUp={(e) => {
-                handleCanvasMouseUp();
-                handleMouseUp();
-              }}
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-            >
-              {/* Placed components */}
-              {placedComponents.map((component) => (
-                <div key={component.id}>
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: component.x,
-                      top: component.y,
-                      width: "120px",
-                      height: "120px",
-                      backgroundColor: theme === "dark" ? "#374151" : "#f3f4f6",
-                      border: `2px solid ${
-                        theme === "dark" ? "#4b5563" : "#d1d5db"
-                      }`,
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      zIndex: 1000,
-                      color: theme === "dark" ? "#e5e7eb" : "#374151",
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                      textAlign: "center",
-                      boxShadow:
-                        theme === "dark"
-                          ? "0 2px 4px rgba(0,0,0,0.3)"
-                          : "0 2px 4px rgba(0,0,0,0.1)",
-                      cursor: "move",
-                      userSelect: "none", // Disable text selection
-                      transform: `scale(${zoom})`, // Components scale
-                      transformOrigin: "top left",
-                    }}
-                    onMouseDown={(e) =>
-                      handleComponentMouseDown(e, component.id)
-                    }
-                    onMouseUp={(e) => {
-                      // Clear drag timeout if mouse is released before drag starts
-                      if ((e.currentTarget as any).dragTimeout) {
-                        clearTimeout((e.currentTarget as any).dragTimeout);
-                        (e.currentTarget as any).dragTimeout = null;
-                      }
-                      // Handle component click if not dragging
-                      if (!draggedComponent) {
-                        handleComponentClick(component);
-                      }
-                    }}
-                  >
-                    <div>
-                      <div className="flex justify-center mb-1">
-                        {(() => {
-                          const componentDef = circuitComponents.find(
-                            (c) => c.id === component.type
-                          );
-                          if (componentDef) {
-                            const IconComponent = componentDef.icon;
-                            return (
-                              <IconComponent
-                                className={`h-6 w-6 ${
-                                  theme === "dark"
-                                    ? "text-green-400"
-                                    : "text-blue-600"
-                                }`}
-                              />
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                      <div style={{ fontSize: "12px", textAlign: "center" }}>
-                        {component.name}
-                      </div>
-                      <button
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          handleComponentDelete(component.id);
-                        }}
-                        className={`absolute top-1 right-1 p-1 rounded-full transition-colors duration-200 ${
-                          theme === "dark"
-                            ? "text-red-400 hover:text-red-300 hover:bg-red-900/30"
-                            : "text-red-600 hover:text-red-700 hover:bg-red-100"
-                        }`}
-                        title="Delete component"
-                      >
-                        <TrashIcon className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Connection dots */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: component.x + 55 - 50 * (1 - zoom), // Move very close
-                      top: component.y + 125 - 50 * (1 - zoom), // Move very close
-                      width: "10px",
-                      height: "10px",
-                      backgroundColor:
-                        connectingFrom === component.id ? "#ef4444" : "#3b82f6",
-                      borderRadius: "50%",
-                      cursor: "pointer",
-                      zIndex: 1001,
-                      border: `2px solid ${
-                        theme === "dark" ? "#1f2937" : "white"
-                      }`,
-                      boxShadow:
-                        theme === "dark"
-                          ? "0 2px 4px rgba(0,0,0,0.4)"
-                          : "0 2px 4px rgba(0,0,0,0.2)",
-                      transform: `scale(${zoom})`,
-                      transformOrigin: "top left",
-                      pointerEvents: "auto",
-                    }}
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      handleConnectionDotClick(component.id);
-                    }}
-                    title={
-                      connectingFrom === component.id
-                        ? "Click to cancel connection"
-                        : "Click to start connection"
-                    }
-                  />
-                </div>
-              ))}
-
-              {/* Connection lines - Follow the dots */}
-              <svg
-                className="absolute inset-0 pointer-events-none"
-                width="100%"
-                height="100%"
-              >
-                {/* Existing connections */}
-                {connections.map((connection) => {
-                  const fromComponent = placedComponents.find(
-                    (c) => c.id === connection.from
-                  );
-                  const toComponent = placedComponents.find(
-                    (c) => c.id === connection.to
-                  );
-
-                  if (!fromComponent || !toComponent) return null;
-
-                  return (
-                    <line
-                      key={connection.id}
-                      x1={fromComponent.x + 55 - 50 * (1 - zoom) + 5}
-                      y1={fromComponent.y + 125 - 50 * (1 - zoom) + 5}
-                      x2={toComponent.x + 55 - 50 * (1 - zoom) + 5}
-                      y2={toComponent.y + 125 - 50 * (1 - zoom) + 5}
-                      stroke="green"
-                      strokeWidth="3"
-                    />
-                  );
-                })}
-
-                {/* Active connection line following mouse */}
-                {connectingFrom && mousePosition && (
-                  <line
-                    x1={(() => {
-                      const fromComponent = placedComponents.find(
-                        (c) => c.id === connectingFrom
-                      );
-                      return fromComponent
-                        ? fromComponent.x + 55 - 50 * (1 - zoom) + 5
-                        : 0;
-                    })()}
-                    y1={(() => {
-                      const fromComponent = placedComponents.find(
-                        (c) => c.id === connectingFrom
-                      );
-                      return fromComponent
-                        ? fromComponent.y + 125 - 50 * (1 - zoom) + 5
-                        : 0;
-                    })()}
-                    x2={mousePosition.x}
-                    y2={mousePosition.y}
-                    stroke="green"
-                    strokeWidth="3"
-                    strokeDasharray="5,5"
-                  />
-                )}
-              </svg>
-            </div>
-
-            {/* Zoom Controls - Bottom Right Corner */}
-            <div className="absolute bottom-4 right-4 flex flex-col space-y-2">
-              <div
-                className={`flex items-center space-x-2 p-2 rounded-lg backdrop-blur-sm transition-colors duration-200 ${
-                  theme === "dark"
-                    ? "bg-gray-800/80 border border-gray-700/50"
-                    : "bg-white/90 border border-gray-200/50"
-                }`}
-              >
-                <button
-                  onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
-                  className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 ${
-                    theme === "dark"
-                      ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
-                  title="Zoom Out"
-                >
-                  -
-                </button>
-                <span
-                  className={`text-sm font-medium px-2 transition-colors duration-200 ${
-                    theme === "dark" ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  {Math.round(zoom * 100)}%
-                </span>
-                <button
-                  onClick={() => setZoom(Math.min(3, zoom + 0.1))}
-                  className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 ${
-                    theme === "dark"
-                      ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
-                  title="Zoom In"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => {
-                    setZoom(1);
-                    setPan({ x: 0, y: 0 });
-                  }}
-                  className={`px-2 py-1 text-xs rounded border transition-colors duration-200 ${
-                    theme === "dark"
-                      ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
-                  title="Reset View (Ctrl+0)"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CircuitCanvas
+          placedComponents={placedComponents}
+          connections={connections}
+          connectingFrom={connectingFrom}
+          mousePosition={mousePosition}
+          zoom={zoom}
+          theme={theme}
+          draggedComponent={draggedComponent}
+          handleComponentMouseDown={handleComponentMouseDown}
+          handleCanvasMouseMove={handleCanvasMouseMove}
+          handleCanvasMouseUp={handleCanvasMouseUp}
+          handleComponentClick={handleComponentClick}
+          handleComponentDelete={handleComponentDelete}
+          handleConnectionDotClick={handleConnectionDotClick}
+          handleDrop={handleDrop}
+          handleDragOver={handleDragOver}
+          handleWheel={handleWheel}
+          handleMouseDown={handleMouseDown}
+          handleMouseUp={handleMouseUp}
+          setZoom={setZoom}
+          setPan={setPan}
+          circuitComponents={circuitComponents}
+        />
       </div>
+
+      {/* Properties Panel */}
+      <CircuitPropertiesPanel
+        selectedComponent={selectedComponent}
+        handlePropertyChange={handlePropertyChange}
+      />
     </div>
   );
 };
