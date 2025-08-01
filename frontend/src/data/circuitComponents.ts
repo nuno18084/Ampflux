@@ -450,4 +450,34 @@ export const circuitComponents: CircuitComponent[] = [
     icon: CogIcon,
     properties: { power: 50 },
   },
+
+  // Additional Components
+  {
+    id: "ground",
+    type: "ground",
+    name: "Ground",
+    icon: MinusIcon,
+    properties: { voltage: 0 },
+  },
+  {
+    id: "vcc",
+    type: "vcc",
+    name: "VCC",
+    icon: PlusIcon,
+    properties: { voltage: 5 },
+  },
+  {
+    id: "power_supply",
+    type: "power_supply",
+    name: "Power Supply",
+    icon: BoltIcon,
+    properties: { voltage: 12, current: 1 },
+  },
+  {
+    id: "potentiometer",
+    type: "potentiometer",
+    name: "Potentiometer",
+    icon: CogIcon,
+    properties: { resistance: 10000, wiper_position: 0.5 },
+  },
 ];

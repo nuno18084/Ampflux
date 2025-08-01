@@ -85,7 +85,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         >
           {/* Placed components */}
           {placedComponents.map((component) => (
-            <div key={component.id}>
+            <div key={component.id} className="group">
               <div
                 style={{
                   position: "absolute",
@@ -158,10 +158,10 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                       e.preventDefault();
                       handleComponentDelete(component.id);
                     }}
-                    className={`absolute top-1 right-1 p-1 rounded-full transition-colors duration-200 ${
+                    className={`absolute top-1 right-1 p-1 rounded-full opacity-0 group-hover:opacity-100 ${
                       theme === "dark"
-                        ? "text-red-400 hover:text-red-300 hover:bg-red-900/30"
-                        : "text-red-600 hover:text-red-700 hover:bg-red-100"
+                        ? "text-red-400 group-hover:text-red-300 group-hover:bg-red-900/30"
+                        : "text-red-600 group-hover:text-red-700 group-hover:bg-red-100"
                     }`}
                     title="Delete component"
                   >
