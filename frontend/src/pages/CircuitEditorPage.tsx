@@ -317,23 +317,15 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Only process if mouse is actually over the canvas
-    if (!e.currentTarget.contains(e.target as Node)) {
-      return;
-    }
-    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
-      // Middle mouse or Ctrl+Left
+    if (e.button === 0 && !e.ctrlKey) {
       e.preventDefault();
+      e.stopPropagation();
       setIsPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    // Only process if mouse is actually over the canvas
-    if (!e.currentTarget.contains(e.target as Node)) {
-      return;
-    }
     if (isPanning && panStart) {
       setPan({
         x: e.clientX - panStart.x,
@@ -360,6 +352,33 @@ export const CircuitEditorPage: React.FC = () => {
   const [panStart, setPanStart] = useState<{ x: number; y: number } | null>(
     null
   );
+
+  // Add global mouse event handling for panning
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isPanning && panStart) {
+        setPan({
+          x: e.clientX - panStart.x,
+          y: e.clientY - panStart.y,
+        });
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsPanning(false);
+      setPanStart(null);
+    };
+
+    if (isPanning) {
+      document.addEventListener("mousemove", handleGlobalMouseMove);
+      document.addEventListener("mouseup", handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isPanning, panStart]);
 
   const handleComponentClick = (component: PlacedComponent) => {
     setSelectedComponent(component);
@@ -506,6 +525,7 @@ export const CircuitEditorPage: React.FC = () => {
           zoom={zoom}
           theme={theme}
           draggedComponent={draggedComponent}
+          pan={pan}
           handleComponentMouseDown={handleComponentMouseDown}
           handleCanvasMouseMove={handleCanvasMouseMove}
           handleCanvasMouseUp={handleCanvasMouseUp}
@@ -516,6 +536,7 @@ export const CircuitEditorPage: React.FC = () => {
           handleDragOver={handleDragOver}
           handleWheel={handleWheel}
           handleMouseDown={handleMouseDown}
+          handleMouseMove={handleMouseMove}
           handleMouseUp={handleMouseUp}
           setZoom={setZoom}
           setPan={setPan}

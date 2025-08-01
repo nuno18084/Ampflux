@@ -15,6 +15,7 @@ interface CircuitCanvasProps {
   zoom: number;
   theme: string;
   draggedComponent: string | null;
+  pan: { x: number; y: number };
   handleComponentMouseDown: (e: React.MouseEvent, componentId: string) => void;
   handleCanvasMouseMove: (e: React.MouseEvent) => void;
   handleCanvasMouseUp: () => void;
@@ -25,6 +26,7 @@ interface CircuitCanvasProps {
   handleDragOver: (e: React.DragEvent) => void;
   handleWheel: (e: React.WheelEvent) => void;
   handleMouseDown: (e: React.MouseEvent) => void;
+  handleMouseMove: (e: React.MouseEvent) => void;
   handleMouseUp: () => void;
   setZoom: (zoom: number) => void;
   setPan: (pan: { x: number; y: number }) => void;
@@ -39,6 +41,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   zoom,
   theme,
   draggedComponent,
+  pan,
   handleComponentMouseDown,
   handleCanvasMouseMove,
   handleCanvasMouseUp,
@@ -49,13 +52,14 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   handleDragOver,
   handleWheel,
   handleMouseDown,
+  handleMouseMove,
   handleMouseUp,
   setZoom,
   setPan,
   circuitComponents,
 }) => {
   return (
-    <div className="flex-1 p-6 relative overflow-hidden">
+    <div className="flex-1 p-6 relative">
       <div
         className={`w-full h-full border-2 border-dashed rounded-lg relative overflow-hidden transition-colors duration-200 ${
           theme === "dark"
@@ -64,18 +68,27 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
         style={{
           cursor: draggedComponent ? "grabbing" : "default",
         }}
       >
         {/* Canvas Content Container - Fixed workable area */}
         <div
-          className="absolute inset-0 overflow-hidden"
+          className="absolute"
           style={{
-            width: "100%",
-            height: "100%",
+            width: "200%",
+            height: "200%",
+            left: "-50%",
+            top: "-50%",
+            transform: `translate(${pan?.x || 0}px, ${pan?.y || 0}px)`,
           }}
-          onMouseMove={handleCanvasMouseMove}
+          onMouseMove={(e) => {
+            handleCanvasMouseMove(e);
+            handleMouseMove(e);
+          }}
           onMouseUp={(e) => {
             handleCanvasMouseUp();
             handleMouseUp();
