@@ -50,34 +50,21 @@ export const CircuitEditorPage: React.FC = () => {
   // Zoom and Pan state
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+
   const panRef = useRef(pan);
   const intendedPanRef = useRef({ x: 0, y: 0 }); // Track intended pan position
   panRef.current = pan; // Keep ref in sync with state
 
-  // Debug pan changes
-  useEffect(() => {
-    console.log("Pan changed to:", pan);
-  }, [pan]);
-
   // Create a stable setPan function that preserves state during re-renders
   const stableSetPan = useCallback((newPan: { x: number; y: number }) => {
-    console.log("Setting pan to:", newPan, "current pan:", panRef.current);
     intendedPanRef.current = newPan; // Track intended position
     setPan(newPan);
   }, []);
 
   // Preserve pan state when properties panel changes
   useEffect(() => {
-    console.log(
-      "Properties panel collapsed changed to:",
-      isPropertiesPanelCollapsed
-    );
     // Ensure pan is preserved when properties panel changes
     if (intendedPanRef.current.x !== 0 || intendedPanRef.current.y !== 0) {
-      console.log(
-        "Preserving pan position during properties panel change:",
-        intendedPanRef.current
-      );
       // Use setTimeout to ensure this runs after the layout change
       setTimeout(() => {
         if (pan.x === 0 && pan.y === 0) {
@@ -96,10 +83,6 @@ export const CircuitEditorPage: React.FC = () => {
       intendedPanRef.current.x !== 0 &&
       intendedPanRef.current.y !== 0
     ) {
-      console.log(
-        "Preventing pan reset, restoring to intended position:",
-        intendedPanRef.current
-      );
       stableSetPan(intendedPanRef.current);
     }
   }, [pan, stableSetPan]);
@@ -194,44 +177,6 @@ export const CircuitEditorPage: React.FC = () => {
     }
   }, [savedCircuit, circuitLoading, projectId]);
 
-  // Debug component rendering - only log once when components change
-  useEffect(() => {
-    if (placedComponents.length > 0) {
-      console.log("=== COMPONENTS LOADED ===");
-      console.log("Total components:", placedComponents.length);
-      placedComponents.forEach((comp, index) => {
-        console.log(`Component ${index + 1}:`, {
-          id: comp.id,
-          name: comp.name,
-          x: comp.x,
-          y: comp.y,
-          type: comp.type,
-        });
-      });
-
-      // Log the first component's exact position
-      const firstComponent = placedComponents[0];
-      console.log("FIRST COMPONENT POSITION:", {
-        name: firstComponent.name,
-        x: firstComponent.x,
-        y: firstComponent.y,
-        id: firstComponent.id,
-      });
-
-      // Log all component positions
-      console.log("ALL COMPONENT POSITIONS:");
-      placedComponents.forEach((comp, index) => {
-        console.log(`${index + 1}. ${comp.name}: (${comp.x}, ${comp.y})`);
-        // Check for components with very large coordinates
-        if (comp.x > 1000 || comp.y > 1000) {
-          console.warn(
-            `⚠️ Component ${comp.name} has large coordinates: (${comp.x}, ${comp.y})`
-          );
-        }
-      });
-    }
-  }, [placedComponents.length]); // Only trigger when length changes, not on every render
-
   // Mutations
   const saveMutation = useMutation({
     mutationFn: (circuitData: any) => {
@@ -294,24 +239,30 @@ export const CircuitEditorPage: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
 
-    const componentData = JSON.parse(
-      e.dataTransfer.getData("application/json")
-    );
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - 60; // Center the component
-    const y = e.clientY - rect.top - 60;
+    try {
+      const componentData = JSON.parse(
+        e.dataTransfer.getData("application/json")
+      );
 
-    const newComponent: PlacedComponent = {
-      id: `${componentData.id}_${Date.now()}`,
-      componentId: componentData.id,
-      type: componentData.type,
-      name: componentData.name,
-      x,
-      y,
-      properties: componentData.properties,
-    };
+      const rect = e.currentTarget.getBoundingClientRect();
+      // Account for pan transform when calculating position
+      const x = (e.clientX - rect.left - pan.x) / zoom - 60; // Center the component
+      const y = (e.clientY - rect.top - pan.y) / zoom - 60;
 
-    setPlacedComponents((prev) => [...prev, newComponent]);
+      const newComponent: PlacedComponent = {
+        id: `${componentData.id}_${Date.now()}`,
+        componentId: componentData.id,
+        type: componentData.type,
+        name: componentData.name,
+        x,
+        y,
+        properties: componentData.properties,
+      };
+
+      setPlacedComponents((prev) => [...prev, newComponent]);
+    } catch (error) {
+      console.error("Error in handleDrop:", error);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -350,15 +301,17 @@ export const CircuitEditorPage: React.FC = () => {
     });
 
     if (draggedComponent) {
-      // Simple position calculation: mouse position relative to canvas
-      let x = e.clientX - rect.left - 60; // Center the component on mouse
-      let y = e.clientY - rect.top - 60;
+      // Account for pan transform when calculating position
+      let x = (e.clientX - rect.left - pan.x) / zoom - 60; // Center the component on mouse
+      let y = (e.clientY - rect.top - pan.y) / zoom - 60;
 
-      // Constrain to canvas boundaries
-      const componentSize = 120;
-      const padding = 10;
-      x = Math.max(padding, Math.min(x, rect.width - componentSize - padding));
-      y = Math.max(padding, Math.min(y, rect.height - componentSize - padding));
+      // Constrain to canvas boundaries (accounting for zoom and pan)
+      const componentSize = 120 * zoom;
+      const padding = 10 * zoom;
+      const maxX = (rect.width - pan.x) / zoom - componentSize - padding;
+      const maxY = (rect.height - pan.y) / zoom - componentSize - padding;
+      x = Math.max(padding, Math.min(x, maxX));
+      y = Math.max(padding, Math.min(y, maxY));
 
       const updatedComponents = placedComponents.map((component) =>
         component.id === draggedComponent ? { ...component, x, y } : component

@@ -58,17 +58,6 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   setPan,
   circuitComponents,
 }) => {
-  useEffect(() => {
-    console.log(
-      "CircuitCanvas rendered with zoom:",
-      zoom,
-      "pan:",
-      pan,
-      "setZoom type:",
-      typeof setZoom
-    );
-  }, [zoom, pan, setZoom]);
-
   return (
     <div className="flex-1 p-6 relative">
       <div
@@ -86,16 +75,17 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         style={{
           cursor: draggedComponent ? "grabbing" : "default",
         }}
+        onDragEnter={(e) => {
+          e.preventDefault();
+        }}
       >
-        {/* Canvas Content Container - Fixed workable area */}
+        {/* Canvas Content Container */}
         <div
-          className="absolute"
+          className="absolute inset-0"
           style={{
-            width: "200%",
-            height: "200%",
-            left: "-50%",
-            top: "-50%",
             transform: `translate(${pan?.x || 0}px, ${pan?.y || 0}px)`,
+            minHeight: "100vh",
+            minWidth: "100vw",
           }}
           onMouseMove={(e) => {
             handleCanvasMouseMove(e);
@@ -109,7 +99,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           onMouseDown={handleMouseDown}
         >
           {/* Placed components */}
-          {placedComponents.map((component) => (
+          {placedComponents.map((component, index) => (
             <div key={component.id} className="group">
               <div
                 style={{
@@ -137,7 +127,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                       : "0 2px 4px rgba(0,0,0,0.1)",
                   cursor: "move",
                   userSelect: "none", // Disable text selection
-                  transform: `scale(${zoom})`, // Components scale
+                  transform: `scale(${zoom})`,
                   transformOrigin: "top left",
                 }}
                 onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
@@ -199,8 +189,8 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
               <div
                 style={{
                   position: "absolute",
-                  left: component.x + 55 - 50 * (1 - zoom), // Move very close
-                  top: component.y + 125 - 50 * (1 - zoom), // Move very close
+                  left: component.x + 55,
+                  top: component.y + 125,
                   width: "10px",
                   height: "10px",
                   backgroundColor:
@@ -213,8 +203,6 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                     theme === "dark"
                       ? "0 2px 4px rgba(0,0,0,0.4)"
                       : "0 2px 4px rgba(0,0,0,0.2)",
-                  transform: `scale(${zoom})`,
-                  transformOrigin: "top left",
                   pointerEvents: "auto",
                 }}
                 onPointerDown={(e) => {
@@ -251,10 +239,10 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
               return (
                 <line
                   key={connection.id}
-                  x1={fromComponent.x + 55 - 50 * (1 - zoom) + 5}
-                  y1={fromComponent.y + 125 - 50 * (1 - zoom) + 5}
-                  x2={toComponent.x + 55 - 50 * (1 - zoom) + 5}
-                  y2={toComponent.y + 125 - 50 * (1 - zoom) + 5}
+                  x1={fromComponent.x + 55 + 5}
+                  y1={fromComponent.y + 125 + 5}
+                  x2={toComponent.x + 55 + 5}
+                  y2={toComponent.y + 125 + 5}
                   stroke="green"
                   strokeWidth="3"
                 />
@@ -268,17 +256,13 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                   const fromComponent = placedComponents.find(
                     (c) => c.id === connectingFrom
                   );
-                  return fromComponent
-                    ? fromComponent.x + 55 - 50 * (1 - zoom) + 5
-                    : 0;
+                  return fromComponent ? fromComponent.x + 55 + 5 : 0;
                 })()}
                 y1={(() => {
                   const fromComponent = placedComponents.find(
                     (c) => c.id === connectingFrom
                   );
-                  return fromComponent
-                    ? fromComponent.y + 125 - 50 * (1 - zoom) + 5
-                    : 0;
+                  return fromComponent ? fromComponent.y + 125 + 5 : 0;
                 })()}
                 x2={mousePosition.x}
                 y2={mousePosition.y}
