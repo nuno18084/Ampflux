@@ -28,19 +28,19 @@ def create_project(project_data: ProjectCreate, db: Session = Depends(get_db), c
     member = models.ProjectMember(project_id=project.id, user_id=current_user.id, role=models.ProjectRole.editor)
     db.add(member)
     db.commit()
-    return {"id": project.id, "name": project.name, "created_at": project.created_at.isoformat() if project.created_at else None}
+    return {"id": project.id, "name": project.name, "created_at": project.created_at.isoformat() if project.created_at else None, "updated_at": project.updated_at.isoformat() if project.updated_at else None}
 
 @router.get("/", response_model=List[dict])
 def list_projects(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    projects = db.query(models.Project).filter(models.Project.company_id == current_user.company_id).all()
-    return [{"id": p.id, "name": p.name, "created_at": p.created_at.isoformat() if p.created_at else None} for p in projects]
+    projects = db.query(models.Project).filter(models.Project.company_id == current_user.company_id).order_by(models.Project.updated_at.desc()).all()
+    return [{"id": p.id, "name": p.name, "created_at": p.created_at.isoformat() if p.created_at else None, "updated_at": p.updated_at.isoformat() if p.updated_at else None} for p in projects]
 
 @router.get("/{project_id}", response_model=dict)
 def get_project(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     project = db.query(models.Project).filter(models.Project.id == project_id, models.Project.company_id == current_user.company_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    return {"id": project.id, "name": project.name, "created_at": project.created_at.isoformat() if project.created_at else None}
+    return {"id": project.id, "name": project.name, "created_at": project.created_at.isoformat() if project.created_at else None, "updated_at": project.updated_at.isoformat() if project.updated_at else None}
 
 @router.delete("/{project_id}")
 def delete_project(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

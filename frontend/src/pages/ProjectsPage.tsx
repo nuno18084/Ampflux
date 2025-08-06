@@ -216,8 +216,14 @@ export const ProjectsPage: React.FC = () => {
                           theme === "dark" ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        Created{" "}
-                        {new Date(project.created_at).toLocaleDateString()}
+                        Last edited{" "}
+                        {new Date(project.updated_at).toLocaleDateString()}
+                        {project.created_at !== project.updated_at && (
+                          <span className="ml-2 text-xs opacity-75">
+                            (created{" "}
+                            {new Date(project.created_at).toLocaleDateString()})
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>

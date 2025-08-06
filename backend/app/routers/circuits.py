@@ -51,6 +51,15 @@ def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Se
     global_max = db.query(models.CircuitVersion.version_number).order_by(models.CircuitVersion.version_number.desc()).first()
     print(f"Global max version number: {global_max[0] if global_max else 0}")
     
+    # Update project's updated_at field
+    project = db.query(models.Project).filter_by(id=project_id).first()
+    if project:
+        print(f"=== UPDATING PROJECT {project_id} ===")
+        print(f"Old updated_at: {project.updated_at}")
+        project.updated_at = datetime.utcnow()
+        print(f"New updated_at: {project.updated_at}")
+        print(f"=== END UPDATE ===")
+    
     version = models.CircuitVersion(
         project_id=project_id, 
         version_number=next_version_number,
@@ -84,6 +93,11 @@ def simulate_circuit(project_id: int, request: CircuitSimulationRequest, db: Ses
         circuit_data = json.loads(request.circuit_data)
         voltage = float(circuit_data.get("voltage", 0))
         resistances = circuit_data.get("resistances", [])
+        # Update project's updated_at field
+        project = db.query(models.Project).filter_by(id=project_id).first()
+        if project:
+            project.updated_at = datetime.utcnow()
+        
         task = run_short_circuit_simulation.apply_async(args=[voltage, resistances])
         # Store simulation with pending result
         sim = models.Simulation(project_id=project_id, result_json={"task_id": task.id, "status": "pending"})

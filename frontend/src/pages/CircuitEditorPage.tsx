@@ -180,12 +180,14 @@ export const CircuitEditorPage: React.FC = () => {
   // Mutations
   const saveMutation = useMutation({
     mutationFn: (circuitData: any) => {
+      console.log("Save mutation called with projectId:", projectId);
       const token = localStorage.getItem("access_token");
       if (!token) {
         throw new Error("No authentication token found");
       }
 
       const jsonData = JSON.stringify(circuitData);
+      console.log("Sending save request to backend...");
 
       return fetch(`http://localhost:8000/circuits/${projectId}/save_version`, {
         method: "POST",
@@ -197,8 +199,10 @@ export const CircuitEditorPage: React.FC = () => {
           data_json: jsonData,
         }),
       }).then((response) => {
+        console.log("Save response status:", response.status);
         if (!response.ok) {
           return response.text().then((text) => {
+            console.error("Save failed:", response.status, text);
             throw new Error(`Save failed: ${response.status} ${text}`);
           });
         }
@@ -206,6 +210,7 @@ export const CircuitEditorPage: React.FC = () => {
       });
     },
     onSuccess: (data) => {
+      console.log("Save mutation succeeded:", data);
       // Only show success message for version saves (when leaving editor)
       if (data && data.id) {
         setSaveSuccess(true);
@@ -245,9 +250,8 @@ export const CircuitEditorPage: React.FC = () => {
       );
 
       const rect = e.currentTarget.getBoundingClientRect();
-      // Account for pan transform when calculating position
-      const x = (e.clientX - rect.left - pan.x) / zoom - 60; // Center the component
-      const y = (e.clientY - rect.top - pan.y) / zoom - 60;
+      const x = e.clientX - rect.left - 60; // Center the component
+      const y = e.clientY - rect.top - 60;
 
       const newComponent: PlacedComponent = {
         id: `${componentData.id}_${Date.now()}`,
@@ -301,17 +305,15 @@ export const CircuitEditorPage: React.FC = () => {
     });
 
     if (draggedComponent) {
-      // Account for pan transform when calculating position
-      let x = (e.clientX - rect.left - pan.x) / zoom - 60; // Center the component on mouse
-      let y = (e.clientY - rect.top - pan.y) / zoom - 60;
+      // Simple position calculation: mouse position relative to canvas
+      let x = e.clientX - rect.left - 60; // Center the component on mouse
+      let y = e.clientY - rect.top - 60;
 
-      // Constrain to canvas boundaries (accounting for zoom and pan)
-      const componentSize = 120 * zoom;
-      const padding = 10 * zoom;
-      const maxX = (rect.width - pan.x) / zoom - componentSize - padding;
-      const maxY = (rect.height - pan.y) / zoom - componentSize - padding;
-      x = Math.max(padding, Math.min(x, maxX));
-      y = Math.max(padding, Math.min(y, maxY));
+      // Constrain to canvas boundaries
+      const componentSize = 120;
+      const padding = 10;
+      x = Math.max(padding, Math.min(x, rect.width - componentSize - padding));
+      y = Math.max(padding, Math.min(y, rect.height - componentSize - padding));
 
       const updatedComponents = placedComponents.map((component) =>
         component.id === draggedComponent ? { ...component, x, y } : component
@@ -453,7 +455,6 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleSave = () => {
-    // Just save to memory during the session, don't create a version
     const circuitData = {
       components: placedComponents,
       connections: connections,
@@ -462,8 +463,14 @@ export const CircuitEditorPage: React.FC = () => {
         pan: pan,
       },
     };
-    // Store in session storage for persistence during the session
+
+    // Save to session storage for persistence during the session
     sessionStorage.setItem(`circuit_${projectId}`, JSON.stringify(circuitData));
+
+    // Also save a version to the backend to update the project's updated_at field
+    console.log("Saving circuit version to backend...");
+    saveMutation.mutate(circuitData);
+
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);

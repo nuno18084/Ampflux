@@ -327,9 +327,9 @@ export const DashboardPage: React.FC = () => {
                                   : "text-gray-600"
                               }`}
                             >
-                              Created{" "}
+                              Last edited{" "}
                               {new Date(
-                                project.created_at
+                                project.updated_at
                               ).toLocaleDateString()}
                             </p>
                           </div>
