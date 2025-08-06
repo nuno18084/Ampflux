@@ -396,9 +396,10 @@ def share_project(
 @router.get("/shared/with-me", response_model=List[dict])
 def get_shared_projects(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     """Get projects shared with the current user"""
+    # Get both pending and accepted shares
     shares = db.query(models.ProjectShare).filter(
         models.ProjectShare.shared_with_email == current_user.email,
-        models.ProjectShare.status == "pending"
+        models.ProjectShare.status.in_(["pending", "accepted"])
     ).all()
     
     result = []
@@ -430,6 +431,9 @@ def get_shared_projects(db: Session = Depends(get_db), current_user: models.User
                 "email": shared_by_user.email
             } if shared_by_user else None
         })
+    
+    # Sort by project's updated_at (most recent first)
+    result.sort(key=lambda x: x["project"]["updated_at"] if x["project"] else x["created_at"], reverse=True)
     
     return result
 

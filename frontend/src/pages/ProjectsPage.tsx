@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { apiClient } from "../lib/api";
@@ -25,6 +25,7 @@ export const ProjectsPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const { user } = useAuth();
   const { theme } = useTheme();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const queryKey = user ? ["projects", user.id] : ["projects"];
 
@@ -45,6 +46,8 @@ export const ProjectsPage: React.FC = () => {
     queryKey,
     queryFn: () => apiClient.getProjects(),
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   // Fetch shared projects
@@ -56,7 +59,30 @@ export const ProjectsPage: React.FC = () => {
     queryKey: ["shared-projects"],
     queryFn: () => apiClient.getSharedProjects(),
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
+
+  // Refetch data when component mounts
+  useEffect(() => {
+    if (user) {
+      refetch();
+      refetchSharedProjects();
+    }
+  }, [user, refetch, refetchSharedProjects]);
+
+  // Refetch data when window gains focus (user returns to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user) {
+        refetch();
+        refetchSharedProjects();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user, refetch, refetchSharedProjects]);
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
@@ -386,7 +412,10 @@ export const ProjectsPage: React.FC = () => {
                           {share.role === "viewer"
                             ? "Read Only"
                             : "Read & Write"}{" "}
-                          • {new Date(share.created_at).toLocaleDateString()}
+                          • Last edited{" "}
+                          {new Date(
+                            share.project?.updated_at || share.created_at
+                          ).toLocaleDateString()}
                         </p>
                       </div>
                     </div>

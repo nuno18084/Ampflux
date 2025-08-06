@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
@@ -19,6 +19,7 @@ import {
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const queryClient = useQueryClient();
   const [isPageLoading, setIsPageLoading] = useState(true);
   const queryKey = user ? ["projects", user.id] : ["projects"];
 
@@ -31,13 +32,66 @@ export const DashboardPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const { data: projects, isLoading } = useQuery({
+  const {
+    data: projects,
+    isLoading,
+    refetch: refetchProjects,
+  } = useQuery({
     queryKey,
     queryFn: () => apiClient.getProjects(),
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
-  const recentProjects = projects?.slice(0, 3) || [];
+  const {
+    data: sharedProjects,
+    isLoading: sharedLoading,
+    refetch: refetchSharedProjects,
+  } = useQuery({
+    queryKey: ["shared-projects", user?.id],
+    queryFn: () => apiClient.getSharedProjects(),
+    enabled: !!user,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+  });
+
+  // Refetch data when component mounts
+  useEffect(() => {
+    if (user) {
+      refetchProjects();
+      refetchSharedProjects();
+    }
+  }, [user, refetchProjects, refetchSharedProjects]);
+
+  // Refetch data when window gains focus (user returns to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user) {
+        refetchProjects();
+        refetchSharedProjects();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user, refetchProjects, refetchSharedProjects]);
+
+  // Combine owned and shared projects, sort by updated_at
+  const allProjects = [
+    ...(projects || []),
+    ...(sharedProjects || []).map((share) => ({
+      ...share.project,
+      isShared: true,
+      sharedBy: share.shared_by_user,
+      role: share.role,
+    })),
+  ].sort(
+    (a, b) =>
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+
+  const recentProjects = allProjects.slice(0, 3) || [];
 
   // Disable scrolling when component mounts
   useEffect(() => {
@@ -137,7 +191,7 @@ export const DashboardPage: React.FC = () => {
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
               }`}
             >
-              {isLoading ? (
+              {isLoading || sharedLoading ? (
                 <LoadingSkeleton type="stat" />
               ) : (
                 <div className="flex items-center">
@@ -159,7 +213,7 @@ export const DashboardPage: React.FC = () => {
                         theme === "dark" ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {projects?.length || 0}
+                      {allProjects.length}
                     </p>
                   </div>
                 </div>
@@ -263,7 +317,7 @@ export const DashboardPage: React.FC = () => {
                   >
                     Recent Projects
                   </h2>
-                  {projects && projects.length > 3 && (
+                  {allProjects && allProjects.length > 3 && (
                     <div className="flex items-center space-x-3">
                       <span
                         className={`text-sm px-3 py-1 rounded-full shadow-sm border ${
@@ -272,7 +326,7 @@ export const DashboardPage: React.FC = () => {
                             : "text-gray-600 bg-white border-green-200"
                         }`}
                       >
-                        Showing 3 of {projects.length}
+                        Showing 3 of {allProjects.length}
                       </span>
                       <Link
                         to="/projects"
@@ -289,7 +343,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
               <div className="p-6">
-                {isLoading ? (
+                {isLoading || sharedLoading ? (
                   <div className="space-y-3">
                     <LoadingSkeleton type="card" />
                     <LoadingSkeleton type="card" />
@@ -307,19 +361,38 @@ export const DashboardPage: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center">
-                          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg mr-4 shadow-lg">
+                          <div
+                            className={`p-2 rounded-lg mr-4 shadow-lg ${
+                              project.isShared
+                                ? "bg-gradient-to-r from-blue-500 to-blue-600"
+                                : "bg-gradient-to-r from-green-500 to-emerald-600"
+                            }`}
+                          >
                             <FolderIcon className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <h3
-                              className={`text-sm font-semibold ${
-                                theme === "dark"
-                                  ? "text-white"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              {project.name}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h3
+                                className={`text-sm font-semibold ${
+                                  theme === "dark"
+                                    ? "text-white"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {project.name}
+                              </h3>
+                              {project.isShared && (
+                                <span
+                                  className={`text-xs px-2 py-1 rounded-full ${
+                                    theme === "dark"
+                                      ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
+                                      : "bg-blue-100 text-blue-700 border border-blue-200"
+                                  }`}
+                                >
+                                  Shared ({project.role})
+                                </span>
+                              )}
+                            </div>
                             <p
                               className={`text-sm ${
                                 theme === "dark"
@@ -331,6 +404,11 @@ export const DashboardPage: React.FC = () => {
                               {new Date(
                                 project.updated_at
                               ).toLocaleDateString()}
+                              {project.isShared && project.sharedBy && (
+                                <span className="ml-2">
+                                  • Shared by {project.sharedBy.name}
+                                </span>
+                              )}
                             </p>
                           </div>
                         </div>
