@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
 import { LoadingAnimation } from "../components/LoadingAnimation";
+import { apiClient } from "../lib/api";
+import { useQuery } from "@tanstack/react-query";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -10,6 +12,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
   BuildingOfficeIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
 export const RegisterPage: React.FC = () => {
@@ -19,6 +22,7 @@ export const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isCompany, setIsCompany] = useState(false);
   const [companyName, setCompanyName] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [error, setError] = useState("");
@@ -41,6 +45,7 @@ export const RegisterPage: React.FC = () => {
     setError("");
 
     try {
+      // Create new company or individual account
       await register(name, email, password, isCompany, companyName);
       navigate("/");
     } catch (err: any) {
@@ -299,38 +304,42 @@ export const RegisterPage: React.FC = () => {
                 </div>
 
                 {isCompany && (
-                  <div>
-                    <label
-                      htmlFor="companyName"
-                      className={`block text-xs sm:text-sm lg:text-xs font-medium mb-1 sm:mb-2 lg:mb-1 ${
-                        theme === "dark" ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      Company name
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-3 flex items-center pointer-events-none">
-                        <BuildingOfficeIcon
-                          className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
-                            theme === "dark" ? "text-gray-400" : "text-gray-500"
+                  <div className="space-y-3">
+                    <div>
+                      <label
+                        htmlFor="companyName"
+                        className={`block text-xs sm:text-sm lg:text-xs font-medium mb-1 sm:mb-2 lg:mb-1 ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        Company name
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-3 flex items-center pointer-events-none">
+                          <BuildingOfficeIcon
+                            className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-4 lg:w-4 ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          />
+                        </div>
+                        <input
+                          id="companyName"
+                          name="companyName"
+                          type="text"
+                          autoComplete="organization"
+                          required={isCompany}
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          className={`block w-full pl-8 sm:pl-10 lg:pl-10 pr-3 py-2 sm:py-3 lg:py-2.5 text-sm rounded-lg transition-all duration-200 ${
+                            theme === "dark"
+                              ? "bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50"
+                              : "border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                           }`}
+                          placeholder="Enter your company name"
                         />
                       </div>
-                      <input
-                        id="companyName"
-                        name="companyName"
-                        type="text"
-                        autoComplete="organization"
-                        required={isCompany}
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        className={`block w-full pl-8 sm:pl-10 lg:pl-10 pr-3 py-2 sm:py-3 lg:py-2.5 text-sm rounded-lg transition-all duration-200 ${
-                          theme === "dark"
-                            ? "bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50"
-                            : "border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        }`}
-                        placeholder="Enter your company name"
-                      />
                     </div>
                   </div>
                 )}

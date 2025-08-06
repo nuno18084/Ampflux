@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useTheme } from "../contexts/ThemeProvider";
+import { useProjectPermissions } from "../hooks/useProjectPermissions";
 import { CircuitSidebar } from "../components/CircuitSidebar";
 import { CircuitToolbar } from "../components/CircuitToolbar";
 import { CircuitCanvas } from "../components/CircuitCanvas";
@@ -18,6 +19,9 @@ export const CircuitEditorPage: React.FC = () => {
   const queryClient = useQueryClient();
   const currentPositionsRef = useRef<PlacedComponent[]>([]); // Track current positions during drag
   const { theme } = useTheme();
+
+  // Get user permissions for this project
+  const permissions = useProjectPermissions(parseInt(projectId!));
 
   // Force remount on every page load to reset state
   const remountKey = Date.now();
@@ -244,6 +248,11 @@ export const CircuitEditorPage: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
 
+    if (!permissions.canEdit) {
+      alert("You don't have permission to add components to this project.");
+      return;
+    }
+
     try {
       const componentData = JSON.parse(
         e.dataTransfer.getData("application/json")
@@ -278,6 +287,11 @@ export const CircuitEditorPage: React.FC = () => {
     componentId: string
   ) => {
     e.stopPropagation();
+
+    if (!permissions.canEdit) {
+      return; // Don't allow dragging for viewers
+    }
+
     const component = placedComponents.find((c) => c.id === componentId);
     if (component) {
       // Add a small delay to distinguish between click and drag
@@ -430,6 +444,13 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleComponentDelete = (componentId: string) => {
+    if (!permissions.canEdit) {
+      alert(
+        "You don't have permission to delete components from this project."
+      );
+      return;
+    }
+
     setPlacedComponents((prev) => prev.filter((c) => c.id !== componentId));
     setConnections((prev) =>
       prev.filter((c) => c.from !== componentId && c.to !== componentId)
@@ -442,6 +463,13 @@ export const CircuitEditorPage: React.FC = () => {
     property: string,
     value: number | boolean | string
   ) => {
+    if (!permissions.canEdit) {
+      alert(
+        "You don't have permission to modify component properties in this project."
+      );
+      return;
+    }
+
     setPlacedComponents((prev) =>
       prev.map((component) =>
         component.id === componentId
@@ -455,6 +483,11 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleSave = () => {
+    if (!permissions.canEdit) {
+      alert("You don't have permission to save changes to this project.");
+      return;
+    }
+
     const circuitData = {
       components: placedComponents,
       connections: connections,
@@ -478,6 +511,11 @@ export const CircuitEditorPage: React.FC = () => {
   };
 
   const handleSimulate = () => {
+    if (!permissions.canEdit) {
+      alert("You don't have permission to run simulations on this project.");
+      return;
+    }
+
     setIsSimulating(true);
     const circuitData = {
       components: placedComponents,
@@ -553,6 +591,7 @@ export const CircuitEditorPage: React.FC = () => {
           isSimulating={isSimulating}
           saveSuccess={saveSuccess}
           placedComponents={placedComponents}
+          permissions={permissions}
         />
 
         {/* Canvas */}

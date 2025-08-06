@@ -10,11 +10,14 @@ import {
   FolderIcon,
   ClockIcon,
   BoltIcon,
+  ShareIcon,
 } from "@heroicons/react/24/outline";
+import { ShareProjectModal } from "../components/ShareProjectModal";
 
 export const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const { theme } = useTheme();
 
   // Simulate page loading
@@ -153,13 +156,22 @@ export const ProjectPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <Link
-              to={`/projects/${project.id}/editor`}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border border-green-500/20 inline-flex items-center"
-            >
-              <PencilIcon className="h-5 w-5 mr-2" />
-              Edit Circuit
-            </Link>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShareModalOpen(true)}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border border-blue-500/20 inline-flex items-center"
+              >
+                <ShareIcon className="h-5 w-5 mr-2" />
+                Share
+              </button>
+              <Link
+                to={`/projects/${project.id}/editor`}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border border-green-500/20 inline-flex items-center"
+              >
+                <PencilIcon className="h-5 w-5 mr-2" />
+                Edit Circuit
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -423,6 +435,14 @@ export const ProjectPage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Share Project Modal */}
+        <ShareProjectModal
+          projectId={parseInt(projectId!)}
+          projectName={project?.name || ""}
+          isOpen={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+        />
       </div>
     </div>
   );

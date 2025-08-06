@@ -62,6 +62,7 @@ class Project(Base):
     circuit_versions = relationship("CircuitVersion", back_populates="project")
     simulations = relationship("Simulation", back_populates="project")
     audit_logs = relationship("AuditLog", back_populates="project")
+    shares = relationship("ProjectShare", back_populates="project")
 
 class ProjectMember(Base):
     __tablename__ = "project_members"
@@ -97,3 +98,19 @@ class AuditLog(Base):
     action = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
     project = relationship("Project", back_populates="audit_logs")
+
+class ProjectShare(Base):
+    __tablename__ = "project_shares"
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    shared_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    shared_with_email = Column(String, nullable=False)
+    role = Column(String, default="viewer")  # viewer, editor
+    status = Column(String, default="pending")  # pending, accepted, declined
+    created_at = Column(DateTime, default=datetime.utcnow)
+    accepted_at = Column(DateTime, nullable=True)
+    accepted_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    project = relationship("Project", back_populates="shares")
+    shared_by_user = relationship("User", foreign_keys=[shared_by_user_id])
+    accepted_by_user = relationship("User", foreign_keys=[accepted_by_user_id])

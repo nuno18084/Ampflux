@@ -4,6 +4,8 @@ import {
   DocumentArrowDownIcon,
   PlayIcon,
   CheckIcon,
+  EyeIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { useTheme } from "../contexts/ThemeProvider";
 
@@ -16,6 +18,10 @@ interface CircuitToolbarProps {
   isSimulating: boolean;
   saveSuccess: boolean;
   placedComponents: any[];
+  permissions?: {
+    canEdit: boolean;
+    role: string | null;
+  };
 }
 
 export const CircuitToolbar: React.FC<CircuitToolbarProps> = ({
@@ -27,6 +33,7 @@ export const CircuitToolbar: React.FC<CircuitToolbarProps> = ({
   isSimulating,
   saveSuccess,
   placedComponents,
+  permissions,
 }) => {
   const { theme } = useTheme();
 
@@ -51,7 +58,7 @@ export const CircuitToolbar: React.FC<CircuitToolbarProps> = ({
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Project
           </button>
-          <div>
+          <div className="flex items-center space-x-3">
             <h1
               className={`text-xl font-semibold transition-colors duration-200 ${
                 theme === "dark" ? "text-white" : "text-gray-900"
@@ -59,6 +66,26 @@ export const CircuitToolbar: React.FC<CircuitToolbarProps> = ({
             >
               {project?.name} - Circuit Editor
             </h1>
+            {permissions && (
+              <div className="flex items-center space-x-2">
+                {permissions.role === "viewer" ? (
+                  <div className="flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                    <EyeIcon className="h-3 w-3 mr-1" />
+                    Read Only
+                  </div>
+                ) : permissions.role === "editor" ? (
+                  <div className="flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    <PencilIcon className="h-3 w-3 mr-1" />
+                    Read & Write
+                  </div>
+                ) : permissions.role === "owner" ? (
+                  <div className="flex items-center px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                    <PencilIcon className="h-3 w-3 mr-1" />
+                    Owner
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex space-x-3">

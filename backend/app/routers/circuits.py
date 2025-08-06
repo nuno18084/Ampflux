@@ -26,16 +26,136 @@ def get_db():
     finally:
         db.close()
 
+def check_project_access(project_id: int, current_user: models.User, db: Session) -> models.Project:
+    """Check if user has access to a project (owner, member, or shared)"""
+    # First check if user is project owner or in same company
+    project = db.query(models.Project).filter(
+        models.Project.id == project_id,
+        models.Project.company_id == current_user.company_id
+    ).first()
+    
+    if project:
+        return project
+    
+    # Check if user is a project member (for cross-company sharing)
+    member = db.query(models.ProjectMember).filter(
+        models.ProjectMember.project_id == project_id,
+        models.ProjectMember.user_id == current_user.id
+    ).first()
+    
+    if member:
+        # Get the project for the member
+        project = db.query(models.Project).filter(models.Project.id == project_id).first()
+        return project
+    
+    # Check if project is shared with this user (pending shares)
+    share = db.query(models.ProjectShare).filter(
+        models.ProjectShare.project_id == project_id,
+        models.ProjectShare.shared_with_email == current_user.email,
+        models.ProjectShare.status == "pending"
+    ).first()
+    
+    if share:
+        project = db.query(models.Project).filter(models.Project.id == project_id).first()
+        return project
+    
+    # Check if project is shared with this user (accepted shares)
+    accepted_share = db.query(models.ProjectShare).filter(
+        models.ProjectShare.project_id == project_id,
+        models.ProjectShare.shared_with_email == current_user.email,
+        models.ProjectShare.status == "accepted"
+    ).first()
+    
+    if accepted_share:
+        project = db.query(models.Project).filter(models.Project.id == project_id).first()
+        return project
+    
+    return None
+
+def check_project_permissions(project_id: int, current_user: models.User, db: Session, required_role: str = "viewer") -> dict:
+    """Check project access and return user's role"""
+    # Check if user is project owner or in same company
+    project = db.query(models.Project).filter(
+        models.Project.id == project_id,
+        models.Project.company_id == current_user.company_id
+    ).first()
+    
+    if project:
+        # User is owner or in same company - has full access
+        return {"can_edit": True, "can_view": True, "role": "owner"}
+    
+    # Check if user is a project member
+    member = db.query(models.ProjectMember).filter(
+        models.ProjectMember.project_id == project_id,
+        models.ProjectMember.user_id == current_user.id
+    ).first()
+    
+    if member:
+        return {
+            "can_edit": member.role == models.ProjectRole.editor,
+            "can_view": True,
+            "role": member.role
+        }
+    
+    # Check if project is shared with this user (pending shares)
+    share = db.query(models.ProjectShare).filter(
+        models.ProjectShare.project_id == project_id,
+        models.ProjectShare.shared_with_email == current_user.email,
+        models.ProjectShare.status == "pending"
+    ).first()
+    
+    if share:
+        return {
+            "can_edit": share.role == "editor",
+            "can_view": True,
+            "role": share.role
+        }
+    
+    # Check if project is shared with this user (accepted shares)
+    accepted_share = db.query(models.ProjectShare).filter(
+        models.ProjectShare.project_id == project_id,
+        models.ProjectShare.shared_with_email == current_user.email,
+        models.ProjectShare.status == "accepted"
+    ).first()
+    
+    if accepted_share:
+        return {
+            "can_edit": accepted_share.role == "editor",
+            "can_view": True,
+            "role": accepted_share.role
+        }
+    
+    return {"can_edit": False, "can_view": False, "role": None}
+
+router = APIRouter()
+
+class CircuitSimulationRequest(BaseModel):
+    circuit_data: str
+
+class CircuitVersionRequest(BaseModel):
+    data_json: str
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 @router.get("/test")
 def test_circuits():
     return {"message": "Circuits router is working"}
 
 @router.post("/{project_id}/save_version", response_model=dict)
 def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    # Check project membership
-    member = db.query(models.ProjectMember).filter_by(project_id=project_id, user_id=current_user.id).first()
-    if not member:
-        raise HTTPException(status_code=403, detail="Not a project member")
+    # Check project access and permissions
+    permissions = check_project_permissions(project_id, current_user, db)
+    if not permissions["can_view"]:
+        raise HTTPException(status_code=403, detail="No access to this project")
+    
+    # Only editors can save versions
+    if not permissions["can_edit"]:
+        raise HTTPException(status_code=403, detail="Only editors can save circuit versions")
     
     # Get the next version number for this project
     latest_version = db.query(models.CircuitVersion).filter_by(project_id=project_id).order_by(models.CircuitVersion.version_number.desc()).first()
@@ -76,17 +196,24 @@ def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Se
 
 @router.get("/{project_id}/versions", response_model=List[dict])
 def list_circuit_versions(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    member = db.query(models.ProjectMember).filter_by(project_id=project_id, user_id=current_user.id).first()
-    if not member:
-        raise HTTPException(status_code=403, detail="Not a project member")
+    # Check project access
+    project = check_project_access(project_id, current_user, db)
+    if not project:
+        raise HTTPException(status_code=403, detail="No access to this project")
+    
     versions = db.query(models.CircuitVersion).filter_by(project_id=project_id).order_by(models.CircuitVersion.version_number.desc()).all()
     return [{"id": v.id, "version_number": v.version_number, "created_at": v.created_at, "data_json": v.data_json} for v in versions]
 
 @router.post("/{project_id}/simulate", response_model=dict)
 def simulate_circuit(project_id: int, request: CircuitSimulationRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    member = db.query(models.ProjectMember).filter_by(project_id=project_id, user_id=current_user.id).first()
-    if not member:
-        raise HTTPException(status_code=403, detail="Not a project member")
+    # Check project access and permissions
+    permissions = check_project_permissions(project_id, current_user, db)
+    if not permissions["can_view"]:
+        raise HTTPException(status_code=403, detail="No access to this project")
+    
+    # Only editors can run simulations
+    if not permissions["can_edit"]:
+        raise HTTPException(status_code=403, detail="Only editors can run simulations")
     try:
         # Parse the circuit data (assuming it's JSON string)
         import json
@@ -120,8 +247,10 @@ def get_simulation_result(task_id: str):
 
 @router.get("/{project_id}/simulations", response_model=List[dict])
 def list_simulations(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    member = db.query(models.ProjectMember).filter_by(project_id=project_id, user_id=current_user.id).first()
-    if not member:
-        raise HTTPException(status_code=403, detail="Not a project member")
+    # Check project access
+    project = check_project_access(project_id, current_user, db)
+    if not project:
+        raise HTTPException(status_code=403, detail="No access to this project")
+    
     sims = db.query(models.Simulation).filter_by(project_id=project_id).order_by(models.Simulation.simulated_at.desc()).all()
     return [{"id": s.id, "simulated_at": s.simulated_at, "result": s.result_json} for s in sims]

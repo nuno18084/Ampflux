@@ -11,7 +11,9 @@ import {
   FolderIcon,
   PencilIcon,
   TrashIcon,
+  ShareIcon,
 } from "@heroicons/react/24/outline";
+import { ShareProjectModal } from "../components/ShareProjectModal";
 
 export const ProjectsPage: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -19,6 +21,8 @@ export const ProjectsPage: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   const { user } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -40,6 +44,17 @@ export const ProjectsPage: React.FC = () => {
   } = useQuery({
     queryKey,
     queryFn: () => apiClient.getProjects(),
+    enabled: !!user,
+  });
+
+  // Fetch shared projects
+  const {
+    data: sharedProjects,
+    isLoading: sharedProjectsLoading,
+    refetch: refetchSharedProjects,
+  } = useQuery({
+    queryKey: ["shared-projects"],
+    queryFn: () => apiClient.getSharedProjects(),
     enabled: !!user,
   });
 
@@ -229,14 +244,26 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                   <div className="flex space-x-2">
                     <button
+                      onClick={() => {
+                        setSelectedProject(project);
+                        setShareModalOpen(true);
+                      }}
+                      className="text-blue-400 hover:text-blue-300 transition-colors duration-300 ease-out"
+                      title="Share project"
+                    >
+                      <ShareIcon className="h-5 w-5" />
+                    </button>
+                    <button
                       onClick={() => handleNavigate(`/projects/${project.id}`)}
                       className="text-green-400 hover:text-green-300 transition-colors duration-300 ease-out"
+                      title="View project"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDeleteProject(project.id)}
                       className="text-red-400 hover:text-red-300 transition-colors duration-300 ease-out"
+                      title="Delete project"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -297,6 +324,98 @@ export const ProjectsPage: React.FC = () => {
               <PlusIcon className="h-5 w-5 mr-2" />
               Create Project
             </button>
+          </div>
+        )}
+
+        {/* Shared Projects Section */}
+        {sharedProjects && sharedProjects.length > 0 && (
+          <div className="mt-12">
+            <div className="mb-6">
+              <h2
+                className={`text-2xl font-bold mb-2 ${
+                  theme === "dark"
+                    ? "bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent"
+                    : "bg-gradient-to-r from-blue-600 to-cyan-700 bg-clip-text text-transparent"
+                }`}
+              >
+                Shared with You
+              </h2>
+              <p
+                className={`${
+                  theme === "dark" ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Projects shared with you by other users
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sharedProjects.map((share) => (
+                <div
+                  key={share.id}
+                  className={`transition-all duration-500 ease-out ${
+                    theme === "dark"
+                      ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-blue-500/10 hover:border-blue-500/20"
+                      : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-blue-200/50 hover:shadow-blue-500/20 hover:border-blue-300/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center">
+                      <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-2 rounded-lg mr-3 shadow-lg">
+                        <FolderIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3
+                          className={`text-lg font-medium ${
+                            theme === "dark" ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          {share.project?.name || "Unknown Project"}
+                        </h3>
+                        <p
+                          className={`text-sm ${
+                            theme === "dark" ? "text-gray-400" : "text-gray-600"
+                          }`}
+                        >
+                          Shared by {share.shared_by_user?.name || "Unknown"}
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            theme === "dark" ? "text-gray-500" : "text-gray-500"
+                          }`}
+                        >
+                          {share.role === "viewer"
+                            ? "Read Only"
+                            : "Read & Write"}{" "}
+                          • {new Date(share.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex space-x-2">
+                    <button
+                      onClick={() =>
+                        handleNavigate(`/projects/${share.project_id}`)
+                      }
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
+                        theme === "dark"
+                          ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-blue-500/30"
+                          : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-blue-300"
+                      }`}
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleNavigate(`/projects/${share.project_id}/editor`)
+                      }
+                      className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 flex-1 text-center"
+                    >
+                      {share.role === "viewer" ? "View" : "Edit"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -376,6 +495,19 @@ export const ProjectsPage: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Share Project Modal */}
+        {selectedProject && (
+          <ShareProjectModal
+            projectId={selectedProject.id}
+            projectName={selectedProject.name}
+            isOpen={shareModalOpen}
+            onClose={() => {
+              setShareModalOpen(false);
+              setSelectedProject(null);
+            }}
+          />
         )}
       </div>
     </div>

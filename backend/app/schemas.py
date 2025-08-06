@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from enum import Enum
+from datetime import datetime
 
 class UserRole(str, Enum):
     company_admin = "company_admin"
@@ -45,4 +46,24 @@ class TokenPayload(BaseModel):
 
 class CompanyCreate(BaseModel):
     name: str
+
+class ProjectShareCreate(BaseModel):
+    email: str
+    role: str = "viewer"  # viewer, editor
+
+class ProjectShareRead(BaseModel):
+    id: int
+    project_id: int
+    shared_by_user_id: int
+    shared_with_email: str
+    role: str
+    status: str
+    created_at: datetime
+    accepted_at: Optional[datetime] = None
+    accepted_by_user_id: Optional[int] = None
+    shared_by_user: UserRead
+    accepted_by_user: Optional[UserRead] = None
+
+    class Config:
+        orm_mode = True
 

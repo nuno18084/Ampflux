@@ -87,6 +87,32 @@ class ApiClient {
     return response.data;
   }
 
+  async shareProject(
+    projectId: number,
+    email: string,
+    role: string = "viewer"
+  ): Promise<any> {
+    const response: AxiosResponse<any> = await this.client.post(
+      `/projects/${projectId}/share`,
+      { email, role }
+    );
+    return response.data;
+  }
+
+  async getSharedProjects(): Promise<any[]> {
+    const response: AxiosResponse<any[]> = await this.client.get(
+      "/projects/shared/with-me"
+    );
+    return response.data;
+  }
+
+  async acceptProjectShare(projectId: number): Promise<any> {
+    const response: AxiosResponse<any> = await this.client.post(
+      `/projects/${projectId}/accept-share`
+    );
+    return response.data;
+  }
+
   async refreshToken(refreshToken: string): Promise<Token> {
     const response: AxiosResponse<Token> = await this.client.post(
       "/auth/refresh",
@@ -131,6 +157,54 @@ class ApiClient {
 
   async deleteProject(id: number): Promise<void> {
     await this.client.delete(`/projects/${id}`);
+  }
+
+  async getProjectMembers(projectId: number): Promise<any[]> {
+    const response: AxiosResponse<any[]> = await this.client.get(
+      `/projects/${projectId}/members`
+    );
+    return response.data;
+  }
+
+  async getProjectPermissions(projectId: number): Promise<any> {
+    const response: AxiosResponse<any> = await this.client.get(
+      `/projects/${projectId}/permissions`
+    );
+    return response.data;
+  }
+
+  async getCompanyUsers(): Promise<any[]> {
+    const response: AxiosResponse<any[]> = await this.client.get(
+      `/projects/company/users`
+    );
+    return response.data;
+  }
+
+  async addTestUsers(): Promise<any> {
+    const response: AxiosResponse<any> = await this.client.post(
+      `/projects/add-test-users`
+    );
+    return response.data;
+  }
+
+  async addProjectMember(
+    projectId: number,
+    userId: number,
+    role: string
+  ): Promise<any> {
+    const response: AxiosResponse<any> = await this.client.post(
+      `/projects/${projectId}/add_member`,
+      { user_id: userId, role }
+    );
+    return response.data;
+  }
+
+  async removeProjectMember(projectId: number, userId: number): Promise<any> {
+    const response: AxiosResponse<any> = await this.client.post(
+      `/projects/${projectId}/remove_member`,
+      { user_id: userId }
+    );
+    return response.data;
   }
 
   // Circuit endpoints
