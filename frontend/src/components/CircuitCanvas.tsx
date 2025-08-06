@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../contexts/ThemeProvider";
 import type {
@@ -58,6 +58,17 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   setPan,
   circuitComponents,
 }) => {
+  useEffect(() => {
+    console.log(
+      "CircuitCanvas rendered with zoom:",
+      zoom,
+      "pan:",
+      pan,
+      "setZoom type:",
+      typeof setZoom
+    );
+  }, [zoom, pan, setZoom]);
+
   return (
     <div className="flex-1 p-6 relative">
       <div
@@ -71,6 +82,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onWheel={handleWheel}
         style={{
           cursor: draggedComponent ? "grabbing" : "default",
         }}
@@ -278,8 +290,11 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           </svg>
         </div>
 
-        {/* Zoom Controls - Bottom Right Corner */}
-        <div className="absolute bottom-4 right-4 flex flex-col space-y-2">
+        {/* Zoom Controls - Top Right Corner */}
+        <div
+          className="absolute top-4 right-4 flex flex-col space-y-2 z-50"
+          style={{ border: "2px solid red", backgroundColor: "yellow" }}
+        >
           <div
             className={`flex items-center space-x-2 p-2 rounded-lg backdrop-blur-sm transition-colors duration-200 ${
               theme === "dark"
@@ -287,12 +302,21 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                 : "bg-white/90 border border-gray-200/50"
             }`}
           >
+            <div style={{ color: "red", fontWeight: "bold" }}>
+              ZOOM CONTROLS
+            </div>
             <button
-              onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
-              className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 ${
-                theme === "dark"
-                  ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
-                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              onClick={() => {
+                console.log("Zoom out clicked, current zoom:", zoom);
+                setZoom(Math.max(0.1, zoom - 0.1));
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Mouse down on zoom out");
+              }}
+              className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 bg-red-500 text-white hover:bg-red-600 ${
+                theme === "dark" ? "border-gray-600" : "border-gray-300"
               }`}
               title="Zoom Out"
             >
@@ -303,14 +327,22 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                 theme === "dark" ? "text-gray-300" : "text-gray-700"
               }`}
             >
-              {Math.round(zoom * 100)}%
+              {Math.round(zoom * 100)}% ({zoom.toFixed(2)})
             </span>
             <button
-              onClick={() => setZoom(Math.min(3, zoom + 0.1))}
-              className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 ${
-                theme === "dark"
-                  ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
-                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              onClick={() => {
+                console.log("Zoom in clicked, current zoom:", zoom);
+                const newZoom = Math.min(3, zoom + 0.1);
+                console.log("Setting zoom to:", newZoom);
+                setZoom(newZoom);
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Mouse down on zoom in");
+              }}
+              className={`w-8 h-8 flex items-center justify-center text-sm rounded border transition-colors duration-200 bg-green-500 text-white hover:bg-green-600 ${
+                theme === "dark" ? "border-gray-600" : "border-gray-300"
               }`}
               title="Zoom In"
             >
@@ -318,13 +350,18 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             </button>
             <button
               onClick={() => {
+                console.log("Reset clicked, current zoom:", zoom);
+                console.log("Setting zoom to 1 only");
                 setZoom(1);
-                setPan({ x: 0, y: 0 });
+                // Don't reset pan - just reset zoom to avoid centering issues
               }}
-              className={`px-2 py-1 text-xs rounded border transition-colors duration-200 ${
-                theme === "dark"
-                  ? "border-gray-600 text-gray-300 bg-gray-700/50 hover:bg-gray-600/50"
-                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Mouse down on reset");
+              }}
+              className={`px-2 py-1 text-xs rounded border transition-colors duration-200 bg-blue-500 text-white hover:bg-blue-600 ${
+                theme === "dark" ? "border-gray-600" : "border-gray-300"
               }`}
               title="Reset View (Ctrl+0)"
             >
