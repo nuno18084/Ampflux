@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
@@ -50,6 +50,59 @@ export const CircuitEditorPage: React.FC = () => {
   // Zoom and Pan state
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const panRef = useRef(pan);
+  const intendedPanRef = useRef({ x: 0, y: 0 }); // Track intended pan position
+  panRef.current = pan; // Keep ref in sync with state
+
+  // Debug pan changes
+  useEffect(() => {
+    console.log("Pan changed to:", pan);
+  }, [pan]);
+
+  // Create a stable setPan function that preserves state during re-renders
+  const stableSetPan = useCallback((newPan: { x: number; y: number }) => {
+    console.log("Setting pan to:", newPan, "current pan:", panRef.current);
+    intendedPanRef.current = newPan; // Track intended position
+    setPan(newPan);
+  }, []);
+
+  // Preserve pan state when properties panel changes
+  useEffect(() => {
+    console.log(
+      "Properties panel collapsed changed to:",
+      isPropertiesPanelCollapsed
+    );
+    // Ensure pan is preserved when properties panel changes
+    if (intendedPanRef.current.x !== 0 || intendedPanRef.current.y !== 0) {
+      console.log(
+        "Preserving pan position during properties panel change:",
+        intendedPanRef.current
+      );
+      // Use setTimeout to ensure this runs after the layout change
+      setTimeout(() => {
+        if (pan.x === 0 && pan.y === 0) {
+          stableSetPan(intendedPanRef.current);
+        }
+      }, 100);
+    }
+  }, [isPropertiesPanelCollapsed, pan, stableSetPan]);
+
+  // Prevent pan from being reset during re-renders
+  useEffect(() => {
+    // If pan is being reset to (0,0) and we have an intended pan value, restore it
+    if (
+      pan.x === 0 &&
+      pan.y === 0 &&
+      intendedPanRef.current.x !== 0 &&
+      intendedPanRef.current.y !== 0
+    ) {
+      console.log(
+        "Preventing pan reset, restoring to intended position:",
+        intendedPanRef.current
+      );
+      stableSetPan(intendedPanRef.current);
+    }
+  }, [pan, stableSetPan]);
 
   // Queries
   const { data: project, isLoading: projectLoading } = useQuery({
@@ -96,6 +149,15 @@ export const CircuitEditorPage: React.FC = () => {
         if (circuitData.connections && circuitData.connections.length > 0) {
           setConnections(circuitData.connections);
         }
+        // Restore view state if available
+        if (circuitData.viewState) {
+          if (circuitData.viewState.zoom) {
+            setZoom(circuitData.viewState.zoom);
+          }
+          if (circuitData.viewState.pan) {
+            stableSetPan(circuitData.viewState.pan);
+          }
+        }
         return; // Don't load from saved versions if we have session data
       } catch (error) {
         console.error("Error parsing session data:", error);
@@ -116,6 +178,15 @@ export const CircuitEditorPage: React.FC = () => {
         }
         if (circuitData.connections && circuitData.connections.length > 0) {
           setConnections(circuitData.connections);
+        }
+        // Restore view state if available
+        if (circuitData.viewState) {
+          if (circuitData.viewState.zoom) {
+            setZoom(circuitData.viewState.zoom);
+          }
+          if (circuitData.viewState.pan) {
+            stableSetPan(circuitData.viewState.pan);
+          }
         }
       } catch (error) {
         console.error("Error parsing saved circuit data:", error);
@@ -327,7 +398,7 @@ export const CircuitEditorPage: React.FC = () => {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isPanning && panStart) {
-      setPan({
+      stableSetPan({
         x: e.clientX - panStart.x,
         y: e.clientY - panStart.y,
       });
@@ -343,7 +414,7 @@ export const CircuitEditorPage: React.FC = () => {
     if (e.key === "0" && e.ctrlKey) {
       e.preventDefault();
       setZoom(1);
-      setPan({ x: 0, y: 0 });
+      stableSetPan({ x: 0, y: 0 });
     }
   };
 
@@ -357,7 +428,7 @@ export const CircuitEditorPage: React.FC = () => {
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (isPanning && panStart) {
-        setPan({
+        stableSetPan({
           x: e.clientX - panStart.x,
           y: e.clientY - panStart.y,
         });
@@ -433,6 +504,10 @@ export const CircuitEditorPage: React.FC = () => {
     const circuitData = {
       components: placedComponents,
       connections: connections,
+      viewState: {
+        zoom: zoom,
+        pan: pan,
+      },
     };
     // Store in session storage for persistence during the session
     sessionStorage.setItem(`circuit_${projectId}`, JSON.stringify(circuitData));
@@ -457,6 +532,10 @@ export const CircuitEditorPage: React.FC = () => {
     const circuitData = {
       components: placedComponents,
       connections: connections,
+      viewState: {
+        zoom: zoom,
+        pan: pan,
+      },
     };
 
     // Save the current state as a version
@@ -539,7 +618,7 @@ export const CircuitEditorPage: React.FC = () => {
           handleMouseMove={handleMouseMove}
           handleMouseUp={handleMouseUp}
           setZoom={setZoom}
-          setPan={setPan}
+          setPan={stableSetPan}
           circuitComponents={circuitComponents}
         />
       </div>
