@@ -13,6 +13,7 @@ import {
   ChartBarIcon,
   CogIcon,
   BuildingOfficeIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline";
 
 export const DashboardPage: React.FC = () => {
@@ -20,6 +21,11 @@ export const DashboardPage: React.FC = () => {
   const { theme } = useTheme();
   const { isPageLoading } = usePageLoading();
   const { allProjects, recentProjects, isLoading } = useDashboard();
+
+  // Helper function to check if user is owner of a project
+  const isProjectOwner = (project: any) => {
+    return user && project && project.owner_id && user.id === project.owner_id;
+  };
 
   // Show loading animation while page is loading
   if (isPageLoading) {
@@ -299,6 +305,18 @@ export const DashboardPage: React.FC = () => {
                               >
                                 {project.name}
                               </h3>
+                              {isProjectOwner(project) && (
+                                <span
+                                  className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
+                                    theme === "dark"
+                                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                                      : "bg-purple-100 text-purple-700 border border-purple-200"
+                                  }`}
+                                >
+                                  <StarIcon className="h-2.5 w-2.5" />
+                                  Owner
+                                </span>
+                              )}
                               {project.isShared && (
                                 <span
                                   className={`text-xs px-2 py-1 rounded-full ${

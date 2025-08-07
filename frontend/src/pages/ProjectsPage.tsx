@@ -13,6 +13,7 @@ import {
   PencilIcon,
   TrashIcon,
   ShareIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline";
 import { ShareProjectModal } from "../components/ShareProjectModal";
 
@@ -34,6 +35,11 @@ export const ProjectsPage: React.FC = () => {
     refetch,
     refetchSharedProjects,
   } = useProjects();
+
+  // Helper function to check if user is owner of a project
+  const isProjectOwner = (project: any) => {
+    return user && project && project.owner_id && user.id === project.owner_id;
+  };
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,13 +202,27 @@ export const ProjectsPage: React.FC = () => {
                       <FolderIcon className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3
-                        className={`text-lg font-medium ${
-                          theme === "dark" ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {project.name}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className={`text-lg font-medium ${
+                            theme === "dark" ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          {project.name}
+                        </h3>
+                        {isProjectOwner(project) && (
+                          <span
+                            className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
+                              theme === "dark"
+                                ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                                : "bg-purple-100 text-purple-700 border border-purple-200"
+                            }`}
+                          >
+                            <StarIcon className="h-2.5 w-2.5" />
+                            Owner
+                          </span>
+                        )}
+                      </div>
                       <p
                         className={`text-sm ${
                           theme === "dark" ? "text-gray-400" : "text-gray-600"
@@ -341,13 +361,27 @@ export const ProjectsPage: React.FC = () => {
                         <FolderIcon className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <h3
-                          className={`text-lg font-medium ${
-                            theme === "dark" ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {share.project?.name || "Unknown Project"}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3
+                            className={`text-lg font-medium ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {share.project?.name || "Unknown Project"}
+                          </h3>
+                          {isProjectOwner(share.project) && (
+                            <span
+                              className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
+                                theme === "dark"
+                                  ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                                  : "bg-purple-100 text-purple-700 border border-purple-200"
+                              }`}
+                            >
+                              <StarIcon className="h-2.5 w-2.5" />
+                              Owner
+                            </span>
+                          )}
+                        </div>
                         <p
                           className={`text-sm ${
                             theme === "dark" ? "text-gray-400" : "text-gray-600"
@@ -372,26 +406,43 @@ export const ProjectsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-4 flex space-x-2">
-                    <button
-                      onClick={() =>
-                        handleNavigate(`/projects/${share.project_id}`)
-                      }
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
-                        theme === "dark"
-                          ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-blue-500/30"
-                          : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-blue-300"
-                      }`}
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleNavigate(`/projects/${share.project_id}/editor`)
-                      }
-                      className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 flex-1 text-center"
-                    >
-                      {share.role === "viewer" ? "View" : "Edit"}
-                    </button>
+                    {share.role === "viewer" ? (
+                      // Read-only: Show only one "View" button
+                      <button
+                        onClick={() =>
+                          handleNavigate(`/projects/${share.project_id}`)
+                        }
+                        className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 w-full text-center"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      // Read & Write: Show both "View" and "Edit" buttons
+                      <>
+                        <button
+                          onClick={() =>
+                            handleNavigate(`/projects/${share.project_id}`)
+                          }
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
+                            theme === "dark"
+                              ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-blue-500/30"
+                              : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-blue-300"
+                          }`}
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleNavigate(
+                              `/projects/${share.project_id}/editor`
+                            )
+                          }
+                          className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 flex-1 text-center"
+                        >
+                          Edit
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

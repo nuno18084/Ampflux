@@ -145,6 +145,7 @@ def list_projects(db: Session = Depends(get_db), current_user: models.User = Dep
         {
             "id": p.id, 
             "name": p.name, 
+            "owner_id": p.owner_id,
             "created_at": p.created_at.isoformat() if p.created_at else None, 
             "updated_at": p.updated_at.isoformat() if p.updated_at else None
         } 
@@ -156,7 +157,13 @@ def get_project(project_id: int, db: Session = Depends(get_db), current_user: mo
     project = check_project_access(project_id, current_user, db)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    return {"id": project.id, "name": project.name, "created_at": project.created_at.isoformat() if project.created_at else None, "updated_at": project.updated_at.isoformat() if project.updated_at else None}
+    return {
+        "id": project.id, 
+        "name": project.name, 
+        "owner_id": project.owner_id,
+        "created_at": project.created_at.isoformat() if project.created_at else None, 
+        "updated_at": project.updated_at.isoformat() if project.updated_at else None
+    }
 
 @router.delete("/{project_id}")
 def delete_project(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
@@ -424,6 +431,7 @@ def get_shared_projects(db: Session = Depends(get_db), current_user: models.User
             "project": {
                 "id": project.id,
                 "name": project.name,
+                "owner_id": project.owner_id,
                 "created_at": project.created_at,
                 "updated_at": project.updated_at
             } if project else None,
