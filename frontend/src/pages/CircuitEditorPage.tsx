@@ -8,6 +8,25 @@ import { CircuitCanvas } from "../components/CircuitCanvas";
 import { CircuitPropertiesPanel } from "../components/CircuitPropertiesPanel";
 import { circuitComponents } from "../data/circuitComponents";
 import { useCircuitEditor } from "../hooks/useCircuitEditor";
+import {
+  createHandleDragStart,
+  createHandleDrop,
+  createHandleDragOver,
+  createHandleComponentMouseDown,
+  createHandleCanvasMouseMove,
+  createHandleCanvasMouseUp,
+  createHandleWheel,
+  createHandleMouseDown,
+  createHandleMouseMove,
+  createHandleMouseUp,
+  createHandleKeyDown,
+  createHandleComponentClick,
+  createHandleConnectionDotClick,
+  createHandleComponentDelete,
+  createHandlePropertyChange,
+  createHandleSave,
+  createHandleSimulate,
+} from "../utils/circuitEditorUtils";
 
 export const CircuitEditorPage: React.FC = () => {
   const navigate = useNavigate();
@@ -102,264 +121,89 @@ export const CircuitEditorPage: React.FC = () => {
   }
 
   // Event handlers
-  const handleDragStart = (e: React.DragEvent, component: any) => {
-    e.dataTransfer.setData("application/json", JSON.stringify(component));
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-
-    if (!permissions.canEdit) {
-      alert("You don't have permission to add components to this project.");
-      return;
-    }
-
-    try {
-      const componentData = JSON.parse(
-        e.dataTransfer.getData("application/json")
-      );
-
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left - 60; // Center the component
-      const y = e.clientY - rect.top - 60;
-
-      const newComponent = {
-        id: `${componentData.id}_${Date.now()}`,
-        componentId: componentData.id,
-        type: componentData.id, // Use componentData.id as type
-        name: componentData.name,
-        x,
-        y,
-        properties: componentData.properties,
-      };
-
-      setPlacedComponents((prev) => [...prev, newComponent]);
-    } catch (error) {
-      console.error("Error in handleDrop:", error);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleComponentMouseDown = (
-    e: React.MouseEvent,
-    componentId: string
-  ) => {
-    e.stopPropagation();
-
-    if (!permissions.canEdit) {
-      return; // Don't allow dragging for viewers
-    }
-
-    const component = placedComponents.find((c) => c.id === componentId);
-    if (component) {
-      // Add a small delay to distinguish between click and drag
-      const dragTimeout = setTimeout(() => {
-        setDraggedComponent(componentId);
-        setIsDragging(true);
-        // Store current positions
-        currentPositionsRef.current = [...placedComponents];
-      }, 150); // 150ms delay
-
-      // Clear timeout on mouse up
-      const handleMouseUp = () => {
-        clearTimeout(dragTimeout);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-  };
-
-  const handleCanvasMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && draggedComponent) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left - 60;
-      const y = e.clientY - rect.top - 60;
-
-      setPlacedComponents((prev) =>
-        prev.map((component) =>
-          component.id === draggedComponent ? { ...component, x, y } : component
-        )
-      );
-    }
-
-    // Update mouse position for potential connections
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
-
-  const handleCanvasMouseUp = () => {
-    setIsDragging(false);
-    setDraggedComponent(null);
-  };
-
-  // Zoom and Pan handlers
-  const handleWheel = (e: React.WheelEvent) => {
-    // Only process if mouse is actually over the canvas
-    if (!e.currentTarget.contains(e.target as Node)) {
-      return;
-    }
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.1, Math.min(3, zoom * delta));
-    setZoom(newZoom);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && !e.ctrlKey) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning && panStart) {
-      stableSetPan({
-        x: e.clientX - panStart.x,
-        y: e.clientY - panStart.y,
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsPanning(false);
-    setPanStart(null);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "0" && e.ctrlKey) {
-      e.preventDefault();
-      setZoom(1);
-      stableSetPan({ x: 0, y: 0 });
-    }
-  };
-
-  const handleComponentClick = (component: any) => {
-    setSelectedComponent(component);
-  };
-
-  const handleConnectionDotClick = (componentId: string) => {
-    if (!permissions.canEdit) {
-      return; // Don't allow connections for viewers
-    }
-
-    if (!connectingFrom) {
-      setConnectingFrom(componentId);
-    } else {
-      // Create connection
-      if (connectingFrom !== componentId) {
-        const newConnection = {
-          id: `connection_${Date.now()}`,
-          from: connectingFrom,
-          to: componentId,
-        };
-        setConnections((prev) => [...prev, newConnection]);
-      }
-      setConnectingFrom(null);
-    }
-  };
-
-  const handleComponentDelete = (componentId: string) => {
-    if (!permissions.canEdit) {
-      alert(
-        "You don't have permission to delete components from this project."
-      );
-      return;
-    }
-
-    setPlacedComponents((prev) =>
-      prev.filter((component) => component.id !== componentId)
-    );
-    setConnections((prev) =>
-      prev.filter(
-        (connection) =>
-          connection.from !== componentId && connection.to !== componentId
-      )
-    );
-    if (selectedComponent?.id === componentId) {
-      setSelectedComponent(null);
-    }
-  };
-
-  const handlePropertyChange = (
-    componentId: string,
-    property: string,
-    value: number | boolean | string
-  ) => {
-    if (!permissions.canEdit) {
-      alert("You don't have permission to modify components in this project.");
-      return;
-    }
-
-    setPlacedComponents((prev) =>
-      prev.map((component) =>
-        component.id === componentId
-          ? {
-              ...component,
-              properties: {
-                ...component.properties,
-                [property]: value,
-              },
-            }
-          : component
-      )
-    );
-  };
-
-  const handleSave = () => {
-    if (!permissions.canEdit) {
-      alert("You don't have permission to save this project.");
-      return;
-    }
-
-    setIsSaving(true);
-    const circuitData = {
-      components: placedComponents,
-      connections,
-      viewState: {
-        zoom,
-        pan,
-      },
-    };
-
-    saveMutation.mutate(JSON.stringify(circuitData), {
-      onSuccess: () => {
-        setIsSaving(false);
-      },
-      onError: () => {
-        setIsSaving(false);
-      },
-    });
-  };
-
-  const handleSimulate = () => {
-    if (!permissions.canEdit) {
-      alert("You don't have permission to simulate this project.");
-      return;
-    }
-
-    setIsSimulating(true);
-    const circuitData = {
-      components: placedComponents,
-      connections,
-    };
-
-    simulateMutation.mutate(JSON.stringify(circuitData), {
-      onSuccess: () => {
-        setIsSimulating(false);
-      },
-      onError: () => {
-        setIsSimulating(false);
-      },
-    });
-  };
+  const handleDragStart = createHandleDragStart();
+  const handleDrop = createHandleDrop(
+    placedComponents,
+    setPlacedComponents,
+    zoom,
+    pan,
+    permissions
+  );
+  const handleDragOver = createHandleDragOver();
+  const handleComponentMouseDown = createHandleComponentMouseDown(
+    placedComponents,
+    setDraggedComponent,
+    setIsDragging,
+    currentPositionsRef,
+    permissions
+  );
+  const handleCanvasMouseMove = createHandleCanvasMouseMove(
+    draggedComponent,
+    placedComponents,
+    setPlacedComponents,
+    currentPositionsRef,
+    zoom,
+    pan,
+    isDragging,
+    setMousePosition
+  );
+  const handleCanvasMouseUp = createHandleCanvasMouseUp(
+    setDraggedComponent,
+    setIsDragging
+  );
+  const handleWheel = createHandleWheel(zoom, setZoom);
+  const handleMouseDown = createHandleMouseDown(setIsPanning, setPanStart);
+  const handleMouseMove = createHandleMouseMove(
+    isPanning,
+    panStart,
+    pan,
+    setPan
+  );
+  const handleMouseUp = createHandleMouseUp(setIsPanning, setPanStart);
+  const handleKeyDown = createHandleKeyDown(
+    selectedComponent,
+    placedComponents,
+    setPlacedComponents,
+    setSelectedComponent
+  );
+  const handleComponentClick = createHandleComponentClick(setSelectedComponent);
+  const handleConnectionDotClick = createHandleConnectionDotClick(
+    connectingFrom,
+    setConnectingFrom,
+    connections,
+    setConnections,
+    permissions
+  );
+  const handleComponentDelete = createHandleComponentDelete(
+    placedComponents,
+    setPlacedComponents,
+    connections,
+    setConnections,
+    setSelectedComponent,
+    permissions,
+    selectedComponent
+  );
+  const handlePropertyChange = createHandlePropertyChange(
+    placedComponents,
+    setPlacedComponents,
+    permissions
+  );
+  const handleSave = createHandleSave(
+    permissions,
+    setIsSaving,
+    saveMutation,
+    placedComponents,
+    connections,
+    zoom,
+    pan
+  );
+  const handleSimulate = createHandleSimulate(
+    permissions,
+    setIsSimulating,
+    simulateMutation,
+    placedComponents,
+    connections
+  );
 
   const handleBack = () => {
     navigate(`/projects/${project.id}`);
