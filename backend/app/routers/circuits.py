@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
 from app.utils.security import get_current_user
-from typing import List, Any
+from typing import List
 from datetime import datetime
 import numpy as np
 from app.tasks.simulation import run_short_circuit_simulation
@@ -72,7 +72,7 @@ def check_project_access(project_id: int, current_user: models.User, db: Session
     
     return None
 
-def check_project_permissions(project_id: int, current_user: models.User, db: Session, required_role: str = "viewer") -> dict:
+def check_project_permissions(project_id: int, current_user: models.User, db: Session) -> dict:
     """Check project access and return user's role"""
     # Check if user is project owner or in same company
     project = db.query(models.Project).filter(
@@ -142,9 +142,7 @@ def get_db():
     finally:
         db.close()
 
-@router.get("/test")
-def test_circuits():
-    return {"message": "Circuits router is working"}
+
 
 @router.post("/{project_id}/save_version", response_model=dict)
 def save_circuit_version(project_id: int, request: CircuitVersionRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
-import { LoadingSpinner } from "../components/LoadingSpinner";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useAuth } from "../hooks/useAuth";
@@ -19,7 +18,6 @@ import {
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
-  const queryClient = useQueryClient();
   const [isPageLoading, setIsPageLoading] = useState(true);
   const queryKey = user ? ["projects", user.id] : ["projects"];
 

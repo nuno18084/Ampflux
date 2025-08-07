@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app import models, schemas
 from app.database import SessionLocal
 from app.utils.security import hash_password, verify_password, create_access_token
 from datetime import timedelta
-from typing import List
 import uuid
 
 router = APIRouter()

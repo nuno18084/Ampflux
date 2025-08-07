@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "../lib/api";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useTheme } from "../contexts/ThemeProvider";
@@ -16,7 +16,6 @@ export const CircuitEditorPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const currentPositionsRef = useRef<PlacedComponent[]>([]); // Track current positions during drag
   const { theme } = useTheme();
 
@@ -44,9 +43,7 @@ export const CircuitEditorPage: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<any>(null);
-  const [showInstructions, setShowInstructions] = useState(true);
   const [showGettingStarted, setShowGettingStarted] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isPropertiesPanelCollapsed, setIsPropertiesPanelCollapsed] =
     useState(false);

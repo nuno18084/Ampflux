@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models, schemas
-from app.utils.security import get_current_user, require_company_admin
+from app.utils.security import get_current_user
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
@@ -54,7 +54,7 @@ def check_project_access(project_id: int, current_user: models.User, db: Session
     
     return None
 
-def check_project_permissions(project_id: int, current_user: models.User, db: Session, required_role: str = "viewer") -> dict:
+def check_project_permissions(project_id: int, current_user: models.User, db: Session) -> dict:
     """Check project access and return user's role"""
     # Check if user is project owner or in same company
     project = db.query(models.Project).filter(

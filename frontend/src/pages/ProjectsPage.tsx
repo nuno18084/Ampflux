@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { apiClient } from "../lib/api";
@@ -25,7 +25,6 @@ export const ProjectsPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const { user } = useAuth();
   const { theme } = useTheme();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const queryKey = user ? ["projects", user.id] : ["projects"];
 
