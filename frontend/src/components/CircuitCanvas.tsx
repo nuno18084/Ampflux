@@ -59,22 +59,24 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   circuitComponents,
 }) => {
   return (
-    <div className="flex-1 p-6 relative">
+    <div className="flex-1 p-6 relative h-full">
       <div
         className={`w-full h-full border-2 border-dashed rounded-lg relative overflow-hidden transition-colors duration-200 ${
           theme === "dark"
             ? "bg-gray-800/50 backdrop-blur-sm border-gray-600/50"
             : "bg-white border-gray-300"
         }`}
+        style={{
+          cursor: draggedComponent ? "grabbing" : "default",
+          height: "100%",
+          width: "100%",
+        }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
-        style={{
-          cursor: draggedComponent ? "grabbing" : "default",
-        }}
         onDragEnter={(e) => {
           e.preventDefault();
         }}
@@ -87,14 +89,8 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             minHeight: "100vh",
             minWidth: "100vw",
           }}
-          onMouseMove={(e) => {
-            handleCanvasMouseMove(e);
-            handleMouseMove(e);
-          }}
-          onMouseUp={(e) => {
-            handleCanvasMouseUp();
-            handleMouseUp();
-          }}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
         >
@@ -146,9 +142,22 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                 <div>
                   <div className="flex justify-center mb-1">
                     {(() => {
-                      const componentDef = circuitComponents.find(
+                      // Try to find component by type first, then by componentId
+                      let componentDef = circuitComponents.find(
                         (c) => c.id === component.type
                       );
+                      if (!componentDef) {
+                        componentDef = circuitComponents.find(
+                          (c) => c.id === component.componentId
+                        );
+                      }
+                      if (!componentDef) {
+                        // Fallback: try to find by any matching field
+                        componentDef = circuitComponents.find(
+                          (c) =>
+                            c.id === component.type || c.type === component.type
+                        );
+                      }
                       if (componentDef) {
                         const IconComponent = componentDef.icon;
                         return (

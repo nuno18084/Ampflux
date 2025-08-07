@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
 import { LoadingAnimation } from "../components/LoadingAnimation";
+import { useLoginForm } from "../hooks/useLoginForm";
+import { usePageLoading } from "../hooks/usePageLoading";
 import {
   EnvelopeIcon,
   LockClosedIcon,
@@ -11,37 +13,33 @@ import {
 } from "@heroicons/react/24/outline";
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { isPageLoading } = usePageLoading();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    setShowPassword,
+    isLoading,
+    error,
+    setLoading,
+    setFormError,
+    resetForm,
+  } = useLoginForm();
   const { login } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  // Simulate page loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 1000); // Show loading for 1 second
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    setLoading(true);
 
     try {
       await login(email, password);
       navigate("/");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Login failed");
-    } finally {
-      setIsLoading(false);
+      setFormError(err.response?.data?.detail || "Login failed");
     }
   };
 

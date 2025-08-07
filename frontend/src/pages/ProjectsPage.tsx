@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { apiClient } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
+import { useProjects } from "../hooks/useProjects";
+import { usePageLoading } from "../hooks/usePageLoading";
 import {
   PlusIcon,
   FolderIcon,
@@ -19,69 +20,20 @@ export const ProjectsPage: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const { user } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
-  const queryKey = user ? ["projects", user.id] : ["projects"];
-
-  // Simulate page loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 1000); // Show loading for 1 second
-
-    return () => clearTimeout(timer);
-  }, []);
-
+  const { isPageLoading } = usePageLoading();
   const {
-    data: projects,
+    projects,
+    sharedProjects,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey,
-    queryFn: () => apiClient.getProjects(),
-    enabled: !!user,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  // Fetch shared projects
-  const {
-    data: sharedProjects,
-    isLoading: sharedProjectsLoading,
-    refetch: refetchSharedProjects,
-  } = useQuery({
-    queryKey: ["shared-projects"],
-    queryFn: () => apiClient.getSharedProjects(),
-    enabled: !!user,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  // Refetch data when component mounts
-  useEffect(() => {
-    if (user) {
-      refetch();
-      refetchSharedProjects();
-    }
-  }, [user, refetch, refetchSharedProjects]);
-
-  // Refetch data when window gains focus (user returns to tab)
-  useEffect(() => {
-    const handleFocus = () => {
-      if (user) {
-        refetch();
-        refetchSharedProjects();
-      }
-    };
-
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [user, refetch, refetchSharedProjects]);
+    refetchSharedProjects,
+  } = useProjects();
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();

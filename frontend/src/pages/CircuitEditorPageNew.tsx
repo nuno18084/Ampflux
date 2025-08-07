@@ -126,7 +126,7 @@ export const CircuitEditorPage: React.FC = () => {
       const newComponent = {
         id: `${componentData.id}_${Date.now()}`,
         componentId: componentData.id,
-        type: componentData.id, // Use componentData.id as type
+        type: componentData.type,
         name: componentData.name,
         x,
         y,
@@ -388,47 +388,49 @@ export const CircuitEditorPage: React.FC = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <CircuitSidebar
-          isSidebarCollapsed={isSidebarCollapsed}
-          setIsSidebarCollapsed={setIsSidebarCollapsed}
-          showGettingStarted={showGettingStarted}
-          setShowGettingStarted={setShowGettingStarted}
           circuitComponents={circuitComponents}
-          handleDragStart={handleDragStart}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onDragStart={handleDragStart}
         />
 
         <div className="flex-1 relative overflow-hidden">
           <CircuitCanvas
+            ref={canvasRef}
             placedComponents={placedComponents}
             connections={connections}
+            zoom={zoom}
+            pan={pan}
+            selectedComponent={selectedComponent}
+            draggedComponent={draggedComponent}
             connectingFrom={connectingFrom}
             mousePosition={mousePosition}
-            zoom={zoom}
-            theme={theme}
-            draggedComponent={draggedComponent}
-            pan={pan}
-            handleComponentMouseDown={handleComponentMouseDown}
-            handleCanvasMouseMove={handleCanvasMouseMove}
-            handleCanvasMouseUp={handleCanvasMouseUp}
-            handleComponentClick={handleComponentClick}
-            handleComponentDelete={handleComponentDelete}
-            handleConnectionDotClick={handleConnectionDotClick}
-            handleDrop={handleDrop}
-            handleDragOver={handleDragOver}
-            handleWheel={handleWheel}
-            handleMouseDown={handleMouseDown}
-            handleMouseMove={handleMouseMove}
-            handleMouseUp={handleMouseUp}
-            setZoom={setZoom}
-            setPan={stableSetPan}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onComponentMouseDown={handleComponentMouseDown}
+            onCanvasMouseMove={handleCanvasMouseMove}
+            onCanvasMouseUp={handleCanvasMouseUp}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onComponentClick={handleComponentClick}
+            onConnectionDotClick={handleConnectionDotClick}
+            onComponentDelete={handleComponentDelete}
+            onPropertyChange={handlePropertyChange}
             circuitComponents={circuitComponents}
           />
         </div>
 
         <CircuitPropertiesPanel
           selectedComponent={selectedComponent}
-          handlePropertyChange={handlePropertyChange}
-          isPropertiesPanelCollapsed={isPropertiesPanelCollapsed}
-          setIsPropertiesPanelCollapsed={setIsPropertiesPanelCollapsed}
+          onPropertyChange={handlePropertyChange}
+          isCollapsed={isPropertiesPanelCollapsed}
+          onToggleCollapse={() =>
+            setIsPropertiesPanelCollapsed(!isPropertiesPanelCollapsed)
+          }
+          showGettingStarted={showGettingStarted}
+          setShowGettingStarted={setShowGettingStarted}
         />
       </div>
     </div>

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "../lib/api";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
+import { useDashboard } from "../hooks/useDashboard";
+import { usePageLoading } from "../hooks/usePageLoading";
 import {
   PlusIcon,
   FolderIcon,
@@ -18,78 +18,8 @@ import {
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const queryKey = user ? ["projects", user.id] : ["projects"];
-
-  // Simulate page loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 1000); // Show loading for 1 second
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const {
-    data: projects,
-    isLoading,
-    refetch: refetchProjects,
-  } = useQuery({
-    queryKey,
-    queryFn: () => apiClient.getProjects(),
-    enabled: !!user,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  const {
-    data: sharedProjects,
-    isLoading: sharedLoading,
-    refetch: refetchSharedProjects,
-  } = useQuery({
-    queryKey: ["shared-projects", user?.id],
-    queryFn: () => apiClient.getSharedProjects(),
-    enabled: !!user,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  // Refetch data when component mounts
-  useEffect(() => {
-    if (user) {
-      refetchProjects();
-      refetchSharedProjects();
-    }
-  }, [user, refetchProjects, refetchSharedProjects]);
-
-  // Refetch data when window gains focus (user returns to tab)
-  useEffect(() => {
-    const handleFocus = () => {
-      if (user) {
-        refetchProjects();
-        refetchSharedProjects();
-      }
-    };
-
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [user, refetchProjects, refetchSharedProjects]);
-
-  // Combine owned and shared projects, sort by updated_at
-  const allProjects = [
-    ...(projects || []),
-    ...(sharedProjects || []).map((share) => ({
-      ...share.project,
-      isShared: true,
-      sharedBy: share.shared_by_user,
-      role: share.role,
-    })),
-  ].sort(
-    (a, b) =>
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  );
-
-  const recentProjects = allProjects.slice(0, 3) || [];
+  const { isPageLoading } = usePageLoading();
+  const { allProjects, recentProjects, isLoading } = useDashboard();
 
   // Disable scrolling when component mounts
   useEffect(() => {
@@ -189,7 +119,7 @@ export const DashboardPage: React.FC = () => {
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
               }`}
             >
-              {isLoading || sharedLoading ? (
+              {isLoading ? (
                 <LoadingSkeleton type="stat" />
               ) : (
                 <div className="flex items-center">
@@ -341,7 +271,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
               <div className="p-6">
-                {isLoading || sharedLoading ? (
+                {isLoading ? (
                   <div className="space-y-3">
                     <LoadingSkeleton type="card" />
                     <LoadingSkeleton type="card" />

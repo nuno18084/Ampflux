@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { apiClient } from "../lib/api";
 import { useQuery } from "@tanstack/react-query";
+import { useRegisterForm } from "../hooks/useRegisterForm";
+import { usePageLoading } from "../hooks/usePageLoading";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -16,42 +18,40 @@ import {
 } from "@heroicons/react/24/outline";
 
 export const RegisterPage: React.FC = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isCompany, setIsCompany] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { isPageLoading } = usePageLoading();
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    setShowPassword,
+    isCompany,
+    setIsCompany,
+    companyName,
+    setCompanyName,
+    isLoading,
+    error,
+    setLoading,
+    setFormError,
+    resetForm,
+  } = useRegisterForm();
   const { register } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  // Simulate page loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 1000); // Show loading for 1 second
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    setLoading(true);
 
     try {
       // Create new company or individual account
       await register(name, email, password, isCompany, companyName);
       navigate("/");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Registration failed");
-    } finally {
-      setIsLoading(false);
+      setFormError(err.response?.data?.detail || "Registration failed");
     }
   };
 
