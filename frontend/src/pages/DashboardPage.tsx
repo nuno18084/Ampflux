@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { LoadingAnimation } from "../components/LoadingAnimation";
 import { useAuth } from "../hooks/useAuth";
@@ -14,6 +14,7 @@ import {
   CogIcon,
   BuildingOfficeIcon,
   StarIcon,
+  ShareIcon,
 } from "@heroicons/react/24/outline";
 
 export const DashboardPage: React.FC = () => {
@@ -21,10 +22,28 @@ export const DashboardPage: React.FC = () => {
   const { theme } = useTheme();
   const { isPageLoading } = usePageLoading();
   const { allProjects, recentProjects, isLoading } = useDashboard();
+  const navigate = useNavigate();
 
   // Helper function to check if user is owner of a project
   const isProjectOwner = (project: any) => {
     return user && project && project.owner_id && user.id === project.owner_id;
+  };
+
+  // Separate owned and shared projects
+  const ownedProjects = allProjects.filter((project: any) =>
+    isProjectOwner(project)
+  );
+  const sharedProjects = allProjects.filter(
+    (project: any) => !isProjectOwner(project) && project.isShared
+  );
+
+  // Navigation handlers
+  const handleNavigateToMyProjects = () => {
+    navigate("/projects");
+  };
+
+  const handleNavigateToSharedProjects = () => {
+    navigate("/projects?section=shared");
   };
 
   // Show loading animation while page is loading
@@ -144,11 +163,12 @@ export const DashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div
-              className={`transition-all duration-500 ease-out ${
+            <button
+              onClick={handleNavigateToMyProjects}
+              className={`transition-all duration-500 ease-out w-full text-left ${
                 theme === "dark"
-                  ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
-                  : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
+                  ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-purple-500/10 hover:border-purple-500/20 hover:bg-gray-700/50"
+                  : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-purple-500/20 hover:border-purple-300/50 hover:bg-purple-50/50"
               }`}
             >
               {isLoading ? (
@@ -157,7 +177,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-xl shadow-lg">
-                      <BoltIcon className="h-7 w-7 text-white" />
+                      <FolderIcon className="h-7 w-7 text-white" />
                     </div>
                   </div>
                   <div className="ml-4">
@@ -166,25 +186,26 @@ export const DashboardPage: React.FC = () => {
                         theme === "dark" ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
-                      Active Circuits
+                      My Projects
                     </p>
                     <p
                       className={`text-3xl font-bold ${
                         theme === "dark" ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      0
+                      {ownedProjects.length}
                     </p>
                   </div>
                 </div>
               )}
-            </div>
+            </button>
 
-            <div
-              className={`transition-all duration-500 ease-out ${
+            <button
+              onClick={handleNavigateToSharedProjects}
+              className={`transition-all duration-500 ease-out w-full text-left ${
                 theme === "dark"
-                  ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
-                  : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
+                  ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20 hover:bg-gray-700/50"
+                  : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50 hover:bg-green-50/50"
               }`}
             >
               {isLoading ? (
@@ -192,8 +213,8 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                      <ChartBarIcon className="h-7 w-7 text-white" />
+                    <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-3 rounded-xl shadow-lg">
+                      <ShareIcon className="h-7 w-7 text-white" />
                     </div>
                   </div>
                   <div className="ml-4">
@@ -202,19 +223,19 @@ export const DashboardPage: React.FC = () => {
                         theme === "dark" ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
-                      Simulations
+                      Shared with Me
                     </p>
                     <p
                       className={`text-3xl font-bold ${
                         theme === "dark" ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      0
+                      {sharedProjects.length}
                     </p>
                   </div>
                 </div>
               )}
-            </div>
+            </button>
           </div>
 
           {/* Recent Projects */}
