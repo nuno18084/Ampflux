@@ -127,11 +127,12 @@ export const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Stats */}
           <div className="lg:col-span-1 space-y-4">
-            <div
-              className={`transition-all duration-500 ease-out ${
+            <button
+              onClick={() => navigate("/projects?section=all-projects")}
+              className={`transition-all duration-500 ease-out w-full text-left ${
                 theme === "dark"
-                  ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
-                  : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
+                  ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20 hover:bg-gray-700/50"
+                  : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50 hover:bg-green-50/50"
               }`}
             >
               {isLoading ? (
@@ -161,7 +162,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </button>
 
             <button
               onClick={handleNavigateToMyProjects}
@@ -340,7 +341,7 @@ export const DashboardPage: React.FC = () => {
                               )}
                               {project.isShared && (
                                 <span
-                                  className={`text-xs px-2 py-1 rounded-full ${
+                                  className={`text-xs px-1.5 py-0.5 rounded-full ${
                                     theme === "dark"
                                       ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
                                       : "bg-blue-100 text-blue-700 border border-blue-200"
