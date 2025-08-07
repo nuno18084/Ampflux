@@ -263,29 +263,28 @@ export const DashboardPage: React.FC = () => {
                   >
                     Recent Projects
                   </h2>
-                  {allProjects && allProjects.length > 3 && (
-                    <div className="flex items-center space-x-3">
-                      <span
-                        className={`text-sm px-3 py-1 rounded-full shadow-sm border ${
-                          theme === "dark"
-                            ? "text-gray-300 bg-gray-700/50 border-gray-600"
-                            : "text-gray-600 bg-white border-green-200"
-                        }`}
-                      >
-                        Showing 3 of {allProjects.length}
-                      </span>
-                      <Link
-                        to="/projects"
-                        className={`text-sm font-medium hover:underline ${
-                          theme === "dark"
-                            ? "text-green-400 hover:text-green-300"
-                            : "text-green-600 hover:text-green-700"
-                        }`}
-                      >
-                        View All
-                      </Link>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-3">
+                    <span
+                      className={`text-sm px-3 py-1 rounded-full shadow-sm border ${
+                        theme === "dark"
+                          ? "text-gray-300 bg-gray-700/50 border-gray-600"
+                          : "text-gray-600 bg-white border-green-200"
+                      }`}
+                    >
+                      Showing {Math.min(3, allProjects?.length || 0)} of{" "}
+                      {allProjects?.length || 0}
+                    </span>
+                    <Link
+                      to="/projects"
+                      className={`text-sm font-medium hover:underline ${
+                        theme === "dark"
+                          ? "text-green-400 hover:text-green-300"
+                          : "text-green-600 hover:text-green-700"
+                      }`}
+                    >
+                      View All
+                    </Link>
+                  </div>
                 </div>
               </div>
               <div className="p-6">
