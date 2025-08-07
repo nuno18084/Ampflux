@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { LoadingAnimation } from "../components/LoadingAnimation";
@@ -21,16 +21,6 @@ export const DashboardPage: React.FC = () => {
   const { isPageLoading } = usePageLoading();
   const { allProjects, recentProjects, isLoading } = useDashboard();
 
-  // Disable scrolling when component mounts
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-
-    // Re-enable scrolling when component unmounts
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
-
   // Show loading animation while page is loading
   if (isPageLoading) {
     return (
@@ -48,7 +38,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-200 z-[-1] overflow-hidden ${
+      className={`min-h-screen transition-colors duration-200 ${
         theme === "dark"
           ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
           : "bg-gradient-to-br from-green-50 via-white to-emerald-50"

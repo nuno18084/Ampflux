@@ -77,10 +77,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     >
       {/* Navigation */}
       <nav
-        className={`transition-all duration-500 ease-out z-[9999] ${
+        className={`fixed top-0 left-0 right-0 transition-all duration-500 ease-out z-[9999] ${
           theme === "dark"
-            ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl border-b border-gray-700/50"
-            : "bg-white/90 backdrop-blur-sm shadow-xl border-b border-green-200/50"
+            ? "bg-gray-800/80 backdrop-blur-md shadow-2xl border-b border-gray-700/50"
+            : "bg-white/95 backdrop-blur-md shadow-xl border-b border-green-200/50"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -276,7 +276,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </nav>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">{children}</main>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 pt-24">
+        {children}
+      </main>
     </div>
   );
 };
