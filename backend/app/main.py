@@ -1,27 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, users, projects, circuits, ai
+import os
 
 app = FastAPI()
 
-# Add CORS middleware
+# Add CORS middleware with restricted origins
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173", 
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174", 
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001", 
-        "http://127.0.0.1:3001"
-    ],  # Frontend URLs
+    allow_origins=allowed_origins,  # Restrict to specific domains
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Restrict methods
+    allow_headers=["Authorization", "Content-Type"],  # Restrict headers
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])

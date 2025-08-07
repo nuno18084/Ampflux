@@ -6,6 +6,8 @@ from app.utils.security import get_current_user
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
+import os
+import secrets
 
 router = APIRouter()
 
@@ -327,7 +329,7 @@ def add_test_users(db: Session = Depends(get_db), current_user: models.User = De
         new_user = models.User(
             name=test_user["name"],
             email=test_user["email"],
-            password_hash=hash_password("password123"),  # Default password
+            password_hash=hash_password(os.getenv("DEFAULT_USER_PASSWORD", secrets.token_urlsafe(12))),  # Generate secure random password
             role=test_user["role"],
             company_id=current_user.company_id
         )

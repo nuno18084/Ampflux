@@ -4,7 +4,7 @@ import os
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/ampflux"
-    SECRET_KEY: str = ""  # Will be loaded from environment variable
+    SECRET_KEY: str  # Required - will raise error if not set
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     OPENAI_API_KEY: str = ""
@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Generate a secure secret key if not provided
+        # Require SECRET_KEY to be set
         if not self.SECRET_KEY:
-            self.SECRET_KEY = secrets.token_urlsafe(32)
+            raise ValueError("SECRET_KEY must be set in environment variables")
 
 settings = Settings()
 
