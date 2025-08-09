@@ -25,7 +25,6 @@ export const LoginPage: React.FC = () => {
     error,
     setLoading,
     setFormError,
-    resetForm,
   } = useLoginForm();
   const { login } = useAuth();
   const { theme } = useTheme();
@@ -37,7 +36,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err: any) {
       setFormError(err.response?.data?.detail || "Login failed");
     }

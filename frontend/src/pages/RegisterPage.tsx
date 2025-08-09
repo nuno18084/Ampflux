@@ -3,8 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
 import { LoadingAnimation } from "../components/LoadingAnimation";
-import { apiClient } from "../lib/api";
-import { useQuery } from "@tanstack/react-query";
 import { useRegisterForm } from "../hooks/useRegisterForm";
 import { usePageLoading } from "../hooks/usePageLoading";
 import {
@@ -14,7 +12,6 @@ import {
   EyeIcon,
   EyeSlashIcon,
   BuildingOfficeIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
 export const RegisterPage: React.FC = () => {
@@ -36,7 +33,7 @@ export const RegisterPage: React.FC = () => {
     error,
     setLoading,
     setFormError,
-    resetForm,
+    // resetForm,
   } = useRegisterForm();
   const { register } = useAuth();
   const { theme } = useTheme();
@@ -49,7 +46,7 @@ export const RegisterPage: React.FC = () => {
     try {
       // Create new company or individual account
       await register(name, email, password, isCompany, companyName);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err: any) {
       setFormError(err.response?.data?.detail || "Registration failed");
     }

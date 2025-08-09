@@ -9,7 +9,6 @@ import {
   UserIcon,
   ArrowRightOnRectangleIcon,
   BoltIcon,
-  BuildingOfficeIcon,
   SunIcon,
   MoonIcon,
   ChevronDownIcon,
@@ -29,7 +28,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: HomeIcon },
+    { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
     { name: "Projects", href: "/projects", icon: FolderIcon },
   ];
 
@@ -87,7 +86,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link
-                to="/"
+                to="/dashboard"
                 className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-300 ease-out"
               >
                 <div

@@ -18,6 +18,7 @@ import { CircuitEditorPage } from "./pages/CircuitEditorPage";
 import { CircuitEditorPageZustand } from "./pages/CircuitEditorPageZustand";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { HomePage } from "./pages/HomePage";
 
 function App() {
   return (
@@ -27,12 +28,13 @@ function App() {
           <Router>
             <Routes>
               {/* Public routes */}
+              <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
               {/* Protected routes */}
               <Route
-                path="/"
+                path="/dashboard"
                 element={
                   <ProtectedRoute>
                     <Layout>
@@ -94,7 +96,7 @@ function App() {
               />
 
               {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Router>
         </AuthProvider>
