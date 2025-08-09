@@ -40,8 +40,8 @@ export const HomePage: React.FC = () => {
       {/* Decorative background accents */}
       <div
         aria-hidden
-        className={`pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full blur-3xl opacity-20 ${
-          theme === "dark" ? "bg-emerald-600" : "bg-emerald-400"
+        className={`pointer-events-none absolute -top-24 -left-24 h-[28rem] w-[28rem] rounded-full blur-3xl opacity-20 ${
+          theme === "dark" ? "bg-green-500" : "bg-green-300"
         }`}
       />
       <div
