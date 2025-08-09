@@ -133,11 +133,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Videos */}
-      <section
-        className={`py-12 md:py-16 ${
-          theme === "dark" ? "bg-gray-900/40" : "bg-white/80"
-        }`}
-      >
+      <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -297,11 +293,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* FAQs */}
-      <section
-        className={`py-12 md:py-16 ${
-          theme === "dark" ? "bg-gray-900/40" : "bg-white/80"
-        }`}
-      >
+      <section className="py-12 md:py-16">
         <div className="max-w-4xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -492,9 +484,7 @@ export const HomePage: React.FC = () => {
       {/* Policies */}
       <footer
         className={`py-10 border-t ${
-          theme === "dark"
-            ? "border-gray-800 bg-gray-900/70"
-            : "border-green-200/60 bg-white/70"
+          theme === "dark" ? "border-gray-800" : "border-green-200/60"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
