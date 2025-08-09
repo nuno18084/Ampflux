@@ -198,7 +198,7 @@ export const ProjectPage: React.FC = () => {
               {permissions.canShare && (
                 <button
                   onClick={() => setShareModalOpen(true)}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border border-blue-500/20 inline-flex items-center"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 inline-flex items-center"
                 >
                   <ShareIcon className="h-5 w-5 mr-2" />
                   Share
@@ -207,7 +207,7 @@ export const ProjectPage: React.FC = () => {
               {permissions.canEdit && (
                 <Link
                   to={`/projects/${project.id}/editor`}
-                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border border-green-500/20 inline-flex items-center"
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-green-500/20 inline-flex items-center"
                 >
                   <PencilIcon className="h-5 w-5 mr-2" />
                   Edit Circuit
