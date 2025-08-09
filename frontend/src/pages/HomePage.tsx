@@ -482,11 +482,14 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Policies */}
-      <footer
-        className={`py-10 border-t ${
-          theme === "dark" ? "border-gray-800" : "border-green-200/60"
-        }`}
-      >
+      <footer className="py-10 relative">
+        <div
+          className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${
+            theme === "dark"
+              ? "from-gray-800 via-gray-700 to-transparent"
+              : "from-green-200/60 via-green-200/40 to-transparent"
+          }`}
+        ></div>
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p
             className={`text-sm ${
