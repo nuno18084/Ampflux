@@ -1759,3 +1759,18 @@ textarea,
 .animate-background-wave-3 {
   animation: background-wave-3 30s linear infinite;
 }
+
+/* Force consistent height for all project cards */
+.project-card-grid {
+  align-items: stretch;
+}
+
+.project-card-grid > * {
+  height: 100%;
+}
+
+/* Force all project card containers to have same height */
+.project-card-grid > div {
+  min-height: 200px !important;
+  height: 100% !important;
+}

@@ -7,15 +7,9 @@ import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../contexts/ThemeProvider";
 import { useProjects } from "../hooks/useProjects";
 import { usePageLoading } from "../hooks/usePageLoading";
-import {
-  PlusIcon,
-  FolderIcon,
-  PencilIcon,
-  TrashIcon,
-  ShareIcon,
-  StarIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon, FolderIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { ShareProjectModal } from "../components/ShareProjectModal";
+import { ProjectCard } from "../components/ProjectCard";
 
 export const ProjectsPage: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -253,241 +247,46 @@ export const ProjectsPage: React.FC = () => {
           <>
             {(projects && projects.length > 0) ||
             (sharedProjects && sharedProjects.length > 0) ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 project-card-grid">
                 {/* Owned Projects */}
                 {projects &&
                   projects.map((project) => (
-                    <div
+                    <ProjectCard
                       key={project.id}
-                      className={`transition-all duration-500 ease-out flex flex-col ${
-                        theme === "dark"
-                          ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
-                          : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between flex-grow">
-                        <div className="flex items-start">
-                          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
-                            <FolderIcon className="h-6 w-6 text-white" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3
-                                className={`text-lg font-medium ${
-                                  theme === "dark"
-                                    ? "text-white"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {project.name}
-                              </h3>
-                              {isProjectOwner(project) && (
-                                <span
-                                  className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
-                                    theme === "dark"
-                                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
-                                      : "bg-purple-100 text-purple-700 border border-purple-200"
-                                  }`}
-                                >
-                                  <StarIcon className="h-2.5 w-2.5" />
-                                  Owner
-                                </span>
-                              )}
-                            </div>
-                            <p
-                              className={`text-sm ${
-                                theme === "dark"
-                                  ? "text-gray-400"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              Last edited{" "}
-                              {new Date(
-                                project.updated_at
-                              ).toLocaleDateString()}
-                              {project.created_at !== project.updated_at && (
-                                <span className="ml-2 text-xs opacity-75">
-                                  (created{" "}
-                                  {new Date(
-                                    project.created_at
-                                  ).toLocaleDateString()}
-                                  )
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setSelectedProject(project);
-                              setShareModalOpen(true);
-                            }}
-                            className="text-blue-400 hover:text-blue-300 transition-colors duration-300 ease-out"
-                            title="Share project"
-                          >
-                            <ShareIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleNavigate(`/projects/${project.id}`)
-                            }
-                            className="text-green-400 hover:text-green-300 transition-colors duration-300 ease-out"
-                            title="View project"
-                          >
-                            <PencilIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProject(project.id)}
-                            className="text-red-400 hover:text-red-300 transition-colors duration-300 ease-out"
-                            title="Delete project"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex space-x-2">
-                        <button
-                          onClick={() =>
-                            handleNavigate(`/projects/${project.id}`)
-                          }
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
-                            theme === "dark"
-                              ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-green-500/30"
-                              : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-green-300"
-                          }`}
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleNavigate(`/projects/${project.id}/editor`)
-                          }
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-green-500/20 flex-1 text-center"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </div>
+                      project={project}
+                      projectId={project.id}
+                      projectName={project.name}
+                      updatedAt={project.updated_at}
+                      createdAt={project.created_at}
+                      cardType="owned"
+                      isOwner={isProjectOwner(project)}
+                      onNavigate={handleNavigate}
+                      onShare={() => {
+                        setSelectedProject(project);
+                        setShareModalOpen(true);
+                      }}
+                      onDelete={() => handleDeleteProject(project.id)}
+                      theme={theme}
+                    />
                   ))}
 
                 {/* Shared Projects */}
                 {sharedProjects &&
                   sharedProjects.map((share) => (
-                    <div
+                    <ProjectCard
                       key={share.id}
-                      className={`transition-all duration-500 ease-out flex flex-col ${
-                        theme === "dark"
-                          ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-blue-500/10 hover:border-blue-500/20"
-                          : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-blue-200/50 hover:shadow-blue-500/20 hover:border-blue-300/50"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between flex-grow">
-                        <div className="flex items-start">
-                          <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
-                            <FolderIcon className="h-6 w-6 text-white" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3
-                                className={`text-lg font-medium ${
-                                  theme === "dark"
-                                    ? "text-white"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {share.project?.name || "Unknown Project"}
-                              </h3>
-                              {isProjectOwner(share.project) && (
-                                <span
-                                  className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
-                                    theme === "dark"
-                                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
-                                      : "bg-purple-100 text-purple-700 border border-purple-200"
-                                  }`}
-                                >
-                                  <StarIcon className="h-2.5 w-2.5" />
-                                  Owner
-                                </span>
-                              )}
-                              <span
-                                className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
-                                  theme === "dark"
-                                    ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
-                                    : "bg-blue-100 text-blue-700 border border-blue-200"
-                                }`}
-                              >
-                                Shared ({share.role})
-                              </span>
-                            </div>
-                            <p
-                              className={`text-sm ${
-                                theme === "dark"
-                                  ? "text-gray-400"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              Shared by{" "}
-                              {share.shared_by_user?.name || "Unknown"}
-                            </p>
-                            <p
-                              className={`text-xs ${
-                                theme === "dark"
-                                  ? "text-gray-500"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {share.role === "viewer"
-                                ? "Read Only"
-                                : "Read & Write"}{" "}
-                              • Last edited{" "}
-                              {new Date(
-                                share.project?.updated_at || share.created_at
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex space-x-2">
-                        {share.role === "viewer" ? (
-                          // Read-only: Show only one "View" button
-                          <button
-                            onClick={() =>
-                              handleNavigate(`/projects/${share.project_id}`)
-                            }
-                            className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 w-full text-center"
-                          >
-                            View
-                          </button>
-                        ) : (
-                          // Read & Write: Show both "View" and "Edit" buttons
-                          <>
-                            <button
-                              onClick={() =>
-                                handleNavigate(`/projects/${share.project_id}`)
-                              }
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
-                                theme === "dark"
-                                  ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-blue-500/30"
-                                  : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-blue-300"
-                              }`}
-                            >
-                              View
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleNavigate(
-                                  `/projects/${share.project_id}/editor`
-                                )
-                              }
-                              className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 flex-1 text-center"
-                            >
-                              Edit
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                      project={share.project}
+                      projectId={share.project_id}
+                      projectName={share.project?.name || "Unknown Project"}
+                      updatedAt={share.project?.updated_at || share.created_at}
+                      createdAt={share.created_at}
+                      cardType="shared"
+                      isOwner={isProjectOwner(share.project)}
+                      sharedByUser={share.shared_by_user}
+                      role={share.role}
+                      onNavigate={handleNavigate}
+                      theme={theme}
+                    />
                   ))}
               </div>
             ) : (
@@ -528,118 +327,25 @@ export const ProjectsPage: React.FC = () => {
         ) : currentSection === "my-projects" ? (
           <>
             {projects && projects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 project-card-grid">
                 {projects.map((project) => (
-                  <div
+                  <ProjectCard
                     key={project.id}
-                    className={`transition-all duration-500 ease-out flex flex-col ${
-                      theme === "dark"
-                        ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
-                        : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between flex-grow">
-                      <div className="flex items-start">
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
-                          <FolderIcon className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3
-                              className={`text-lg font-medium ${
-                                theme === "dark"
-                                  ? "text-white"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              {project.name}
-                            </h3>
-                            {isProjectOwner(project) && (
-                              <span
-                                className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
-                                  theme === "dark"
-                                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
-                                    : "bg-purple-100 text-purple-700 border border-purple-200"
-                                }`}
-                              >
-                                <StarIcon className="h-2.5 w-2.5" />
-                                Owner
-                              </span>
-                            )}
-                          </div>
-                          <p
-                            className={`text-sm ${
-                              theme === "dark"
-                                ? "text-gray-400"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            Last edited{" "}
-                            {new Date(project.updated_at).toLocaleDateString()}
-                            {project.created_at !== project.updated_at && (
-                              <span className="ml-2 text-xs opacity-75">
-                                (created{" "}
-                                {new Date(
-                                  project.created_at
-                                ).toLocaleDateString()}
-                                )
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedProject(project);
-                            setShareModalOpen(true);
-                          }}
-                          className="text-blue-400 hover:text-blue-300 transition-colors duration-300 ease-out"
-                          title="Share project"
-                        >
-                          <ShareIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleNavigate(`/projects/${project.id}`)
-                          }
-                          className="text-green-400 hover:text-green-300 transition-colors duration-300 ease-out"
-                          title="View project"
-                        >
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProject(project.id)}
-                          className="text-red-400 hover:text-red-300 transition-colors duration-300 ease-out"
-                          title="Delete project"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex space-x-2">
-                      <button
-                        onClick={() =>
-                          handleNavigate(`/projects/${project.id}`)
-                        }
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
-                          theme === "dark"
-                            ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-green-500/30"
-                            : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-green-300"
-                        }`}
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() =>
-                          handleNavigate(`/projects/${project.id}/editor`)
-                        }
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-green-500/20 flex-1 text-center"
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
+                    project={project}
+                    projectId={project.id}
+                    projectName={project.name}
+                    updatedAt={project.updated_at}
+                    createdAt={project.created_at}
+                    cardType="owned"
+                    isOwner={isProjectOwner(project)}
+                    onNavigate={handleNavigate}
+                    onShare={() => {
+                      setSelectedProject(project);
+                      setShareModalOpen(true);
+                    }}
+                    onDelete={() => handleDeleteProject(project.id)}
+                    theme={theme}
+                  />
                 ))}
               </div>
             ) : (
@@ -680,122 +386,24 @@ export const ProjectsPage: React.FC = () => {
         ) : currentSection === "shared" ? (
           <>
             {sharedProjects && sharedProjects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sharedProjects.map((share) => (
-                  <div
-                    key={share.id}
-                    className={`transition-all duration-500 ease-out flex flex-col ${
-                      theme === "dark"
-                        ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-blue-500/10 hover:border-blue-500/20"
-                        : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-blue-200/50 hover:shadow-blue-500/20 hover:border-blue-300/50"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between flex-grow">
-                      <div className="flex items-start">
-                        <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
-                          <FolderIcon className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3
-                              className={`text-lg font-medium ${
-                                theme === "dark"
-                                  ? "text-white"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              {share.project?.name || "Unknown Project"}
-                            </h3>
-                            {isProjectOwner(share.project) && (
-                              <span
-                                className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
-                                  theme === "dark"
-                                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
-                                    : "bg-purple-100 text-purple-700 border border-purple-200"
-                                }`}
-                              >
-                                <StarIcon className="h-2.5 w-2.5" />
-                                Owner
-                              </span>
-                            )}
-                            <span
-                              className={`px-1.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center gap-1 ${
-                                theme === "dark"
-                                  ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
-                                  : "bg-blue-100 text-blue-700 border border-blue-200"
-                              }`}
-                            >
-                              Shared ({share.role})
-                            </span>
-                          </div>
-                          <p
-                            className={`text-sm ${
-                              theme === "dark"
-                                ? "text-gray-400"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            Shared by {share.shared_by_user?.name || "Unknown"}
-                          </p>
-                          <p
-                            className={`text-xs ${
-                              theme === "dark"
-                                ? "text-gray-500"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {share.role === "viewer"
-                              ? "Read Only"
-                              : "Read & Write"}{" "}
-                            • Last edited{" "}
-                            {new Date(
-                              share.project?.updated_at || share.created_at
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex space-x-2">
-                      {share.role === "viewer" ? (
-                        // Read-only: Show only one "View" button
-                        <button
-                          onClick={() =>
-                            handleNavigate(`/projects/${share.project_id}`)
-                          }
-                          className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 w-full text-center"
-                        >
-                          View
-                        </button>
-                      ) : (
-                        // Read & Write: Show both "View" and "Edit" buttons
-                        <>
-                          <button
-                            onClick={() =>
-                              handleNavigate(`/projects/${share.project_id}`)
-                            }
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out flex-1 text-center ${
-                              theme === "dark"
-                                ? "bg-gray-700/50 text-gray-300 hover:text-white border border-gray-600/50 hover:border-blue-500/30"
-                                : "bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-blue-300"
-                            }`}
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleNavigate(
-                                `/projects/${share.project_id}/editor`
-                              )
-                            }
-                            className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 ease-out shadow-md hover:shadow-lg border border-blue-500/20 flex-1 text-center"
-                          >
-                            Edit
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 project-card-grid">
+                {sharedProjects &&
+                  sharedProjects.map((share) => (
+                    <ProjectCard
+                      key={share.id}
+                      project={share.project}
+                      projectId={share.project_id}
+                      projectName={share.project?.name || "Unknown Project"}
+                      updatedAt={share.project?.updated_at || share.created_at}
+                      createdAt={share.created_at}
+                      cardType="shared"
+                      isOwner={isProjectOwner(share.project)}
+                      sharedByUser={share.shared_by_user}
+                      role={share.role}
+                      onNavigate={handleNavigate}
+                      theme={theme}
+                    />
+                  ))}
               </div>
             ) : (
               <div
