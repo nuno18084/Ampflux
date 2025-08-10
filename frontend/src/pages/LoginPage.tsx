@@ -103,7 +103,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Loading Animation */}
         {isLoading && (
-          <div className="fixed inset-0 flex items-start justify-center pt-32 z-50">
+          <div className="fixed inset-0 flex items-start justify-center pt-40 z-50">
             <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
             <div className="relative z-10">
               <LoadingAnimation size="xl" showText={false} />

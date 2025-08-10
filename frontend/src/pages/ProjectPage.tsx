@@ -74,34 +74,6 @@ export const ProjectPage: React.FC = () => {
     }
   }, [isPageLoading, projectId, refetchVersions]);
 
-  if (isPageLoading) {
-    return (
-      <div
-        className={`min-h-screen flex items-start justify-center pt-40 transition-colors duration-200 ${
-          theme === "dark"
-            ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
-            : "bg-gradient-to-br from-green-50 via-white to-emerald-50"
-        }`}
-      >
-        <LoadingAnimation size="xl" showText={false} />
-      </div>
-    );
-  }
-
-  if (projectLoading || permissions.isLoading) {
-    return (
-      <div
-        className={`min-h-screen flex items-start justify-center pt-40 transition-colors duration-200 ${
-          theme === "dark"
-            ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
-            : "bg-gradient-to-br from-green-50 via-white to-emerald-50"
-        }`}
-      >
-        <LoadingAnimation size="xl" showText={false} />
-      </div>
-    );
-  }
-
   if (!project) {
     return (
       <div
