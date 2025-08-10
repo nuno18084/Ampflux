@@ -818,85 +818,94 @@ export const HomePage: React.FC = () => {
                 theme === "dark" ? "text-gray-300" : "text-gray-600"
               }`}
             >
-              See AmpFlux in action with detailed walkthroughs
+              Comprehensive overviews of AmpFlux's core capabilities and
+              workflows
             </p>
           </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {[
               {
-                title: "Circuit Design Workflow",
-                desc: "Complete walkthrough of the design process from concept to simulation",
-                duration: "3:45",
-                category: "Tutorial",
+                title: "Schematic Design & PCB Layout",
+                desc: "Complete design workflow from initial concept to manufacturable PCB layout with real-time collaboration and version control",
+                duration: "6:24",
+                category: "Design Process",
+                features: [
+                  "Schematic capture",
+                  "Component library",
+                  "PCB routing",
+                  "Design validation",
+                ],
               },
               {
-                title: "Advanced Simulation Features",
-                desc: "Deep dive into analysis tools and reporting capabilities",
-                duration: "4:12",
-                category: "Feature Demo",
+                title: "Advanced Circuit Simulation",
+                desc: "Comprehensive analysis including thermal management, electromagnetic compatibility, and power distribution optimization",
+                duration: "8:15",
+                category: "Analysis Tools",
+                features: [
+                  "Thermal analysis",
+                  "EMC testing",
+                  "Power analysis",
+                  "Signal integrity",
+                ],
               },
             ].map((video, idx) => (
               <div
                 key={idx}
-                className={`group relative rounded-2xl overflow-hidden transition-all duration-300 ${
+                className={`group relative ${
                   theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
+                    ? "bg-gray-900/60 border border-gray-800"
                     : "bg-white border border-gray-200"
-                }`}
+                } rounded-2xl shadow-lg overflow-hidden`}
               >
                 {/* Video Thumbnail */}
-                <div
-                  className={`aspect-video ${
-                    theme === "dark"
-                      ? "bg-gradient-to-br from-gray-700 to-gray-800"
-                      : "bg-gradient-to-br from-gray-100 to-gray-50"
-                  } flex items-center justify-center relative overflow-hidden`}
-                >
-                  {/* Video Preview */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20"></div>
+                <div className="relative aspect-video">
+                  {/* Background */}
+                  <div
+                    className={`absolute inset-0 ${
+                      theme === "dark"
+                        ? "bg-gradient-to-br from-gray-800 to-gray-900"
+                        : "bg-gradient-to-br from-gray-100 to-gray-50"
+                    }`}
+                  />
 
-                  {/* Mock Video Frame */}
-                  <div className="absolute inset-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                    {/* Video Content */}
-                    <div className="absolute inset-2 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded flex items-center justify-center">
-                      <div className="text-center">
-                        <div
-                          className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${
-                            theme === "dark"
-                              ? "bg-white/20 text-white"
-                              : "bg-black/20 text-black"
-                          }`}
-                        >
-                          <PlayCircleIcon className="h-6 w-6" />
-                        </div>
-                        <p
-                          className={`text-xs ${
-                            theme === "dark" ? "text-white/70" : "text-black/70"
-                          }`}
-                        >
-                          {video.title}
-                        </p>
-                      </div>
+                  {/* Professional Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+                  {/* Play Button */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 ${
+                        theme === "dark"
+                          ? "bg-white/10 backdrop-blur-sm border border-white/20"
+                          : "bg-black/10 backdrop-blur-sm border border-black/20"
+                      }`}
+                    >
+                      <PlayCircleIcon
+                        className={`h-10 w-10 ${
+                          theme === "dark" ? "text-white" : "text-black"
+                        }`}
+                      />
                     </div>
                   </div>
 
                   {/* Duration Badge */}
                   <div
-                    className={`absolute top-4 right-4 px-2 py-1 rounded text-xs font-medium ${
+                    className={`absolute bottom-4 right-4 px-3 py-1.5 rounded-lg text-sm font-medium ${
                       theme === "dark"
-                        ? "bg-black/60 text-gray-300"
-                        : "bg-white/80 text-gray-700"
-                    }`}
+                        ? "bg-black/80 text-gray-200"
+                        : "bg-white/95 text-gray-800"
+                    } shadow-lg`}
                   >
                     {video.duration}
                   </div>
 
                   {/* Category Badge */}
                   <div
-                    className={`absolute top-4 left-4 px-2 py-1 rounded text-xs font-medium ${
+                    className={`absolute top-4 left-4 px-4 py-2 rounded-lg text-sm font-semibold ${
                       theme === "dark"
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                        : "bg-green-100 text-green-700 border border-green-200"
+                        ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                        : "bg-green-100 text-green-800 border border-green-200"
                     }`}
                   >
                     {video.category}
@@ -904,21 +913,60 @@ export const HomePage: React.FC = () => {
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-8">
                   <h3
-                    className={`text-xl font-semibold mb-3 ${
+                    className={`text-xl font-bold mb-4 ${
                       theme === "dark" ? "text-white" : "text-gray-900"
                     }`}
                   >
                     {video.title}
                   </h3>
                   <p
-                    className={`text-sm ${
+                    className={`text-base leading-relaxed mb-6 ${
                       theme === "dark" ? "text-gray-300" : "text-gray-600"
                     }`}
                   >
                     {video.desc}
                   </p>
+
+                  {/* Features List */}
+                  <div className="mb-6">
+                    <h4
+                      className={`text-sm font-semibold mb-3 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      Key Features Covered:
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {video.features.map((feature, featureIdx) => (
+                        <div
+                          key={featureIdx}
+                          className={`flex items-center gap-2 text-sm ${
+                            theme === "dark" ? "text-gray-400" : "text-gray-600"
+                          }`}
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              theme === "dark" ? "bg-green-400" : "bg-green-600"
+                            }`}
+                          />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Watch Button */}
+                  <button
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-300 ${
+                      theme === "dark"
+                        ? "bg-green-600 text-white hover:bg-green-700 shadow-lg"
+                        : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
+                    }`}
+                  >
+                    Watch Full Demo
+                  </button>
                 </div>
               </div>
             ))}
@@ -929,113 +977,213 @@ export const HomePage: React.FC = () => {
       {/* Pricing */}
       <section className="py-32 md:py-40">
         <div className="max-w-7xl mx-auto px-6">
-          <h2
-            className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-green-400" : "text-green-600"
-            }`}
-          >
-            Pricing
-          </h2>
-          <p
-            className={`text-center mt-2 mb-8 ${
-              theme === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            Simple plans for individuals and teams
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center mb-16">
+            <h2
+              className={`text-3xl md:text-4xl font-bold ${
+                theme === "dark" ? "text-green-400" : "text-green-600"
+              }`}
+            >
+              Enterprise-Grade Pricing
+            </h2>
+            <p
+              className={`text-lg mt-4 max-w-2xl mx-auto ${
+                theme === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              Scalable solutions designed for professional engineering teams and
+              organizations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
             {[
               {
-                name: "Starter",
-                price: "$0",
-                period: "/mo",
-                cta: "Get Started",
-                features: ["1 project", "Basic editor", "Community support"],
+                name: "Professional",
+                subtitle: "Individual Engineers",
+                price: "$29",
+                period: "per month",
+                description:
+                  "Perfect for individual engineers and small design teams",
+                features: [
+                  "Unlimited circuit designs",
+                  "Advanced simulation engine",
+                  "Component library (10,000+ parts)",
+                  "Export to industry standards",
+                  "Email support",
+                  "Cloud storage (10GB)",
+                ],
+                cta: "Start Free Trial",
                 highlight: false,
+                popular: false,
               },
               {
-                name: "Pro",
-                price: "$19",
-                period: "/mo",
-                cta: "Start Pro",
+                name: "Enterprise",
+                subtitle: "Engineering Teams",
+                price: "$99",
+                period: "per month",
+                description:
+                  "Comprehensive solution for professional engineering teams",
                 features: [
-                  "Unlimited projects",
-                  "Simulation engine",
-                  "Priority support",
+                  "Everything in Professional",
+                  "Team collaboration tools",
+                  "Role-based access control",
+                  "Advanced analytics & reporting",
+                  "Priority support (24/7)",
+                  "Cloud storage (100GB)",
+                  "API access",
+                  "Custom integrations",
                 ],
+                cta: "Contact Sales",
                 highlight: true,
+                popular: true,
               },
               {
-                name: "Team",
-                price: "$49",
-                period: "/mo",
-                cta: "Start Team",
+                name: "Custom",
+                subtitle: "Large Organizations",
+                price: "Custom",
+                period: "enterprise",
+                description:
+                  "Tailored solutions for large organizations and OEMs",
                 features: [
-                  "Team collaboration",
-                  "Role-based access",
-                  "Project sharing",
+                  "Everything in Enterprise",
+                  "On-premise deployment",
+                  "Custom feature development",
+                  "Dedicated account manager",
+                  "Training & certification",
+                  "SLA guarantees",
+                  "White-label options",
+                  "Enterprise security",
                 ],
+                cta: "Schedule Demo",
                 highlight: false,
+                popular: false,
               },
             ].map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl p-6 shadow-xl backdrop-blur ${
-                  theme === "dark"
-                    ? "border border-gray-700/60 bg-gray-800/60"
-                    : "border border-green-200/60 bg-white/80"
-                } ${plan.highlight ? "ring-2 ring-emerald-500/50" : ""}`}
+                className={`relative flex flex-col ${
+                  plan.highlight
+                    ? theme === "dark"
+                      ? "bg-gray-900 border-2 border-green-500/50 lg:scale-110"
+                      : "bg-white border-2 border-green-500/50 lg:scale-110"
+                    : theme === "dark"
+                    ? "bg-gray-900/60 border border-gray-800 lg:scale-95"
+                    : "bg-white border border-gray-200 lg:scale-95"
+                } rounded-xl p-5 shadow-lg`}
               >
-                <h3
-                  className={`text-lg font-semibold ${
-                    theme === "dark" ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {plan.name}
-                </h3>
-                <div className="mt-3 flex items-end gap-1">
-                  <span
-                    className={`text-3xl font-extrabold ${
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-green-600 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                      Most Popular
+                    </div>
+                  </div>
+                )}
+
+                {/* Header */}
+                <div className="text-center mb-4">
+                  <h3
+                    className={`text-lg font-bold mb-1 ${
                       theme === "dark" ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    {plan.price}
-                  </span>
-                  <span className="text-gray-500">{plan.period}</span>
+                    {plan.name}
+                  </h3>
+                  <p
+                    className={`text-xs font-medium ${
+                      theme === "dark" ? "text-green-400" : "text-green-600"
+                    }`}
+                  >
+                    {plan.subtitle}
+                  </p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    {plan.description}
+                  </p>
                 </div>
-                <ul className="mt-4 space-y-2">
-                  {plan.features.map((f) => (
-                    <li
-                      key={f}
-                      className={`flex items-center ${
-                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+
+                {/* Pricing */}
+                <div className="text-center mb-4">
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span
+                      className={`text-2xl font-bold ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      <CheckCircleIcon
-                        className={`h-5 w-5 mr-2 ${
-                          theme === "dark"
-                            ? "text-emerald-400"
-                            : "text-green-600"
+                      {plan.price}
+                    </span>
+                    <span
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      {plan.period}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div className="mb-4 flex-grow">
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, idx) => (
+                      <li
+                        key={idx}
+                        className={`flex items-start gap-2 ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
                         }`}
-                      />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                      >
+                        <CheckCircleIcon
+                          className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                            theme === "dark"
+                              ? "text-green-400"
+                              : "text-green-600"
+                          }`}
+                        />
+                        <span className="text-xs leading-relaxed">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* CTA Button */}
                 <button
                   onClick={scrollToForm}
-                  className={`mt-6 w-full px-4 py-2 rounded-lg font-medium transition-all duration-300 ease-out ${
+                  className={`w-full py-2 px-3 rounded-md font-medium text-sm transition-all duration-300 mt-auto ${
                     plan.highlight
-                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-md hover:shadow-lg"
+                      ? "bg-green-600 text-white hover:bg-green-700 shadow-lg"
                       : theme === "dark"
-                      ? "border border-gray-700 text-gray-200 hover:text-white hover:border-gray-600 bg-gray-800/60"
-                      : "border border-green-300 text-green-700 hover:text-green-800 hover:border-green-400 bg-white"
+                      ? "bg-gray-800 text-white border border-gray-700 hover:bg-gray-700 hover:border-gray-600"
+                      : "bg-gray-50 text-gray-900 border border-gray-200 hover:bg-gray-100 hover:border-gray-300"
                   }`}
                 >
                   {plan.cta}
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* Additional Info */}
+          <div className="text-center mt-16">
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              All plans include a 14-day free trial. No credit card required.
+            </p>
+            <p
+              className={`text-sm mt-2 ${
+                theme === "dark" ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              Need a custom solution? Contact our enterprise team for a
+              personalized quote.
+            </p>
           </div>
         </div>
       </section>
