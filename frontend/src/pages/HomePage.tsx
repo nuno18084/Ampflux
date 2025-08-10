@@ -1316,125 +1316,138 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Ask Questions / Demo Form */}
+      {/* Contact Form */}
       <section ref={formRef} className="pt-32 pb-24 md:pt-40 md:pb-32">
         <div className="max-w-3xl mx-auto px-6">
-          <h2
-            className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-green-400" : "text-green-600"
-            }`}
-          >
-            Ask a Question / Request a Demo
-          </h2>
-          <p
-            className={`text-center mt-2 mb-8 ${
-              theme === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            We’ll get back to you shortly
-          </p>
-          <form
-            onSubmit={handleSubmit}
-            className={`rounded-2xl p-6 shadow-xl backdrop-blur ${
+          <div className="text-center mb-8">
+            <h2
+              className={`text-2xl md:text-3xl font-bold mb-3 ${
+                theme === "dark" ? "text-green-400" : "text-green-600"
+              }`}
+            >
+              Get in Touch
+            </h2>
+            <p
+              className={`text-base ${
+                theme === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              Ready to transform your circuit design workflow? Let's talk.
+            </p>
+          </div>
+
+          <div
+            className={`rounded-xl p-6 shadow-xl ${
               theme === "dark"
-                ? "border border-gray-700/60 bg-gray-800/60"
-                : "border border-green-200/60 bg-white/80"
+                ? "border border-gray-700/60 bg-gray-800/60 backdrop-blur"
+                : "border border-gray-200 bg-white"
             }`}
           >
             {submitted && (
               <div
-                className={`mb-4 rounded-lg border p-3 ${
+                className={`mb-6 rounded-lg border p-4 ${
                   theme === "dark"
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                    ? "border-green-500/40 bg-green-500/10 text-green-300"
                     : "border-green-300 bg-green-50 text-green-700"
                 }`}
               >
-                Thanks! We received your message.
+                <div className="flex items-center">
+                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  <span className="font-medium">
+                    Message sent successfully!
+                  </span>
+                </div>
+                <p className="text-sm mt-1">We'll respond within 24 hours.</p>
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-700"
+                    }`}
+                  >
+                    Name *
+                  </label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="Your name"
+                    className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 ${
+                      theme === "dark"
+                        ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
+                        : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-700"
+                    }`}
+                  >
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="your@email.com"
+                    className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 ${
+                      theme === "dark"
+                        ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
+                        : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
+                    }`}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label
                   className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-300" : "text-gray-700"
+                    theme === "dark" ? "text-gray-200" : "text-gray-700"
                   }`}
                 >
-                  Name
+                  Message *
                 </label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   required
-                  placeholder="Your name"
-                  className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+                  rows={4}
+                  placeholder="Tell us about your project or request a demo..."
+                  className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 resize-none ${
                     theme === "dark"
-                      ? "bg-gray-800/60 border border-gray-700 text-white placeholder-gray-400"
-                      : "border border-gray-300 text-gray-900 placeholder-gray-500"
+                      ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
+                      : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
                   }`}
                 />
               </div>
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-300" : "text-gray-700"
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 ease-out shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Send Message
+                </button>
+                <a
+                  href="mailto:contact@ampflux.com"
+                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-out border text-center ${
+                    theme === "dark"
+                      ? "border-gray-600 text-gray-200 hover:text-white hover:border-gray-500 bg-gray-700/60"
+                      : "border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400 bg-gray-50"
                   }`}
                 >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="name@company.com"
-                  className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
-                    theme === "dark"
-                      ? "bg-gray-800/60 border border-gray-700 text-white placeholder-gray-400"
-                      : "border border-gray-300 text-gray-900 placeholder-gray-500"
-                  }`}
-                />
+                  Email Directly
+                </a>
               </div>
-            </div>
-            <div className="mt-4">
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  theme === "dark" ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Message
-              </label>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                required
-                rows={5}
-                placeholder="Tell us what you need or request a demo time"
-                className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
-                  theme === "dark"
-                    ? "bg-gray-800/60 border border-gray-700 text-white placeholder-gray-400"
-                    : "border border-gray-300 text-gray-900 placeholder-gray-500"
-                }`}
-              />
-            </div>
-            <div className="mt-6 flex items-center gap-3">
-              <button
-                type="submit"
-                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 ease-out shadow-md hover:shadow-xl border border-green-500/30"
-              >
-                Send Message
-              </button>
-              <a
-                href="mailto:contact@ampflux.example"
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ease-out border ${
-                  theme === "dark"
-                    ? "border-gray-700 text-gray-200 hover:text-white hover:border-gray-600 bg-gray-800/60"
-                    : "border border-green-300 text-green-700 hover:text-green-800 hover:border-green-400 bg-white"
-                }`}
-              >
-                Email Us
-              </a>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </section>
 
