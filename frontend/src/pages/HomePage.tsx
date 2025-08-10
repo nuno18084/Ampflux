@@ -87,6 +87,205 @@ export const HomePage: React.FC = () => {
           theme === "dark" ? "bg-green-500" : "bg-green-300"
         }`}
       />
+
+      {/* Wave background animation */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className={`absolute inset-0 bg-gradient-to-br from-transparent via-green-500/5 to-transparent animate-background-wave ${
+            theme === "dark" ? "opacity-10" : "opacity-5"
+          }`}
+          style={{
+            background:
+              theme === "dark"
+                ? "linear-gradient(45deg, transparent 0%, rgba(34, 197, 94, 0.03) 25%, rgba(16, 185, 129, 0.02) 50%, rgba(34, 197, 94, 0.03) 75%, transparent 100%)"
+                : "linear-gradient(45deg, transparent 0%, rgba(34, 197, 94, 0.02) 25%, rgba(16, 185, 129, 0.01) 50%, rgba(34, 197, 94, 0.02) 75%, transparent 100%)",
+          }}
+        />
+        <div
+          className={`absolute inset-0 bg-gradient-to-tl from-transparent via-emerald-500/5 to-transparent animate-background-wave-2 ${
+            theme === "dark" ? "opacity-8" : "opacity-4"
+          }`}
+          style={{
+            background:
+              theme === "dark"
+                ? "linear-gradient(-45deg, transparent 0%, rgba(16, 185, 129, 0.02) 25%, rgba(34, 197, 94, 0.03) 50%, rgba(16, 185, 129, 0.02) 75%, transparent 100%)"
+                : "linear-gradient(-45deg, transparent 0%, rgba(16, 185, 129, 0.01) 25%, rgba(34, 197, 94, 0.02) 50%, rgba(16, 185, 129, 0.01) 75%, transparent 100%)",
+          }}
+        />
+      </div>
+
+      {/* Shooting Star Electrical Lines */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Horizontal shooting stars - from edges only */}
+        <div
+          className={`absolute w-32 h-[1px] bg-gradient-to-r from-green-400/60 via-green-400/80 to-transparent animate-shooting-star-left`}
+          style={{
+            top: "15%",
+            left: "0%",
+            boxShadow:
+              "0 0 8px rgba(74, 222, 128, 0.6), 0 0 16px rgba(74, 222, 128, 0.4), 0 0 24px rgba(74, 222, 128, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-24 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/80 to-emerald-400/60 animate-shooting-star-right`}
+          style={{
+            top: "28%",
+            right: "0%",
+            boxShadow:
+              "0 0 8px rgba(52, 211, 153, 0.6), 0 0 16px rgba(52, 211, 153, 0.4), 0 0 24px rgba(52, 211, 153, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-40 h-[1px] bg-gradient-to-r from-green-500/60 via-green-500/80 to-transparent animate-shooting-star-left-delay-1`}
+          style={{
+            top: "42%",
+            left: "0%",
+            boxShadow:
+              "0 0 8px rgba(34, 197, 94, 0.6), 0 0 16px rgba(34, 197, 94, 0.4), 0 0 24px rgba(34, 197, 94, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-28 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/80 to-emerald-500/60 animate-shooting-star-right-delay-1`}
+          style={{
+            top: "58%",
+            right: "0%",
+            boxShadow:
+              "0 0 8px rgba(16, 185, 129, 0.6), 0 0 16px rgba(16, 185, 129, 0.4), 0 0 24px rgba(16, 185, 129, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-36 h-[1px] bg-gradient-to-r from-green-400/60 via-green-400/80 to-transparent animate-shooting-star-left-delay-2`}
+          style={{
+            top: "73%",
+            left: "0%",
+            boxShadow:
+              "0 0 8px rgba(74, 222, 128, 0.6), 0 0 16px rgba(74, 222, 128, 0.4), 0 0 24px rgba(74, 222, 128, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-20 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/80 to-emerald-400/60 animate-shooting-star-right-delay-2`}
+          style={{
+            top: "87%",
+            right: "0%",
+            boxShadow:
+              "0 0 8px rgba(52, 211, 153, 0.6), 0 0 16px rgba(52, 211, 153, 0.4), 0 0 24px rgba(52, 211, 153, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-44 h-[1px] bg-gradient-to-r from-green-500/60 via-green-500/80 to-transparent animate-shooting-star-left-delay-3`}
+          style={{
+            top: "18%",
+            left: "0%",
+            boxShadow:
+              "0 0 8px rgba(34, 197, 94, 0.6), 0 0 16px rgba(34, 197, 94, 0.4), 0 0 24px rgba(34, 197, 94, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-32 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/80 to-emerald-500/60 animate-shooting-star-right-delay-3`}
+          style={{
+            top: "95%",
+            right: "0%",
+            boxShadow:
+              "0 0 8px rgba(16, 185, 129, 0.6), 0 0 16px rgba(16, 185, 129, 0.4), 0 0 24px rgba(16, 185, 129, 0.3)",
+          }}
+        ></div>
+
+        {/* Vertical shooting stars - from edges only */}
+        <div
+          className={`absolute w-[1px] h-16 bg-gradient-to-b from-green-400/60 via-green-400/80 to-transparent animate-shooting-star-vertical-1`}
+          style={{
+            top: "0%",
+            left: "22%",
+            boxShadow:
+              "0 0 8px rgba(74, 222, 128, 0.6), 0 0 16px rgba(74, 222, 128, 0.4), 0 0 24px rgba(74, 222, 128, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-[1px] h-20 bg-gradient-to-b from-transparent via-emerald-400/80 to-emerald-400/60 animate-shooting-star-vertical-2`}
+          style={{
+            bottom: "0%",
+            left: "67%",
+            boxShadow:
+              "0 0 8px rgba(52, 211, 153, 0.6), 0 0 16px rgba(52, 211, 153, 0.4), 0 0 24px rgba(52, 211, 153, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-[1px] h-24 bg-gradient-to-b from-green-500/60 via-green-500/80 to-transparent animate-shooting-star-vertical-3`}
+          style={{
+            top: "0%",
+            left: "45%",
+            boxShadow:
+              "0 0 8px rgba(34, 197, 94, 0.6), 0 0 16px rgba(34, 197, 94, 0.4), 0 0 24px rgba(34, 197, 94, 0.3)",
+          }}
+        ></div>
+        <div
+          className={`absolute w-[1px] h-28 bg-gradient-to-b from-transparent via-emerald-500/80 to-emerald-500/60 animate-shooting-star-vertical-4`}
+          style={{
+            bottom: "0%",
+            left: "83%",
+            boxShadow:
+              "0 0 8px rgba(16, 185, 129, 0.6), 0 0 16px rgba(16, 185, 129, 0.4), 0 0 24px rgba(16, 185, 129, 0.3)",
+          }}
+        ></div>
+
+        {/* Circuit nodes (stationary glowing dots) */}
+        <div
+          className={`absolute top-[18%] left-[12%] w-2 h-2 bg-green-400/60 rounded-full animate-glow-ping-slow`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(74, 222, 128, 0.8), 0 0 24px rgba(74, 222, 128, 0.6), 0 0 36px rgba(74, 222, 128, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[28%] left-[62%] w-2 h-2 bg-emerald-400/50 rounded-full animate-glow-ping-slow-delay-1`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(52, 211, 153, 0.8), 0 0 24px rgba(52, 211, 153, 0.6), 0 0 36px rgba(52, 211, 153, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[38%] left-[22%] w-2 h-2 bg-green-500/55 rounded-full animate-glow-ping-slow-delay-2`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(34, 197, 94, 0.8), 0 0 24px rgba(34, 197, 94, 0.6), 0 0 36px rgba(34, 197, 94, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[48%] left-[72%] w-2 h-2 bg-emerald-500/45 rounded-full animate-glow-ping-slow-delay-3`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(16, 185, 129, 0.8), 0 0 24px rgba(16, 185, 129, 0.6), 0 0 36px rgba(16, 185, 129, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[58%] left-[17%] w-2 h-2 bg-green-400/50 rounded-full animate-glow-ping-slow-delay-4`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(74, 222, 128, 0.8), 0 0 24px rgba(74, 222, 128, 0.6), 0 0 36px rgba(74, 222, 128, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[68%] left-[52%] w-2 h-2 bg-emerald-400/45 rounded-full animate-glow-ping-slow-delay-5`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(52, 211, 153, 0.8), 0 0 24px rgba(52, 211, 153, 0.6), 0 0 36px rgba(52, 211, 153, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[78%] left-[27%] w-2 h-2 bg-green-500/40 rounded-full animate-glow-ping-slow-delay-6`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(34, 197, 94, 0.8), 0 0 24px rgba(34, 197, 94, 0.6), 0 0 36px rgba(34, 197, 94, 0.4)",
+          }}
+        ></div>
+        <div
+          className={`absolute top-[88%] left-[67%] w-2 h-2 bg-emerald-500/50 rounded-full animate-glow-ping-slow-delay-7`}
+          style={{
+            boxShadow:
+              "0 0 12px rgba(16, 185, 129, 0.8), 0 0 24px rgba(16, 185, 129, 0.6), 0 0 36px rgba(16, 185, 129, 0.4)",
+          }}
+        ></div>
+      </div>
       {/* Hero / Introduction */}
       <header className="relative">
         <div className="max-w-7xl mx-auto px-6 pt-52 pb-16 md:pt-[12.5rem] md:pb-24 min-h-screen flex items-center">
