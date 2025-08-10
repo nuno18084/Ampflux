@@ -15,6 +15,7 @@ export const HomePage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const scrollToForm = () => {
     if (formRef.current) {
@@ -1196,60 +1197,120 @@ export const HomePage: React.FC = () => {
               theme === "dark" ? "text-green-400" : "text-green-600"
             }`}
           >
-            FAQs
+            Frequently Asked Questions
           </h2>
-          <div className="mt-8 space-y-3">
+          <p
+            className={`text-center mt-2 mb-8 ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Everything you need to know about AmpFlux
+          </p>
+          <div className="mt-8 space-y-4">
             {[
               {
-                q: "What is AmpFlux?",
-                a: "AmpFlux is a platform for circuit design and short-circuit simulation, built for teams and professionals.",
+                q: "What is AmpFlux and how does it work?",
+                a: "AmpFlux is a comprehensive circuit design and simulation platform that allows engineers to create, test, and optimize electrical circuits in a collaborative environment. Our advanced simulation engine provides real-time analysis and helps identify potential issues before physical prototyping.",
               },
               {
-                q: "Can I collaborate with my team?",
-                a: "Yes. AmpFlux supports project sharing and role-based access for smooth collaboration.",
+                q: "Is AmpFlux suitable for beginners or only professionals?",
+                a: "AmpFlux is designed to serve both beginners and professionals. We offer intuitive design tools for newcomers while providing advanced features like complex simulations, team collaboration, and enterprise integrations for experienced engineers.",
               },
               {
-                q: "Do I need to install anything?",
-                a: "No, AmpFlux runs in the browser. For advanced simulations you can use our cloud backend.",
+                q: "What types of circuits can I design with AmpFlux?",
+                a: "AmpFlux supports a wide range of circuit types including analog, digital, mixed-signal, power electronics, and control systems. Our extensive component library includes over 10,000 parts from leading manufacturers.",
+              },
+              {
+                q: "How does team collaboration work in AmpFlux?",
+                a: "AmpFlux offers robust collaboration features including real-time project sharing, role-based access control, version history, and commenting. Team members can work simultaneously on the same project with automatic conflict resolution.",
+              },
+              {
+                q: "What simulation capabilities does AmpFlux provide?",
+                a: "Our simulation engine supports DC analysis, AC analysis, transient analysis, frequency response, and short-circuit analysis. We also offer advanced features like Monte Carlo analysis and sensitivity studies for professional applications.",
+              },
+              {
+                q: "Can I export my designs to other software?",
+                a: "Yes, AmpFlux supports export to industry-standard formats including SPICE netlists, Gerber files, PDF schematics, and common CAD formats. This ensures compatibility with your existing workflow and manufacturing processes.",
+              },
+              {
+                q: "Is my data secure and backed up?",
+                a: "Absolutely. We use enterprise-grade security with end-to-end encryption, regular automated backups, and secure cloud storage. Your intellectual property is protected with industry-standard security protocols.",
+              },
+              {
+                q: "What kind of support do you provide?",
+                a: "We offer comprehensive support including detailed documentation, video tutorials, community forums, email support, and priority phone support for enterprise customers. Our team is committed to helping you succeed.",
               },
             ].map((item, idx) => (
-              <details
+              <div
                 key={idx}
-                className={`group rounded-2xl p-4 open:shadow-lg transition-all ${
-                  theme === "dark"
-                    ? "border border-gray-700/60 bg-gray-800/60 backdrop-blur"
-                    : "border border-green-200/60 bg-white"
+                className={`group rounded-xl border transition-all duration-300 ease-out hover:shadow-md ${
+                  openFAQ === idx
+                    ? theme === "dark"
+                      ? "border-green-500/50 bg-gray-800/80 shadow-lg"
+                      : "border-green-500/50 bg-white shadow-lg"
+                    : theme === "dark"
+                    ? "border-gray-700/60 bg-gray-800/40 hover:border-gray-600/60"
+                    : "border-gray-200 bg-white/80 hover:border-gray-300"
                 }`}
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between">
-                  <span
-                    className={`font-medium flex items-center ${
-                      theme === "dark" ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    <QuestionMarkCircleIcon
-                      className={`h-5 w-5 mr-2 ${
-                        theme === "dark" ? "text-emerald-400" : "text-green-600"
-                      }`}
-                    />
-                    {item.q}
-                  </span>
-                  <span
-                    className={`ml-4 group-open:rotate-180 transition-transform ${
-                      theme === "dark" ? "text-emerald-400" : "text-green-600"
-                    }`}
-                  >
-                    ⌄
-                  </span>
-                </summary>
-                <p
-                  className={`mt-3 ${
-                    theme === "dark" ? "text-gray-300" : "text-gray-700"
-                  }`}
+                <button
+                  onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
+                  className="w-full p-6 text-left focus:outline-none focus:ring-2 focus:ring-green-500/20 rounded-xl"
                 >
-                  {item.a}
-                </p>
-              </details>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`font-semibold text-lg flex items-center ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      <QuestionMarkCircleIcon
+                        className={`h-6 w-6 mr-3 ${
+                          theme === "dark" ? "text-green-400" : "text-green-600"
+                        }`}
+                      />
+                      {item.q}
+                    </span>
+                    <span
+                      className={`ml-4 transition-transform duration-300 ease-out ${
+                        openFAQ === idx ? "rotate-180" : "rotate-0"
+                      } ${
+                        theme === "dark" ? "text-green-400" : "text-green-600"
+                      }`}
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-out ${
+                      openFAQ === idx
+                        ? "max-h-96 opacity-100 mt-4"
+                        : "max-h-0 opacity-0 mt-0"
+                    }`}
+                  >
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <p
+                        className={`text-base leading-relaxed ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        {item.a}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </div>
             ))}
           </div>
         </div>
