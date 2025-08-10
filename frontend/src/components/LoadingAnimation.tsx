@@ -36,8 +36,8 @@ export const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
     <div className="flex flex-col items-center justify-center space-y-4">
       {/* Logo Container */}
       <div className={`relative ${sizeClasses[size]}`}>
-        {/* Background Circle */}
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full animate-pulse" />
+        {/* Background Square */}
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl animate-pulse" />
 
         {/* Logo Icon with Animated Outline */}
         <div className="absolute inset-0 flex items-center justify-center">
