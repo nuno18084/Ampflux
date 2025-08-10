@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext } from "react";
+import React, { useEffect, useState, createContext, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types";
 import { apiClient } from "../lib/api";
@@ -29,40 +29,45 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      console.log("Initializing auth...");
-      if (apiClient.isAuthenticated()) {
-        console.log("User has tokens, fetching current user...");
-        try {
-          const currentUser = await apiClient.getCurrentUser();
-          console.log("Current user fetched:", currentUser);
-          setUser(currentUser);
-        } catch (error) {
-          console.error("Failed to get current user:", error);
-          // Clear invalid tokens
-          apiClient.logout();
-          // Clear React Query cache to prevent data leakage
-          queryClient.clear();
-        }
-      } else {
-        console.log("No tokens found");
-      }
-      setIsLoading(false);
-    };
+  const initializeAuth = useCallback(async () => {
+    if (isInitialized) {
+      console.log("Auth already initialized, skipping...");
+      return;
+    }
 
-    // Add a small delay to ensure the app is fully loaded
-    const timer = setTimeout(initializeAuth, 100);
-    return () => clearTimeout(timer);
-  }, [queryClient]);
+    console.log("Initializing auth...");
+    setIsLoading(true);
+
+    try {
+      // Try to get current user - this will fail if not authenticated
+      const currentUser = await apiClient.getCurrentUser();
+      console.log("Current user fetched:", currentUser);
+      setUser(currentUser);
+    } catch (error) {
+      console.log("No valid authentication found - user not logged in");
+      setUser(null);
+      // Don't redirect or clear anything - just set user to null
+    } finally {
+      console.log("Auth initialization complete");
+      setIsLoading(false);
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
+
+  useEffect(() => {
+    // Only initialize once
+    if (!isInitialized) {
+      const timer = setTimeout(initializeAuth, 500); // Increased delay
+      return () => clearTimeout(timer);
+    }
+  }, [initializeAuth, isInitialized]);
 
   const login = async (email: string, password: string) => {
     try {
-      const token = await apiClient.login({ email, password });
-      apiClient.setTokens(token);
-      const currentUser = await apiClient.getCurrentUser();
+      const currentUser = await apiClient.login({ email, password });
       setUser(currentUser);
       // Clear any existing cache when logging in as a new user
       queryClient.clear();
@@ -89,9 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         company_name: companyName,
       });
       // Then automatically log in to get the tokens
-      const token = await apiClient.login({ email, password });
-      apiClient.setTokens(token);
-      const currentUser = await apiClient.getCurrentUser();
+      const currentUser = await apiClient.login({ email, password });
       setUser(currentUser);
       // Clear any existing cache when registering as a new user
       queryClient.clear();
@@ -101,12 +104,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     console.log("Logging out...");
-    apiClient.logout();
-    setUser(null);
-    // Clear React Query cache to prevent data leakage between users
-    queryClient.clear();
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+      // Clear React Query cache to prevent data leakage between users
+      queryClient.clear();
+    }
   };
 
   const value = {

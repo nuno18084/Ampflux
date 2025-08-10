@@ -19,6 +19,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 class ApiClient {
   private client: AxiosInstance;
+  private refreshPromise: Promise<any> | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -26,17 +27,17 @@ class ApiClient {
       headers: {
         "Content-Type": "application/json",
       },
+      withCredentials: true, // Important for cookies
     });
 
-    // Add request interceptor to include auth token
+    // Add request interceptor to handle auth
     this.client.interceptors.request.use((config) => {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        console.log("Adding auth token to request:", config.url);
-        config.headers.Authorization = `Bearer ${token}`;
-      } else {
-        console.log("No auth token found for request:", config.url);
-      }
+      // Cookies are automatically sent with withCredentials: true
+      console.log("Making request to:", config.url, "with config:", {
+        method: config.method,
+        headers: config.headers,
+        withCredentials: config.withCredentials,
+      });
       return config;
     });
 
@@ -45,26 +46,44 @@ class ApiClient {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
+
+        console.error("API Error:", {
+          url: error.config?.url,
+          method: error.config?.method,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+        });
+
+        // Only retry once and only for 401 errors
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          !originalRequest.headers?.["X-Refresh-Request"]
+        ) {
           console.log("401 error, attempting token refresh...");
           originalRequest._retry = true;
-          const refreshToken = localStorage.getItem("refresh_token");
-          if (refreshToken) {
-            try {
-              const response = await this.refreshToken(refreshToken);
-              localStorage.setItem("access_token", response.access_token);
-              localStorage.setItem("refresh_token", response.refresh_token);
-              originalRequest.headers.Authorization = `Bearer ${response.access_token}`;
-              return this.client(originalRequest);
-            } catch (refreshError) {
-              console.log("Token refresh failed, logging out");
-              localStorage.removeItem("access_token");
-              localStorage.removeItem("refresh_token");
-              window.location.href = "/login";
-              return Promise.reject(refreshError);
+
+          try {
+            // Prevent multiple simultaneous refresh requests
+            if (!this.refreshPromise) {
+              this.refreshPromise = this.refreshToken();
             }
+
+            await this.refreshPromise;
+            this.refreshPromise = null;
+
+            // Retry the original request
+            return this.client(originalRequest);
+          } catch (refreshError) {
+            console.log("Token refresh failed");
+            this.refreshPromise = null;
+            // Don't redirect automatically - let the component handle it
+            return Promise.reject(refreshError);
           }
         }
+
         return Promise.reject(error);
       }
     );
@@ -79,12 +98,39 @@ class ApiClient {
     return response.data;
   }
 
-  async login(credentials: UserLogin): Promise<Token> {
-    const response: AxiosResponse<Token> = await this.client.post(
+  async login(credentials: UserLogin): Promise<User> {
+    const response: AxiosResponse<User> = await this.client.post(
       "/auth/login",
       credentials
     );
     return response.data;
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.client.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      // Clear any client-side state
+      this.clearAuthState();
+    }
+  }
+
+  async refreshToken(): Promise<Token> {
+    try {
+      const response: AxiosResponse<Token> = await this.client.post(
+        "/auth/refresh",
+        {},
+        {
+          headers: { "X-Refresh-Request": "true" }, // Mark as refresh request
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Refresh token failed:", error);
+      throw error;
+    }
   }
 
   async shareProject(
@@ -109,14 +155,6 @@ class ApiClient {
   async acceptProjectShare(projectId: number): Promise<any> {
     const response: AxiosResponse<any> = await this.client.post(
       `/projects/${projectId}/accept-share`
-    );
-    return response.data;
-  }
-
-  async refreshToken(refreshToken: string): Promise<Token> {
-    const response: AxiosResponse<Token> = await this.client.post(
-      "/auth/refresh",
-      { refresh_token: refreshToken }
     );
     return response.data;
   }
@@ -272,21 +310,26 @@ class ApiClient {
 
   // Utility methods
   isAuthenticated(): boolean {
-    const token = localStorage.getItem("access_token");
-    console.log("Checking authentication, token exists:", !!token);
-    return !!token;
+    // Since we're using httpOnly cookies, we can't directly check
+    // We'll rely on the server to tell us if we're authenticated
+    // This will be checked when making API calls
+    return true; // Will be validated by server
   }
 
-  logout(): void {
-    console.log("Logging out, clearing tokens");
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+  clearAuthState(): void {
+    console.log("Clearing auth state");
+    // Clear any client-side state if needed
+    // Cookies are cleared by the server
   }
 
+  // Check if we're in a browser environment
+  private isBrowser(): boolean {
+    return typeof window !== "undefined";
+  }
+
+  // Legacy methods for compatibility (deprecated)
   setTokens(token: Token): void {
-    console.log("Setting tokens");
-    localStorage.setItem("access_token", token.access_token);
-    localStorage.setItem("refresh_token", token.refresh_token);
+    console.warn("setTokens is deprecated - using httpOnly cookies now");
   }
 }
 
