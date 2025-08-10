@@ -259,13 +259,13 @@ export const ProjectsPage: React.FC = () => {
                   projects.map((project) => (
                     <div
                       key={project.id}
-                      className={`transition-all duration-500 ease-out ${
+                      className={`transition-all duration-500 ease-out flex flex-col ${
                         theme === "dark"
                           ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
                           : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
                       }`}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between flex-grow">
                         <div className="flex items-start">
                           <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
                             <FolderIcon className="h-6 w-6 text-white" />
@@ -376,13 +376,13 @@ export const ProjectsPage: React.FC = () => {
                   sharedProjects.map((share) => (
                     <div
                       key={share.id}
-                      className={`transition-all duration-500 ease-out ${
+                      className={`transition-all duration-500 ease-out flex flex-col ${
                         theme === "dark"
                           ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-blue-500/10 hover:border-blue-500/20"
                           : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-blue-200/50 hover:shadow-blue-500/20 hover:border-blue-300/50"
                       }`}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between flex-grow">
                         <div className="flex items-start">
                           <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
                             <FolderIcon className="h-6 w-6 text-white" />
@@ -532,13 +532,13 @@ export const ProjectsPage: React.FC = () => {
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className={`transition-all duration-500 ease-out ${
+                    className={`transition-all duration-500 ease-out flex flex-col ${
                       theme === "dark"
                         ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20"
                         : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50"
                     }`}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between flex-grow">
                       <div className="flex items-start">
                         <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
                           <FolderIcon className="h-6 w-6 text-white" />
@@ -684,13 +684,13 @@ export const ProjectsPage: React.FC = () => {
                 {sharedProjects.map((share) => (
                   <div
                     key={share.id}
-                    className={`transition-all duration-500 ease-out ${
+                    className={`transition-all duration-500 ease-out flex flex-col ${
                       theme === "dark"
                         ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-blue-500/10 hover:border-blue-500/20"
                         : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-blue-200/50 hover:shadow-blue-500/20 hover:border-blue-300/50"
                     }`}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between flex-grow">
                       <div className="flex items-start">
                         <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-2 rounded-lg mr-3 shadow-lg mt-1">
                           <FolderIcon className="h-6 w-6 text-white" />
