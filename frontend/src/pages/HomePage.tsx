@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeProvider";
 import {
@@ -6,6 +6,7 @@ import {
   QuestionMarkCircleIcon,
   PlayCircleIcon,
   BoltIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 
 export const HomePage: React.FC = () => {
@@ -16,6 +17,15 @@ export const HomePage: React.FC = () => {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [activeSection, setActiveSection] = useState("hero");
+
+  // Section refs
+  const heroRef = useRef<HTMLDivElement>(null);
+  const appScreenshotsRef = useRef<HTMLElement>(null);
+  const productDemosRef = useRef<HTMLElement>(null);
+  const pricingRef = useRef<HTMLElement>(null);
+  const faqsRef = useRef<HTMLElement>(null);
+  const contactRef = useRef<HTMLElement>(null);
 
   const scrollToForm = () => {
     if (formRef.current) {
@@ -27,6 +37,79 @@ export const HomePage: React.FC = () => {
       });
     }
   };
+
+  const scrollToSection = (sectionId: string) => {
+    const sectionRefs: { [key: string]: React.RefObject<HTMLElement> } = {
+      hero: heroRef,
+      appScreenshots: appScreenshotsRef,
+      productDemos: productDemosRef,
+      pricing: pricingRef,
+      faqs: faqsRef,
+      contact: contactRef,
+    };
+
+    const ref = sectionRefs[sectionId];
+    if (ref?.current) {
+      if (sectionId === "hero") {
+        // Scroll to the very top for home section
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else {
+        // Use negative offset for other sections
+        const navbarHeight = -50;
+        const elementTop = ref.current.offsetTop - navbarHeight;
+        window.scrollTo({
+          top: elementTop,
+          behavior: "smooth",
+        });
+      }
+    }
+  };
+
+  // Intersection Observer to track active section
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -20% 0px",
+      threshold: 0,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.getAttribute("data-section");
+          if (sectionId) {
+            setActiveSection(sectionId);
+          }
+        }
+      });
+    }, observerOptions);
+
+    const sections = [
+      heroRef.current,
+      appScreenshotsRef.current,
+      productDemosRef.current,
+      pricingRef.current,
+      faqsRef.current,
+      contactRef.current,
+    ];
+
+    sections.forEach((section) => {
+      if (section) {
+        observer.observe(section);
+      }
+    });
+
+    return () => {
+      sections.forEach((section) => {
+        if (section) {
+          observer.unobserve(section);
+        }
+      });
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +158,139 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
       </nav>
+
+      {/* Site Map */}
+      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-40 hidden lg:block">
+        <div className="flex flex-col items-center space-y-6">
+          {[
+            { id: "hero", label: "Home", icon: "home" },
+            { id: "appScreenshots", label: "Features", icon: "⚡" },
+            { id: "productDemos", label: "Demos", icon: "🎥" },
+            { id: "pricing", label: "Pricing", icon: "💰" },
+            { id: "faqs", label: "FAQ", icon: "❓" },
+            { id: "contact", label: "Contact", icon: "📧" },
+          ].map((section) => (
+            <button
+              key={section.id}
+              onClick={() => scrollToSection(section.id)}
+              className={`group relative flex flex-col items-center transition-all duration-500 ease-out ${
+                activeSection === section.id ? "scale-125" : "hover:scale-110"
+              }`}
+              title={section.label}
+            >
+              {/* Modern Dot with Ring or Icon */}
+              {section.icon === "home" ? (
+                // Home Icon instead of dot
+                <div className="relative">
+                  {/* Outer Ring */}
+                  <div
+                    className={`absolute inset-0 rounded-full transition-all duration-500 ease-out ${
+                      activeSection === section.id
+                        ? theme === "dark"
+                          ? "bg-green-400/30 scale-150"
+                          : "bg-green-600/30 scale-150"
+                        : "bg-transparent scale-100"
+                    }`}
+                  />
+
+                  {/* Inner Ring */}
+                  <div
+                    className={`absolute inset-0 rounded-full transition-all duration-500 ease-out ${
+                      activeSection === section.id
+                        ? theme === "dark"
+                          ? "bg-green-400/20 scale-125"
+                          : "bg-green-600/20 scale-125"
+                        : "bg-transparent scale-100"
+                    }`}
+                  />
+
+                  {/* Home Icon */}
+                  <HomeIcon
+                    className={`relative w-4 h-4 transition-all duration-500 ease-out ${
+                      activeSection === section.id
+                        ? theme === "dark"
+                          ? "text-green-400 shadow-lg shadow-green-400/50"
+                          : "text-green-600 shadow-lg shadow-green-600/50"
+                        : theme === "dark"
+                        ? "text-gray-400 hover:text-gray-300"
+                        : "text-gray-500 hover:text-gray-600"
+                    }`}
+                  />
+                </div>
+              ) : (
+                // Regular dot for other sections
+                <div className="relative">
+                  {/* Outer Ring */}
+                  <div
+                    className={`absolute inset-0 rounded-full transition-all duration-500 ease-out ${
+                      activeSection === section.id
+                        ? theme === "dark"
+                          ? "bg-green-400/30 scale-150"
+                          : "bg-green-600/30 scale-150"
+                        : "bg-transparent scale-100"
+                    }`}
+                  />
+
+                  {/* Inner Ring */}
+                  <div
+                    className={`absolute inset-0 rounded-full transition-all duration-500 ease-out ${
+                      activeSection === section.id
+                        ? theme === "dark"
+                          ? "bg-green-400/20 scale-125"
+                          : "bg-green-600/20 scale-125"
+                        : "bg-transparent scale-100"
+                    }`}
+                  />
+
+                  {/* Core Dot */}
+                  <div
+                    className={`relative w-2.5 h-2.5 rounded-full transition-all duration-500 ease-out ${
+                      activeSection === section.id
+                        ? theme === "dark"
+                          ? "bg-green-400 shadow-lg shadow-green-400/50"
+                          : "bg-green-600 shadow-lg shadow-green-600/50"
+                        : theme === "dark"
+                        ? "bg-gray-500 hover:bg-gray-400"
+                        : "bg-gray-400 hover:bg-gray-500"
+                    }`}
+                  />
+                </div>
+              )}
+
+              {/* Modern Label */}
+              <div
+                className={`absolute right-8 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-500 ease-out opacity-0 group-hover:opacity-100 pointer-events-none backdrop-blur-sm ${
+                  theme === "dark"
+                    ? "bg-gray-900/90 text-white border border-gray-700/50 shadow-2xl"
+                    : "bg-white/95 text-gray-900 border border-gray-200/50 shadow-2xl"
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  {section.icon === "home" ? (
+                    <HomeIcon
+                      className={`h-4 w-4 ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    />
+                  ) : (
+                    <span className="text-base">{section.icon}</span>
+                  )}
+                  <span className="font-semibold">{section.label}</span>
+                </div>
+                {/* Modern Arrow */}
+                <div
+                  className={`absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent ${
+                    theme === "dark"
+                      ? "border-t-4 border-t-gray-900/90"
+                      : "border-t-4 border-t-white/95"
+                  }`}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Decorative background accents */}
       <div
         aria-hidden
@@ -288,7 +504,7 @@ export const HomePage: React.FC = () => {
         ></div>
       </div>
       {/* Hero / Introduction */}
-      <header className="relative">
+      <header ref={heroRef} data-section="hero" className="relative">
         <div className="max-w-7xl mx-auto px-6 pt-52 pb-16 md:pt-[12.5rem] md:pb-24 min-h-screen flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Text content */}
@@ -572,7 +788,11 @@ export const HomePage: React.FC = () => {
       </header>
 
       {/* App Screenshots */}
-      <section className="py-32 md:py-40">
+      <section
+        ref={appScreenshotsRef}
+        data-section="appScreenshots"
+        className="py-32 md:py-40"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2
@@ -804,7 +1024,11 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Product Demos */}
-      <section className="py-32 md:py-40">
+      <section
+        ref={productDemosRef}
+        data-section="productDemos"
+        className="py-32 md:py-40"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2
@@ -976,7 +1200,11 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Pricing */}
-      <section className="py-32 md:py-40">
+      <section
+        ref={pricingRef}
+        data-section="pricing"
+        className="py-32 md:py-40"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2
@@ -1190,7 +1418,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* FAQs */}
-      <section className="py-32 md:py-40">
+      <section ref={faqsRef} data-section="faqs" className="py-32 md:py-40">
         <div className="max-w-4xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -1317,136 +1545,142 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Contact Form */}
-      <section ref={formRef} className="pt-32 pb-24 md:pt-40 md:pb-32">
-        <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-8">
-            <h2
-              className={`text-2xl md:text-3xl font-bold mb-3 ${
-                theme === "dark" ? "text-green-400" : "text-green-600"
-              }`}
-            >
-              Get in Touch
-            </h2>
-            <p
-              className={`text-base ${
-                theme === "dark" ? "text-gray-300" : "text-gray-600"
-              }`}
-            >
-              Ready to transform your circuit design workflow? Let's talk.
-            </p>
-          </div>
-
-          <div
-            className={`rounded-xl p-6 shadow-xl ${
-              theme === "dark"
-                ? "border border-gray-700/60 bg-gray-800/60 backdrop-blur"
-                : "border border-gray-200 bg-white"
-            }`}
-          >
-            {submitted && (
-              <div
-                className={`mb-6 rounded-lg border p-4 ${
-                  theme === "dark"
-                    ? "border-green-500/40 bg-green-500/10 text-green-300"
-                    : "border-green-300 bg-green-50 text-green-700"
+      <section
+        ref={contactRef}
+        data-section="contact"
+        className="pt-32 pb-24 md:pt-40 md:pb-32"
+      >
+        <div ref={formRef}>
+          <div className="max-w-3xl mx-auto px-6">
+            <div className="text-center mb-8">
+              <h2
+                className={`text-2xl md:text-3xl font-bold mb-3 ${
+                  theme === "dark" ? "text-green-400" : "text-green-600"
                 }`}
               >
-                <div className="flex items-center">
-                  <CheckCircleIcon className="w-5 h-5 mr-2" />
-                  <span className="font-medium">
-                    Message sent successfully!
-                  </span>
-                </div>
-                <p className="text-sm mt-1">We'll respond within 24 hours.</p>
-              </div>
-            )}
+                Get in Touch
+              </h2>
+              <p
+                className={`text-base ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Ready to transform your circuit design workflow? Let's talk.
+              </p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              className={`rounded-xl p-6 shadow-xl ${
+                theme === "dark"
+                  ? "border border-gray-700/60 bg-gray-800/60 backdrop-blur"
+                  : "border border-gray-200 bg-white"
+              }`}
+            >
+              {submitted && (
+                <div
+                  className={`mb-6 rounded-lg border p-4 ${
+                    theme === "dark"
+                      ? "border-green-500/40 bg-green-500/10 text-green-300"
+                      : "border-green-300 bg-green-50 text-green-700"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <CheckCircleIcon className="w-5 h-5 mr-2" />
+                    <span className="font-medium">
+                      Message sent successfully!
+                    </span>
+                  </div>
+                  <p className="text-sm mt-1">We'll respond within 24 hours.</p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-700"
+                      }`}
+                    >
+                      Name *
+                    </label>
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      placeholder="Your name"
+                      className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 ${
+                        theme === "dark"
+                          ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
+                          : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-700"
+                      }`}
+                    >
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="your@email.com"
+                      className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 ${
+                        theme === "dark"
+                          ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
+                          : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
+                      }`}
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label
                     className={`block text-sm font-medium mb-1 ${
                       theme === "dark" ? "text-gray-200" : "text-gray-700"
                     }`}
                   >
-                    Name *
+                    Message *
                   </label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     required
-                    placeholder="Your name"
-                    className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 ${
+                    rows={4}
+                    placeholder="Tell us about your project or request a demo..."
+                    className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 resize-none ${
                       theme === "dark"
                         ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
                         : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
                     }`}
                   />
                 </div>
-                <div>
-                  <label
-                    className={`block text-sm font-medium mb-1 ${
-                      theme === "dark" ? "text-gray-200" : "text-gray-700"
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 ease-out shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    Send Message
+                  </button>
+                  <a
+                    href="mailto:contact@ampflux.com"
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-out border text-center ${
+                      theme === "dark"
+                        ? "border-gray-600 text-gray-200 hover:text-white hover:border-gray-500 bg-gray-700/60"
+                        : "border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400 bg-gray-50"
                     }`}
                   >
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="your@email.com"
-                    className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 ${
-                      theme === "dark"
-                        ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
-                        : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
-                    }`}
-                  />
+                    Email Directly
+                  </a>
                 </div>
-              </div>
-
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-200" : "text-gray-700"
-                  }`}
-                >
-                  Message *
-                </label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  required
-                  rows={4}
-                  placeholder="Tell us about your project or request a demo..."
-                  className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200 resize-none ${
-                    theme === "dark"
-                      ? "bg-gray-700/60 border border-gray-600 text-white placeholder-gray-400"
-                      : "border border-gray-300 text-gray-900 placeholder-gray-500 bg-white"
-                  }`}
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 ease-out shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  Send Message
-                </button>
-                <a
-                  href="mailto:contact@ampflux.com"
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-out border text-center ${
-                    theme === "dark"
-                      ? "border-gray-600 text-gray-200 hover:text-white hover:border-gray-500 bg-gray-700/60"
-                      : "border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400 bg-gray-50"
-                  }`}
-                >
-                  Email Directly
-                </a>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </section>
