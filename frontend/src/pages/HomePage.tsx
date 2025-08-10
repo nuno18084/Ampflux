@@ -371,94 +371,368 @@ export const HomePage: React.FC = () => {
         </div>
       </header>
 
-      {/* App Pictures */}
-      <section className="py-20 md:py-28">
+      {/* App Screenshots */}
+      <section className="py-32 md:py-40">
         <div className="max-w-7xl mx-auto px-6">
-          <h2
-            className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-white" : "text-gray-900"
-            }`}
-          >
-            See the App
-          </h2>
-          <p
-            className={`text-center mt-2 mb-8 ${
-              theme === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            Screenshots showcasing core workflows
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
+          <div className="text-center mb-16">
+            <h2
+              className={`text-3xl md:text-4xl font-bold ${
+                theme === "dark" ? "text-green-400" : "text-green-600"
+              }`}
+            >
+              Professional Circuit Design
+            </h2>
+            <p
+              className={`text-lg mt-4 max-w-2xl mx-auto ${
+                theme === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              Advanced tools for engineers and design teams
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {[
+              {
+                title: "Circuit Editor Interface",
+                desc: "Professional-grade design environment with intuitive controls and real-time feedback",
+                features: [
+                  "Drag & Drop Components",
+                  "Real-time Validation",
+                  "Advanced Grid System",
+                ],
+              },
+              {
+                title: "Simulation Dashboard",
+                desc: "Comprehensive analysis tools with detailed reporting and export capabilities",
+                features: [
+                  "Performance Metrics",
+                  "Error Detection",
+                  "Export Reports",
+                ],
+              },
+            ].map((item, n) => (
               <div
                 key={n}
-                className={`aspect-video rounded-2xl flex items-center justify-center shadow-lg overflow-hidden transition-transform duration-500 hover:scale-[1.02] ${
+                className={`group relative rounded-2xl overflow-hidden transition-all duration-300 ${
                   theme === "dark"
-                    ? "bg-gradient-to-br from-gray-800/70 to-gray-900/70 border border-gray-700/60"
-                    : "bg-gradient-to-br from-gray-100 to-white border border-green-200/50"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-200"
                 }`}
               >
-                <span className="text-sm text-gray-500">
-                  App Screenshot Placeholder #{n}
-                </span>
+                {/* Screenshot Placeholder */}
+                <div
+                  className={`aspect-[16/10] ${
+                    theme === "dark"
+                      ? "bg-gradient-to-br from-gray-700 to-gray-800"
+                      : "bg-gradient-to-br from-gray-100 to-gray-50"
+                  } flex items-center justify-center relative overflow-hidden`}
+                >
+                  {n === 0 ? (
+                    /* Simple Circuit Editor Mockup */
+                    <div className="absolute inset-2 rounded-lg bg-gray-900 border border-gray-700">
+                      {/* Simple Header */}
+                      <div className="absolute top-0 left-0 right-0 h-8 bg-gray-800 border-b border-gray-700 flex items-center px-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-5 h-5 bg-green-500 rounded flex items-center justify-center">
+                            <BoltIcon className="h-3 w-3 text-white" />
+                          </div>
+                          <span className="text-white text-xs font-medium">
+                            AmpFlux
+                          </span>
+                        </div>
+                        <div className="ml-auto flex space-x-2">
+                          <button className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
+                            Save
+                          </button>
+                          <button className="px-2 py-1 bg-green-600 text-white text-xs rounded">
+                            Simulate
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Simple Layout */}
+                      <div className="absolute top-8 left-0 w-32 h-full bg-gray-800 border-r border-gray-700 p-2">
+                        <div className="text-white text-xs font-medium mb-2">
+                          Components
+                        </div>
+                        <div className="space-y-1">
+                          {["Battery", "Resistor", "Capacitor"].map(
+                            (comp, i) => (
+                              <div
+                                key={i}
+                                className="p-2 bg-gray-700 rounded text-center"
+                              >
+                                <div className="text-xs text-gray-300">
+                                  {comp}
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Simple Canvas */}
+                      <div className="absolute top-8 left-32 right-24 bottom-0 bg-blue-900/30 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-16 h-12 bg-gray-700 rounded mb-2 flex items-center justify-center">
+                            <span className="text-white text-xs">Power</span>
+                          </div>
+                          <div className="w-16 h-12 bg-gray-700 rounded mb-2 flex items-center justify-center">
+                            <span className="text-white text-xs">Ground</span>
+                          </div>
+                          <div className="w-16 h-12 bg-gray-700 rounded flex items-center justify-center">
+                            <span className="text-white text-xs">Resistor</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Simple Properties */}
+                      <div className="absolute top-8 right-0 w-24 h-full bg-gray-800 border-l border-gray-700 p-2">
+                        <div className="text-white text-xs font-medium mb-2">
+                          Properties
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <div className="text-xs text-gray-400 mb-1">
+                              Name
+                            </div>
+                            <div className="w-full px-2 py-1 text-xs bg-gray-700 text-white rounded">
+                              Power Supply
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-400 mb-1">
+                              Voltage
+                            </div>
+                            <div className="w-full px-2 py-1 text-xs bg-gray-700 text-white rounded">
+                              12V
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Simulation Dashboard Interface */
+                    <div className="absolute inset-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+                      {/* Header */}
+                      <div className="absolute top-2 left-2 right-2 h-8 bg-white/20 rounded flex items-center px-3">
+                        <div className="text-xs text-white/70 font-medium">
+                          Simulation Dashboard
+                        </div>
+                      </div>
+
+                      {/* Charts and Metrics */}
+                      <div className="absolute top-12 left-2 right-2 bottom-2 grid grid-cols-2 gap-2">
+                        {/* Chart 1 */}
+                        <div className="bg-white/10 rounded p-2">
+                          <div className="text-xs text-white/60 mb-2">
+                            Performance
+                          </div>
+                          <div className="h-12 bg-gradient-to-r from-green-400/40 to-blue-400/40 rounded"></div>
+                        </div>
+
+                        {/* Chart 2 */}
+                        <div className="bg-white/10 rounded p-2">
+                          <div className="text-xs text-white/60 mb-2">
+                            Errors
+                          </div>
+                          <div className="h-12 bg-gradient-to-r from-red-400/40 to-orange-400/40 rounded"></div>
+                        </div>
+
+                        {/* Metrics */}
+                        <div className="bg-white/10 rounded p-2">
+                          <div className="text-xs text-white/60 mb-1">
+                            Voltage
+                          </div>
+                          <div className="text-lg text-white font-bold">
+                            12.5V
+                          </div>
+                        </div>
+
+                        <div className="bg-white/10 rounded p-2">
+                          <div className="text-xs text-white/60 mb-1">
+                            Current
+                          </div>
+                          <div className="text-lg text-white font-bold">
+                            2.3A
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <h3
+                    className={`text-xl font-semibold mb-3 ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className={`text-sm mb-4 ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    {item.desc}
+                  </p>
+                  <div className="space-y-2">
+                    {item.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center">
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full mr-3 ${
+                            theme === "dark" ? "bg-emerald-400" : "bg-green-500"
+                          }`}
+                        ></div>
+                        <span
+                          className={`text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-600"
+                          }`}
+                        >
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Videos */}
-      <section className="py-20 md:py-28">
+      {/* Product Demos */}
+      <section className="py-32 md:py-40">
         <div className="max-w-7xl mx-auto px-6">
-          <h2
-            className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Videos
-          </h2>
-          <p
-            className={`text-center mt-2 mb-8 ${
-              theme === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            Short clips of AmpFlux in action
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {["Editor Walkthrough", "Running a Simulation"].map(
-              (title, idx) => (
+          <div className="text-center mb-16">
+            <h2
+              className={`text-3xl md:text-4xl font-bold ${
+                theme === "dark" ? "text-green-400" : "text-green-600"
+              }`}
+            >
+              Product Demonstrations
+            </h2>
+            <p
+              className={`text-lg mt-4 max-w-2xl mx-auto ${
+                theme === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              See AmpFlux in action with detailed walkthroughs
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {[
+              {
+                title: "Circuit Design Workflow",
+                desc: "Complete walkthrough of the design process from concept to simulation",
+                duration: "3:45",
+                category: "Tutorial",
+              },
+              {
+                title: "Advanced Simulation Features",
+                desc: "Deep dive into analysis tools and reporting capabilities",
+                duration: "4:12",
+                category: "Feature Demo",
+              },
+            ].map((video, idx) => (
+              <div
+                key={idx}
+                className={`group relative rounded-2xl overflow-hidden transition-all duration-300 ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-200"
+                }`}
+              >
+                {/* Video Thumbnail */}
                 <div
-                  key={idx}
-                  className={`group relative aspect-video rounded-2xl overflow-hidden shadow-xl transition-transform duration-500 hover:scale-[1.02] ${
+                  className={`aspect-video ${
                     theme === "dark"
-                      ? "border border-gray-700/60 bg-gray-800/70"
-                      : "border border-green-200/60 bg-gray-100"
-                  }`}
+                      ? "bg-gradient-to-br from-gray-700 to-gray-800"
+                      : "bg-gradient-to-br from-gray-100 to-gray-50"
+                  } flex items-center justify-center relative overflow-hidden`}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <PlayCircleIcon
-                      className={`h-16 w-16 opacity-90 ${
-                        theme === "dark" ? "text-emerald-400" : "text-green-600"
-                      }`}
-                    />
+                  {/* Video Preview */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20"></div>
+
+                  {/* Mock Video Frame */}
+                  <div className="absolute inset-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+                    {/* Video Content */}
+                    <div className="absolute inset-2 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded flex items-center justify-center">
+                      <div className="text-center">
+                        <div
+                          className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${
+                            theme === "dark"
+                              ? "bg-white/20 text-white"
+                              : "bg-black/20 text-black"
+                          }`}
+                        >
+                          <PlayCircleIcon className="h-6 w-6" />
+                        </div>
+                        <p
+                          className={`text-xs ${
+                            theme === "dark" ? "text-white/70" : "text-black/70"
+                          }`}
+                        >
+                          {video.title}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                    <p className="text-white font-medium">{title}</p>
-                    <p className="text-white/80 text-sm">Video placeholder</p>
+
+                  {/* Duration Badge */}
+                  <div
+                    className={`absolute top-4 right-4 px-2 py-1 rounded text-xs font-medium ${
+                      theme === "dark"
+                        ? "bg-black/60 text-gray-300"
+                        : "bg-white/80 text-gray-700"
+                    }`}
+                  >
+                    {video.duration}
+                  </div>
+
+                  {/* Category Badge */}
+                  <div
+                    className={`absolute top-4 left-4 px-2 py-1 rounded text-xs font-medium ${
+                      theme === "dark"
+                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        : "bg-green-100 text-green-700 border border-green-200"
+                    }`}
+                  >
+                    {video.category}
                   </div>
                 </div>
-              )
-            )}
+
+                {/* Content */}
+                <div className="p-6">
+                  <h3
+                    className={`text-xl font-semibold mb-3 ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {video.title}
+                  </h3>
+                  <p
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    {video.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="py-20 md:py-28">
+      <section className="py-32 md:py-40">
         <div className="max-w-7xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-white" : "text-gray-900"
+              theme === "dark" ? "text-green-400" : "text-green-600"
             }`}
           >
             Pricing
@@ -568,11 +842,11 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* FAQs */}
-      <section className="py-20 md:py-28">
+      <section className="py-32 md:py-40">
         <div className="max-w-4xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-white" : "text-gray-900"
+              theme === "dark" ? "text-green-400" : "text-green-600"
             }`}
           >
             FAQs
@@ -635,11 +909,11 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Ask Questions / Demo Form */}
-      <section ref={formRef} className="py-20 md:py-28">
+      <section ref={formRef} className="pt-32 pb-24 md:pt-40 md:pb-32">
         <div className="max-w-3xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
-              theme === "dark" ? "text-white" : "text-gray-900"
+              theme === "dark" ? "text-green-400" : "text-green-600"
             }`}
           >
             Ask a Question / Request a Demo
