@@ -489,3 +489,62 @@ def accept_project_share(project_id: int, db: Session = Depends(get_db), current
     
     return {"message": "Project share accepted successfully"}
 
+@router.get("/{project_id}/shares", response_model=List[dict])
+def get_project_shares(project_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    """Get all shares for a specific project (only for project owner)"""
+    # Check if project exists and user is the owner
+    project = db.query(models.Project).filter(
+        models.Project.id == project_id,
+        models.Project.owner_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found or you don't have permission to view shares")
+    
+    # Get all shares for this project
+    shares = db.query(models.ProjectShare).filter(
+        models.ProjectShare.project_id == project_id
+    ).all()
+    
+    result = []
+    for share in shares:
+        # Get shared by user details
+        shared_by_user = db.query(models.User).filter(models.User.id == share.shared_by_user_id).first()
+        
+        # Get accepted by user details if accepted
+        accepted_by_user = None
+        if share.accepted_by_user_id:
+            accepted_by_user = db.query(models.User).filter(models.User.id == share.accepted_by_user_id).first()
+        
+        # Try to find user by email for shared_with_user details
+        shared_with_user = db.query(models.User).filter(models.User.email == share.shared_with_email).first()
+        
+        result.append({
+            "id": share.id,
+            "shared_with_email": share.shared_with_email,
+            "shared_with_user": {
+                "id": shared_with_user.id,
+                "name": shared_with_user.name,
+                "email": shared_with_user.email
+            } if shared_with_user else None,
+            "role": share.role,
+            "status": share.status,
+            "created_at": share.created_at,
+            "accepted_at": share.accepted_at,
+            "shared_by_user": {
+                "id": shared_by_user.id,
+                "name": shared_by_user.name,
+                "email": shared_by_user.email
+            } if shared_by_user else None,
+            "accepted_by_user": {
+                "id": accepted_by_user.id,
+                "name": accepted_by_user.name,
+                "email": accepted_by_user.email
+            } if accepted_by_user else None
+        })
+    
+    # Sort by created_at (most recent first)
+    result.sort(key=lambda x: x["created_at"], reverse=True)
+    
+    return result
+

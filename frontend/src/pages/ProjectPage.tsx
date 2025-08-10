@@ -58,6 +58,15 @@ export const ProjectPage: React.FC = () => {
     enabled: !!projectId,
   });
 
+  // Get project shares (only for project owner)
+  const { data: projectShares } = useQuery(
+    ["project-shares", projectId],
+    () => apiClient.getProjectShares(parseInt(projectId!)),
+    {
+      enabled: !!projectId && !!isOwner,
+    }
+  );
+
   // Refetch versions when page loads to get latest data
   useEffect(() => {
     if (!isPageLoading && projectId) {
@@ -267,6 +276,82 @@ export const ProjectPage: React.FC = () => {
                   >
                     Description: {project.description}
                   </span>
+                </div>
+              )}
+              {isOwner && projectShares && projectShares.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center mb-3">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-2 rounded-lg mr-3 shadow-lg">
+                      <ShareIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <span
+                      className={`text-sm font-medium ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      Shared with ({projectShares.length})
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {projectShares.map((share) => (
+                      <div
+                        key={share.id}
+                        className={`flex items-center justify-between p-2 rounded-lg ${
+                          theme === "dark"
+                            ? "bg-gray-700/50 border border-gray-600/50"
+                            : "bg-gray-50 border border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-start">
+                          <div className="w-2 h-2 rounded-full mr-2 bg-green-500 mt-1.5" />
+                          <div className="flex flex-col">
+                            <span
+                              className={`text-xs font-medium ${
+                                theme === "dark"
+                                  ? "text-white"
+                                  : "text-gray-900"
+                              }`}
+                            >
+                              {share.shared_with_user?.name || "Unknown User"}
+                            </span>
+                            <span
+                              className={`text-xs ${
+                                theme === "dark"
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {share.shared_with_email}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              share.status === "accepted"
+                                ? theme === "dark"
+                                  ? "bg-green-500/20 text-green-300"
+                                  : "bg-green-100 text-green-700"
+                                : theme === "dark"
+                                ? "bg-yellow-500/20 text-yellow-300"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {share.status}
+                          </span>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              theme === "dark"
+                                ? "bg-blue-500/20 text-blue-300"
+                                : "bg-blue-100 text-blue-700"
+                            }`}
+                          >
+                            {share.role}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

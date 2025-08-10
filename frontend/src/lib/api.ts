@@ -166,6 +166,13 @@ class ApiClient {
     return response.data;
   }
 
+  async getProjectShares(projectId: number): Promise<any[]> {
+    const response: AxiosResponse<any[]> = await this.client.get(
+      `/projects/${projectId}/shares`
+    );
+    return response.data;
+  }
+
   async getProjectPermissions(projectId: number): Promise<any> {
     const response: AxiosResponse<any> = await this.client.get(
       `/projects/${projectId}/permissions`
