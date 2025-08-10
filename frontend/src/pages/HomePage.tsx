@@ -89,7 +89,7 @@ export const HomePage: React.FC = () => {
       />
       {/* Hero / Introduction */}
       <header className="relative">
-        <div className="max-w-7xl mx-auto px-6 pt-50 pb-16 md:pt-[12.75rem] md:pb-24 min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto px-6 pt-52 pb-16 md:pt-[12.5rem] md:pb-24 min-h-screen flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Text content */}
             <div className="text-left">
@@ -136,7 +136,7 @@ export const HomePage: React.FC = () => {
             {/* Right side - Modern Circuit Design Interface */}
             <div className="flex items-center justify-center">
               <div
-                className={`relative w-full max-w-lg aspect-[4/3] rounded-3xl shadow-2xl overflow-hidden backdrop-blur-sm animate-gradient-x transform rotate-3 perspective-1000 ${
+                className={`relative w-full max-w-lg aspect-[4/3] rounded-3xl shadow-2xl overflow-hidden backdrop-blur-sm animate-gradient-x perspective-1000 transition-all duration-1000 ease-out hover:scale-105 hover:shadow-3xl ${
                   theme === "dark"
                     ? "bg-gradient-to-br from-gray-900/90 via-gray-800/80 to-gray-900/90 border border-gray-700/40"
                     : "bg-gradient-to-br from-white/90 via-gray-50/80 to-white/90 border border-green-200/30"
@@ -144,6 +144,24 @@ export const HomePage: React.FC = () => {
                 style={{
                   transform: "rotateY(5deg) rotateX(-2deg) rotateZ(-2deg)",
                   transformStyle: "preserve-3d",
+                }}
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  const centerX = rect.width / 2;
+                  const centerY = rect.height / 2;
+
+                  const rotateX = ((y - centerY) / centerY) * -3;
+                  const rotateY = ((x - centerX) / centerX) * 3;
+
+                  e.currentTarget.style.transform = `rotateY(${
+                    5 + rotateY
+                  }deg) rotateX(${-2 + rotateX}deg) rotateZ(-2deg) scale(1.02)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform =
+                    "rotateY(5deg) rotateX(-2deg) rotateZ(-2deg) scale(1)";
                 }}
               >
                 {/* Animated Background Glow */}
