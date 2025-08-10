@@ -61,6 +61,60 @@
   animation: draw-bolt 2s ease-in-out infinite;
 }
 
+/* Custom wave animation for button */
+@keyframes wave {
+  0% {
+    background-position: 100% 50%;
+  }
+  25% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 0% 0%;
+  }
+  75% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Custom animation class for wave effect */
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: wave 8s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-gradient-x::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.03),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: wave-shine 7s ease-in-out infinite;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@keyframes wave-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;

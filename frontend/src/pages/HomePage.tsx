@@ -17,7 +17,14 @@ export const HomePage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
 
   const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (formRef.current) {
+      const navbarHeight = 80; // Approximate navbar height
+      const elementTop = formRef.current.offsetTop - navbarHeight;
+      window.scrollTo({
+        top: elementTop,
+        behavior: "smooth",
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,6 +44,36 @@ export const HomePage: React.FC = () => {
           : "bg-gradient-to-br from-green-50 via-white to-emerald-50"
       }`}
     >
+      {/* Fixed Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/25 backdrop-blur-md border-b border-green-200/20 dark:bg-gray-900/25 dark:border-gray-800/20">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <BoltIcon className="h-5 w-5 text-white" />
+            </div>
+            <span
+              className={`text-xl font-bold ${
+                theme === "dark" ? "text-white" : "text-gray-900"
+              }`}
+            >
+              AmpFlux
+            </span>
+          </div>
+
+          {/* Sign In Button */}
+          <Link
+            to="/login"
+            className={`px-6 py-2 rounded-xl font-medium text-sm transition-all duration-300 ease-out ${
+              theme === "dark"
+                ? "text-gray-200 hover:text-green-400"
+                : "text-gray-700 hover:text-green-600"
+            }`}
+          >
+            Sign in
+          </Link>
+        </div>
+      </nav>
       {/* Decorative background accents */}
       <div
         aria-hidden
@@ -52,52 +89,272 @@ export const HomePage: React.FC = () => {
       />
       {/* Hero / Introduction */}
       <header className="relative">
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-24 md:pb-24">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-2xl mb-6 ring-1 ring-white/10">
-              <BoltIcon className="h-10 w-10 text-white drop-shadow" />
-            </div>
-            <h1
-              className={`text-4xl md:text-6xl font-extrabold bg-gradient-to-r bg-clip-text text-transparent ${
-                theme === "dark"
-                  ? "from-green-400 to-emerald-500"
-                  : "from-green-600 to-emerald-700"
-              }`}
-            >
-              AmpFlux
-            </h1>
-            <p
-              className={`mt-4 text-lg md:text-xl max-w-3xl mx-auto ${
-                theme === "dark" ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              The modern platform for circuit design, collaboration, and
-              short-circuit simulation — fast, intuitive, and built for teams.
-            </p>
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <button
-                onClick={scrollToForm}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 ease-out shadow-md hover:shadow-xl border border-green-500/30"
-              >
-                Ask for a Demo
-              </button>
-              <Link
-                to="/dashboard"
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ease-out border ${
+        <div className="max-w-7xl mx-auto px-6 pt-50 pb-16 md:pt-[12.75rem] md:pb-24 min-h-screen flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Text content */}
+            <div className="text-left">
+              <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-2xl mb-6 ring-1 ring-white/10">
+                <BoltIcon className="h-12 w-12 text-white drop-shadow" />
+              </div>
+              <h1
+                className={`text-4xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r bg-clip-text text-transparent leading-tight ${
                   theme === "dark"
-                    ? "border-gray-700 text-gray-200 hover:text-white hover:border-gray-600 bg-gray-800/60 backdrop-blur"
-                    : "border-green-300 text-green-700 hover:text-green-800 hover:border-green-400 bg-white"
+                    ? "from-green-400 to-emerald-500"
+                    : "from-green-600 to-emerald-700"
                 }`}
               >
-                Explore Dashboard
-              </Link>
+                AmpFlux
+              </h1>
+              <p
+                className={`mt-6 text-lg md:text-xl lg:text-2xl max-w-2xl ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                The modern platform for circuit design, collaboration, and
+                short-circuit simulation — fast, intuitive, and built for teams.
+              </p>
+              <div className="mt-10 flex items-center gap-6">
+                <Link
+                  to="/register"
+                  className="relative overflow-hidden bg-gradient-to-r from-green-400 via-emerald-500 via-green-500 to-emerald-600 text-white px-10 py-4 rounded-xl font-medium transition-all duration-500 ease-out shadow-md hover:shadow-lg border border-green-500/30 text-lg animate-gradient-x min-w-[180px] hover:brightness-110"
+                >
+                  <span className="relative z-10">Get Started</span>
+                </Link>
+                <button
+                  onClick={scrollToForm}
+                  className={`px-8 py-4 rounded-xl font-medium transition-all duration-300 ease-out border text-lg ${
+                    theme === "dark"
+                      ? "border-gray-700 text-gray-200 hover:text-white hover:border-gray-600 bg-gray-800/60 backdrop-blur"
+                      : "border-green-300 text-green-700 hover:text-green-800 hover:border-green-400 bg-white"
+                  }`}
+                >
+                  Ask for a Demo
+                </button>
+              </div>
+            </div>
+
+            {/* Right side - Modern Circuit Design Interface */}
+            <div className="flex items-center justify-center">
+              <div
+                className={`relative w-full max-w-lg aspect-[4/3] rounded-3xl shadow-2xl overflow-hidden backdrop-blur-sm animate-gradient-x transform rotate-3 perspective-1000 ${
+                  theme === "dark"
+                    ? "bg-gradient-to-br from-gray-900/90 via-gray-800/80 to-gray-900/90 border border-gray-700/40"
+                    : "bg-gradient-to-br from-white/90 via-gray-50/80 to-white/90 border border-green-200/30"
+                }`}
+                style={{
+                  transform: "rotateY(5deg) rotateX(-2deg) rotateZ(-2deg)",
+                  transformStyle: "preserve-3d",
+                }}
+              >
+                {/* Animated Background Glow */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${
+                    theme === "dark"
+                      ? "from-emerald-500/5 via-transparent to-green-500/5"
+                      : "from-green-400/10 via-transparent to-emerald-400/10"
+                  } animate-pulse`}
+                ></div>
+
+                {/* Modern Grid Pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="grid grid-cols-12 grid-rows-8 h-full">
+                    {Array.from({ length: 96 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`border-r border-b ${
+                          theme === "dark"
+                            ? "border-emerald-400/20"
+                            : "border-green-400/20"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Circuit Components */}
+                <div className="absolute inset-0 p-8">
+                  {/* Main Circuit Path with Glow */}
+                  <div className="relative">
+                    <div
+                      className={`absolute h-1.5 rounded-full shadow-lg ${
+                        theme === "dark"
+                          ? "bg-gradient-to-r from-emerald-400 to-green-400 shadow-emerald-400/50"
+                          : "bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/30"
+                      }`}
+                      style={{ top: "35%", left: "8%", width: "84%" }}
+                    ></div>
+                  </div>
+
+                  {/* Animated Circuit Nodes */}
+                  <div
+                    className={`absolute w-4 h-4 rounded-full shadow-lg animate-pulse ${
+                      theme === "dark"
+                        ? "bg-gradient-to-r from-emerald-400 to-green-400 shadow-emerald-400/50"
+                        : "bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/30"
+                    }`}
+                    style={{ top: "33%", left: "20%" }}
+                  ></div>
+                  <div
+                    className={`absolute w-4 h-4 rounded-full shadow-lg animate-pulse delay-300 ${
+                      theme === "dark"
+                        ? "bg-gradient-to-r from-emerald-400 to-green-400 shadow-emerald-400/50"
+                        : "bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/30"
+                    }`}
+                    style={{ top: "33%", left: "50%" }}
+                  ></div>
+                  <div
+                    className={`absolute w-4 h-4 rounded-full shadow-lg animate-pulse delay-700 ${
+                      theme === "dark"
+                        ? "bg-gradient-to-r from-emerald-400 to-green-400 shadow-emerald-400/50"
+                        : "bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/30"
+                    }`}
+                    style={{ top: "33%", left: "80%" }}
+                  ></div>
+
+                  {/* Modern Component Cards */}
+                  <div
+                    className={`absolute w-20 h-10 rounded-xl border backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-105 ${
+                      theme === "dark"
+                        ? "bg-gray-800/60 border-emerald-400/40 shadow-emerald-400/20"
+                        : "bg-white/80 border-green-500/40 shadow-green-500/20"
+                    }`}
+                    style={{ top: "50%", left: "12%" }}
+                  >
+                    <div
+                      className={`text-xs font-mono text-center mt-2 font-semibold ${
+                        theme === "dark" ? "text-emerald-300" : "text-green-700"
+                      }`}
+                    >
+                      R1
+                    </div>
+                  </div>
+
+                  <div
+                    className={`absolute w-20 h-10 rounded-xl border backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-105 ${
+                      theme === "dark"
+                        ? "bg-gray-800/60 border-emerald-400/40 shadow-emerald-400/20"
+                        : "bg-white/80 border-green-500/40 shadow-green-500/20"
+                    }`}
+                    style={{ top: "50%", left: "42%" }}
+                  >
+                    <div
+                      className={`text-xs font-mono text-center mt-2 font-semibold ${
+                        theme === "dark" ? "text-emerald-300" : "text-green-700"
+                      }`}
+                    >
+                      C1
+                    </div>
+                  </div>
+
+                  <div
+                    className={`absolute w-20 h-10 rounded-xl border backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-105 ${
+                      theme === "dark"
+                        ? "bg-gray-800/60 border-emerald-400/40 shadow-emerald-400/20"
+                        : "bg-white/80 border-green-500/40 shadow-green-500/20"
+                    }`}
+                    style={{ top: "50%", left: "72%" }}
+                  >
+                    <div
+                      className={`text-xs font-mono text-center mt-2 font-semibold ${
+                        theme === "dark" ? "text-emerald-300" : "text-green-700"
+                      }`}
+                    >
+                      L1
+                    </div>
+                  </div>
+
+                  {/* Connection Lines with Glow */}
+                  <div
+                    className={`absolute h-10 w-1 rounded-full shadow-lg ${
+                      theme === "dark"
+                        ? "bg-gradient-to-b from-emerald-400/80 to-transparent shadow-emerald-400/30"
+                        : "bg-gradient-to-b from-green-500/80 to-transparent shadow-green-500/20"
+                    }`}
+                    style={{ top: "37%", left: "24%" }}
+                  ></div>
+                  <div
+                    className={`absolute h-10 w-1 rounded-full shadow-lg ${
+                      theme === "dark"
+                        ? "bg-gradient-to-b from-emerald-400/80 to-transparent shadow-emerald-400/30"
+                        : "bg-gradient-to-b from-green-500/80 to-transparent shadow-green-500/20"
+                    }`}
+                    style={{ top: "37%", left: "54%" }}
+                  ></div>
+                  <div
+                    className={`absolute h-10 w-1 rounded-full shadow-lg ${
+                      theme === "dark"
+                        ? "bg-gradient-to-b from-emerald-400/80 to-transparent shadow-emerald-400/30"
+                        : "bg-gradient-to-b from-green-500/80 to-transparent shadow-green-500/20"
+                    }`}
+                    style={{ top: "37%", left: "84%" }}
+                  ></div>
+
+                  {/* Modern Voltage Indicators */}
+                  <div
+                    className={`absolute text-xs font-mono font-semibold px-2 py-1 rounded-lg backdrop-blur-sm ${
+                      theme === "dark"
+                        ? "text-emerald-300 bg-gray-800/40 border border-emerald-400/20"
+                        : "text-green-700 bg-white/60 border border-green-500/20"
+                    }`}
+                    style={{ top: "12%", left: "22%" }}
+                  >
+                    5V
+                  </div>
+                  <div
+                    className={`absolute text-xs font-mono font-semibold px-2 py-1 rounded-lg backdrop-blur-sm ${
+                      theme === "dark"
+                        ? "text-emerald-300 bg-gray-800/40 border border-emerald-400/20"
+                        : "text-green-700 bg-white/60 border border-green-500/20"
+                    }`}
+                    style={{ top: "12%", left: "52%" }}
+                  >
+                    3.3V
+                  </div>
+                  <div
+                    className={`absolute text-xs font-mono font-semibold px-2 py-1 rounded-lg backdrop-blur-sm ${
+                      theme === "dark"
+                        ? "text-emerald-300 bg-gray-800/40 border border-emerald-400/20"
+                        : "text-green-700 bg-white/60 border border-green-500/20"
+                    }`}
+                    style={{ top: "12%", left: "82%" }}
+                  >
+                    GND
+                  </div>
+                </div>
+
+                {/* Modern Overlay Text */}
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div
+                    className={`p-4 rounded-2xl backdrop-blur-sm ${
+                      theme === "dark"
+                        ? "bg-gray-800/40 border border-gray-700/40"
+                        : "bg-white/60 border border-green-200/30"
+                    }`}
+                  >
+                    <p
+                      className={`text-sm font-semibold ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-800"
+                      }`}
+                    >
+                      Circuit Design Interface
+                    </p>
+                    <p
+                      className={`text-xs mt-1 ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Real-time simulation & analysis
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* App Pictures */}
-      <section className="py-12 md:py-16">
+      <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -133,7 +390,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Videos */}
-      <section className="py-12 md:py-16">
+      <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -179,7 +436,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Pricing */}
-      <section className="py-12 md:py-16">
+      <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -293,7 +550,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* FAQs */}
-      <section className="py-12 md:py-16">
+      <section className="py-20 md:py-28">
         <div className="max-w-4xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
@@ -360,7 +617,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Ask Questions / Demo Form */}
-      <section ref={formRef} className="py-12 md:py-16">
+      <section ref={formRef} className="py-20 md:py-28">
         <div className="max-w-3xl mx-auto px-6">
           <h2
             className={`text-2xl md:text-3xl font-bold text-center ${
