@@ -128,12 +128,12 @@ export const DashboardPage: React.FC = () => {
         )}
 
         {/* Stats and Recent Projects in a grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           {/* Stats */}
           <div className="lg:col-span-1 space-y-4">
             <button
               onClick={() => navigate("/projects?section=all-projects")}
-              className={`transition-all duration-500 ease-out w-full text-left ${
+              className={`transition-all duration-500 ease-out w-full text-left min-h-[100px] ${
                 theme === "dark"
                   ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20 hover:bg-gray-700/50"
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50 hover:bg-green-50/50"
@@ -142,7 +142,7 @@ export const DashboardPage: React.FC = () => {
               {showSkeleton ? (
                 <LoadingSkeleton type="stat" />
               ) : (
-                <div className="flex items-center">
+                <div className="flex items-center h-full">
                   <div className="flex-shrink-0">
                     <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl shadow-lg">
                       <FolderIcon className="h-7 w-7 text-white" />
@@ -170,7 +170,7 @@ export const DashboardPage: React.FC = () => {
 
             <button
               onClick={handleNavigateToMyProjects}
-              className={`transition-all duration-500 ease-out w-full text-left ${
+              className={`transition-all duration-500 ease-out w-full text-left min-h-[100px] ${
                 theme === "dark"
                   ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-purple-500/10 hover:border-purple-500/20 hover:bg-gray-700/50"
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-purple-500/20 hover:border-purple-300/50 hover:bg-purple-50/50"
@@ -179,7 +179,7 @@ export const DashboardPage: React.FC = () => {
               {showSkeleton ? (
                 <LoadingSkeleton type="stat" />
               ) : (
-                <div className="flex items-center">
+                <div className="flex items-center h-full">
                   <div className="flex-shrink-0">
                     <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-xl shadow-lg">
                       <FolderIcon className="h-7 w-7 text-white" />
@@ -207,7 +207,7 @@ export const DashboardPage: React.FC = () => {
 
             <button
               onClick={handleNavigateToSharedProjects}
-              className={`transition-all duration-500 ease-out w-full text-left ${
+              className={`transition-all duration-500 ease-out w-full text-left min-h-[100px] ${
                 theme === "dark"
                   ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl p-6 border border-gray-700/50 hover:shadow-green-500/10 hover:border-green-500/20 hover:bg-gray-700/50"
                   : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-green-200/50 hover:shadow-green-500/20 hover:border-green-300/50 hover:bg-green-50/50"
@@ -216,7 +216,7 @@ export const DashboardPage: React.FC = () => {
               {showSkeleton ? (
                 <LoadingSkeleton type="stat" />
               ) : (
-                <div className="flex items-center">
+                <div className="flex items-center h-full">
                   <div className="flex-shrink-0">
                     <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-3 rounded-xl shadow-lg">
                       <ShareIcon className="h-7 w-7 text-white" />
@@ -244,10 +244,10 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Recent Projects */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 h-full max-h-[350px]">
             {showSkeleton ? (
               <div
-                className={`transition-all duration-300 ease-out overflow-hidden ${
+                className={`transition-all duration-300 ease-out overflow-hidden h-full max-h-[350px] flex flex-col ${
                   theme === "dark"
                     ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-gray-700/50"
                     : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl border border-green-200/50"
@@ -271,7 +271,7 @@ export const DashboardPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex-grow">
                   <div className="space-y-3">
                     <LoadingSkeleton type="card" />
                     <LoadingSkeleton type="card" />
@@ -281,7 +281,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : (
               <div
-                className={`transition-all duration-300 ease-out overflow-hidden ${
+                className={`transition-all duration-300 ease-out overflow-hidden h-full max-h-[350px] flex flex-col ${
                   theme === "dark"
                     ? "bg-gray-800/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-gray-700/50"
                     : "bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl border border-green-200/50"
@@ -326,13 +326,13 @@ export const DashboardPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex-grow">
                   {recentProjects.length > 0 ? (
                     <div className="space-y-3">
                       {recentProjects.map((project) => (
                         <div
                           key={project.id}
-                          className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-500 ease-out ${
+                          className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-500 ease-out min-h-[60px] ${
                             theme === "dark"
                               ? "bg-gradient-to-r from-gray-700/50 to-gray-800/50 border-gray-600/50 hover:shadow-lg hover:border-green-500/30"
                               : "bg-gradient-to-r from-green-50/50 to-emerald-50/50 border-green-200/50 hover:shadow-lg hover:border-green-300/50"
@@ -469,7 +469,7 @@ export const DashboardPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Link
                 to="/projects"
-                className={`group flex items-center p-6 rounded-xl transition-all duration-500 ease-out ${
+                className={`group flex items-center p-6 rounded-xl transition-all duration-500 ease-out min-h-[100px] ${
                   theme === "dark"
                     ? "bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 hover:shadow-lg hover:border-green-500/30"
                     : "bg-gradient-to-r from-green-50/50 to-emerald-50/50 border border-green-200/50 hover:shadow-lg hover:border-green-300/50"
@@ -498,7 +498,7 @@ export const DashboardPage: React.FC = () => {
 
               <Link
                 to="/projects"
-                className={`group flex items-center p-6 rounded-xl transition-all duration-500 ease-out ${
+                className={`group flex items-center p-6 rounded-xl transition-all duration-500 ease-out min-h-[100px] ${
                   theme === "dark"
                     ? "bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-600/50 hover:shadow-lg hover:border-green-500/30"
                     : "bg-gradient-to-r from-green-50/50 to-emerald-50/50 border border-green-200/50 hover:shadow-lg hover:border-green-300/50"

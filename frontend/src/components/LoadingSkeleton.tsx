@@ -20,7 +20,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
     return (
       <div className={`animate-pulse ${className}`}>
         {/* Match the actual content structure (no padding, that's in the button container) */}
-        <div className="flex items-center">
+        <div className="flex items-center h-full">
           <div className="flex-shrink-0">
             {/* Match the actual icon container: p-3 with h-7 w-7 icon = 52px total */}
             <div className="bg-gray-300 dark:bg-gray-600 p-3 rounded-xl shadow-lg w-12 h-12"></div>
@@ -38,7 +38,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   if (type === "card") {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className="flex items-center justify-between p-4 rounded-xl border">
+        <div className="flex items-center justify-between p-3 rounded-xl border min-h-[60px]">
           <div className="flex items-center">
             {/* Match the actual icon container: p-2 with h-5 w-5 icon = 36px total */}
             <div className="bg-gray-300 dark:bg-gray-600 p-2 rounded-lg mr-4 shadow-lg w-9 h-9"></div>
@@ -163,7 +163,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
           <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-32 mb-6"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Match the actual quick action card structure: p-6 rounded-xl border */}
-            <div className="flex items-center p-6 rounded-xl border">
+            <div className="flex items-center p-6 rounded-xl border min-h-[100px]">
               {/* Match the actual icon container: p-3 with h-6 w-6 icon */}
               <div className="bg-gray-300 dark:bg-gray-600 p-3 rounded-lg mr-4 w-12 h-12"></div>
               <div>
@@ -173,7 +173,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
                 <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32"></div>
               </div>
             </div>
-            <div className="flex items-center p-6 rounded-xl border">
+            <div className="flex items-center p-6 rounded-xl border min-h-[100px]">
               <div className="bg-gray-300 dark:bg-gray-600 p-3 rounded-lg mr-4 w-12 h-12"></div>
               <div>
                 <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-36 mb-2"></div>
